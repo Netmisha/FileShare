@@ -51,14 +51,14 @@ Data ConsoleView::StageToData(Stage stage)
 {
     switch (stage) {
     case Stage::HelloUser:
-        return StageData::HelloUser();
+        return StageFormat::HelloUser();
     /*
     ...
     */
     case Stage::Exit:
-        return StageData::GoodbyeUser();
+        return StageFormat::GoodbyeUser();
 
     default:
-        return StageData::Experimental();
+        return StageFormat::Experimental();
     }
 }

@@ -14,7 +14,7 @@ namespace FileShare
         
     };
     
-    namespace StageData {
+    namespace StageFormat {
         Data HelloUser();
         Data GoodbyeUser();
         Data Experimental();
