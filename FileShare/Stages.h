@@ -4,17 +4,19 @@ namespace FileShare
 {
     typedef std::string Data;
     
-    enum class Stage
-    {
+    enum class Stage:int
+    {   Experimental = -1,
+        Exit = 0,
         HelloUser,
         MainMenu,
         ///...,
         ///...,
-        Exit
+        
     };
     
     namespace StageData {
         Data HelloUser();
         Data GoodbyeUser();
+        Data Experimental();
     }      
 }

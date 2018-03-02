@@ -24,6 +24,9 @@
     <ClCompile Include="Stages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">
@@ -38,8 +41,11 @@
     <ClInclude Include="Stages.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommandReinterpretation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram.cd" />
+    <None Include="dGram.cd" />
   </ItemGroup>
 </Project>

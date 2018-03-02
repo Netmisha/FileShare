@@ -12,6 +12,11 @@ namespace FileShare {
     class BasicView {
     protected:      
         BasicView(Model&);
+
+        BasicView() = delete;
+        BasicView(const BasicView&) = delete;
+        BasicView(BasicView&&) = delete;
+
         virtual void Render() = 0;
         Model& model;
     };
@@ -26,7 +31,7 @@ namespace FileShare {
         ConsoleView(const ConsoleView&) = delete;
         ConsoleView(ConsoleView&&) = delete;
 
-    private:
+    protected:
         virtual void Render()    override;
         
         virtual Data GetDataFromInput();
@@ -43,7 +48,6 @@ namespace FileShare {
         Stage stage;
         Data dataToPrint;
 
-        friend class Controller;
-        friend class Stages;
+        friend class ConsoleController;
     };
 }

@@ -55,6 +55,8 @@ Data ConsoleView::StageToData(Stage stage)
     */
     case Stage::Exit:
         return StageData::GoodbyeUser();
+
+    default:
+        return StageData::Experimental();
     }
-    
 }

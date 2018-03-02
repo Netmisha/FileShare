@@ -18,3 +18,14 @@ Data StageData::GoodbyeUser() {
         OutDelim "Was good to have ya!" Endline
     };
 }
+
+Data FileShare::StageData::Experimental()
+{
+    return{
+        OutDelim "%s??" Endline
+        OutDelim "This is experimental stage." Endline
+        OutDelim "You have to let it all go, Neo." Endline
+        OutDelim "Fear, doubt, and disbelief." Endline
+        OutDelim "Free your mind." Endline
+    };
+}
