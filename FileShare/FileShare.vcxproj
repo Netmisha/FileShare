@@ -118,8 +118,12 @@
   <ItemGroup>
     <ClInclude Include="CommandReinterpretation.h" />
     <ClInclude Include="Controller.h" />
+    <ClInclude Include="MessengerComponent.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="PresenceComponent.h" />
+    <ClInclude Include="SharedFolderNavigatorComponent.h" />
     <ClInclude Include="Stages.h" />
+    <ClInclude Include="UserDataFileComponent.h" />
     <ClInclude Include="View.h" />
   </ItemGroup>
   <ItemGroup>
