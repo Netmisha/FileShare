@@ -9,21 +9,11 @@ namespace FileShare {
     using Data = std::string;
 
     class BasicController{
-    public:
-        BasicController(Model&, BasicView&, Stage&);
-        
-        BasicController() = delete;
+    public:         
+        virtual void OnLoad() = 0;
+    protected:    
+        BasicController() = default;   
         BasicController(const BasicController&) = delete;
-
-     /*   virtual void OnLoad() = 0;
-        virtual Data GetCommand() = 0;
-        virtual CommandReinterpretation ReinterpretCommand(const Data&) = 0;
-        virtual void GetModelToAct(const CommandReinterpretation&) = 0;*/
-
-    protected:
-        Model& model;
-        BasicView& view;
-        Stage& stage;
     };
 
     class ConsoleController:
@@ -43,7 +33,9 @@ namespace FileShare {
         virtual CommandReinterpretation ReinterpretCommand(const Data&);
         virtual void GetModelToAct(const CommandReinterpretation&);
     protected:
+        Model& model;
         ConsoleView& view;
+        Stage& stage;
     };
 }
 

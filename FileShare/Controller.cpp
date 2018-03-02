@@ -9,15 +9,10 @@
 using namespace FileShare;
 using CommandReinterpretation = ConsoleController::CommandReinterpretation;
 
-BasicController::BasicController(Model& mdl, BasicView& bvw, Stage& stg):
-    model(mdl),
-    view(bvw),
-    stage(stg)
-{}
-
 FileShare::ConsoleController::ConsoleController(Model& mdl, ConsoleView& vw):
-    BasicController(mdl, vw, vw.stage),
-    view(vw)
+    model(mdl),
+    view(vw),
+    stage(vw.stage)
 {}
 
 void FileShare::ConsoleController::OnLoad()
