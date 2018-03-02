@@ -2,6 +2,8 @@
 #include "CommandReinterpretation.h"
 #include "Model.h"
 
+#include <regex>
+
 #pragma warning(disable : 4996) 
 
 using namespace FileShare;
@@ -22,41 +24,44 @@ void FileShare::ConsoleController::OnLoad()
 {
     view.Render();
 
-    while (int i=1) {
-        Data command = GetCommand();
+    Data command;
+    Data format;
+    Data result;
+    
+    for(bool forever=true; forever;){
+        command = GetCommand();
+
         //auto commReint = ReinterpretCommand(command);
-        int commReint = std::stoi(command);
-        
+        int commReint =  std::regex_match(command, std::regex("e(xit|!)|q(uit|!)")) ? 0 : -1;
+     
         switch (commReint) {
-        case 1:
-            view.dataToPrint = "case 1";
-            break;
-        case 2:
-            view.dataToPrint = "case 2";
-            break;
-        case (int)(Stage::Exit) :
-            stage = Stage::Exit;
-            view.dataToPrint = view.ProvideStageFormat();
-            break;
-        
+
         /// the example of doing stuff
         case (int)(Stage::Experimental) :
             stage = Stage::Experimental;
-            Data format = view.ProvideStageFormat();
             /*
-                switch(commReint.Action)
-                    case ModelActSomeWay:
-                        actors params = getParams(commReint.params)
-                        model.SomeComponent.ActSomeWay(params);
-                        
-                        sprintf(&result, &format, model.SomeComponent.Something)
+            switch(commReint.Action)
+            case ModelActSomeWay:
+            actors params = getParams(commReint.params)
+            model.SomeComponent.ActSomeWay(params);
+
+
 
             */
-            Data result("", 256);
-            sprintf(&result.front(), format.c_str(), command);
-            view.dataToPrint = result;
+            break;
+
+        case (int)(Stage::Exit):
+            stage = Stage::Exit;
+            command = "Mister";
+            forever = false;
             break;
         }
+
+        format = view.ProvideStageFormat();
+        std::regex re("%s");
+        result = std::regex_replace(format, re, command);
+
+        view.dataToPrint = result;
         view.Render();
     }
 }

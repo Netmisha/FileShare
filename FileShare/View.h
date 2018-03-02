@@ -15,7 +15,6 @@ namespace FileShare {
 
         BasicView() = delete;
         BasicView(const BasicView&) = delete;
-        BasicView(BasicView&&) = delete;
 
         virtual void Render() = 0;
         Model& model;
@@ -29,7 +28,6 @@ namespace FileShare {
         
         ConsoleView() = delete;
         ConsoleView(const ConsoleView&) = delete;
-        ConsoleView(ConsoleView&&) = delete;
 
     protected:
         virtual void Render()    override;

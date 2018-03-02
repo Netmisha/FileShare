@@ -13,7 +13,8 @@ ConsoleView::ConsoleView(Model& mdl, InStream& in, OutStream& out) :
     BasicView(mdl),
     istrm(in),
     ostrm(out),
-    stage(Stage::HelloUser)
+    stage(Stage::HelloUser),
+    dataToPrint(ProvideStageFormat())
 {}
 
 void ConsoleView::Render(){
@@ -22,6 +23,7 @@ void ConsoleView::Render(){
 }
 
 Data ConsoleView::GetDataFromInput(){
+    ostrm << "<< ";
     Data str;
     std::getline(istrm, str);
     return str;;
