@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{76968D57-B11F-45CD-8266-084BD30E94F2}</ProjectGuid>
-    <RootNamespace>FileShare</RootNamespace>
+    <ProjectGuid>{93FE3147-C704-49C7-994E-AD84DF5B9066}</ProjectGuid>
+    <RootNamespace>FolderNavigationExperiment</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -110,25 +110,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Controller.cpp" />
-    <ClCompile Include="FileShareMain.cpp" />
-    <ClCompile Include="SharedFolderNavigatorComponent.cpp" />
-    <ClCompile Include="Stages.cpp" />
-    <ClCompile Include="View.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CommandReinterpretation.h" />
-    <ClInclude Include="Controller.h" />
-    <ClInclude Include="MessengerComponent.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="PresenceComponent.h" />
-    <ClInclude Include="SharedFolderNavigatorComponent.h" />
-    <ClInclude Include="Stages.h" />
-    <ClInclude Include="UserDataFileComponent.h" />
-    <ClInclude Include="View.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="dGram.cd" />
+    <ClCompile Include="FolderNavigationExperimentMain.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
