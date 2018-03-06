@@ -1,18 +1,43 @@
+#include <Windows.h>
 #include <iostream>
+#include <string>
+
 #include "SharedFolderNavigatorComponent.h"
-using namespace FileShare;
 
 #ifdef _DEBUG
 #define TEST main
-
 void Cerr(const std::string& message);
 #define IN_RED Cerr
-
-//#define TEST_SUBGECT
-#define SHARED_FOLDER_NAVIGATOR_SELF_TEST
+#define TO_STR(s) std::string(#s)
 
 
-#ifdef SHARED_FOLDER_NAVIGATOR_SELF_TEST
+#define TEST_SHARED_FOLDER_NAVIGATOR_SELF   1
+#define TEST_USER_DATA_FILE_COMPONENT       2
+
+#ifndef CURRENT_TEST
+#define CURRENT_TEST TEST_USER_DATA_FILE_COMPONENT
+#endif
+
+#if defined CURRENT_TEST
+#if defined TEST_USER_DATA_FILE_COMPONENT
+#if CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
+
+int TEST() {
+    std::cout << TO_STR(##CURRENT_TEST) << std::endl;
+
+
+
+    return system("pause");
+}
+#endif
+#endif
+#endif
+
+#if defined CURRENT_TEST
+#if defined TEST_SHARED_FOLDER_NAVIGATOR_SELF 
+#if CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
+
+using namespace FileShare;
 int TEST() {
     //for (int i = 0; i < 256; ++i) {
     //    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i);
@@ -35,9 +60,6 @@ int TEST() {
     }
     else
         IN_RED("paintme.bmp created");
-
-
-
     {
         FileVector fv = self.GetFileList();
         if (fv.empty())
@@ -66,6 +88,8 @@ int TEST() {
     }   
     return system("pause");
 }
+#endif
+#endif
 #endif
 
 
