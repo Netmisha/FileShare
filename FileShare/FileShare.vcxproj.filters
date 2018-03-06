@@ -16,6 +16,12 @@
     <Filter Include="Header Files\ModelComponents">
       <UniqueIdentifier>{167e9dc0-2882-47df-91a3-fdf423aa98e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ModelComponents">
+      <UniqueIdentifier>{f9b9b384-ff2b-4645-949a-7ba5a9564139}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tinyxml">
+      <UniqueIdentifier>{062fc7fb-4156-4f83-8bcf-72ae16885a91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileShareMain.cpp">
@@ -30,11 +36,26 @@
     <ClCompile Include="Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SharedFolderNavigatorComponent.cpp">
+    <ClCompile Include="FileShareComponentTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SharedFoldernavigatorSelfTest.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="UserDataFileComponent.cpp">
+      <Filter>Source Files\ModelComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedFolderNavigatorComponent.cpp">
+      <Filter>Source Files\ModelComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinystr.cpp">
+      <Filter>tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinyxml.cpp">
+      <Filter>tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinyxmlerror.cpp">
+      <Filter>tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tinyxml\tinyxmlparser.cpp">
+      <Filter>tinyxml</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -65,8 +86,19 @@
     <ClInclude Include="UserDataFileComponent.h">
       <Filter>Header Files\ModelComponents</Filter>
     </ClInclude>
+    <ClInclude Include="..\tinyxml\tinystr.h">
+      <Filter>tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tinyxml\tinyxml.h">
+      <Filter>tinyxml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dGram.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="note.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

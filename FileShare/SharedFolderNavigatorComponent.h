@@ -29,7 +29,6 @@ namespace FileShare {
         bool   FileExists(const String& fileName);
         bool   FileRename(const String& nameOld, const String& nameNew);
 
-
     protected:
         String FileCreateUniqueName(const String&);
         

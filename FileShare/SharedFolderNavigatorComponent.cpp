@@ -1,10 +1,10 @@
-#include "SharedFolderNavigatorComponent.h"
-
 #include <Windows.h>
 #include <thread>
 #include <string>
 #include <vector>
 #include <regex>
+
+#include "SharedFolderNavigatorComponent.h"
 
 using namespace FileShare;
 using Vector = std::vector<std::string>;
@@ -29,7 +29,15 @@ String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
 {
     String newName = FileCreateUniqueName(fileName);
     String filePath = SharedFolderPath() + newName;
-    HANDLE mafile = CreateFile(filePath.c_str(), GENERIC_READ | GENERIC_WRITE, 7/*1+2+4=all*/, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    HANDLE mafile = CreateFile(
+        filePath.c_str(), 
+        GENERIC_READ | GENERIC_WRITE, 
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL,
+        OPEN_ALWAYS, 
+        FILE_ATTRIBUTE_NORMAL, 
+        NULL
+    );
     CloseHandle(mafile);
     return newName;
 }

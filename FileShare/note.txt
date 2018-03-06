@@ -1,0 +1,9 @@
+
+
+use [] for commands on collections of stuff
+like
+    message-send some message
+    message-whisper [name1, name2] syka bylyat
+
+    file-open file0.ext
+    file-open [file1.ext, file2.ext]

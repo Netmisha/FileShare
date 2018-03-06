@@ -2,43 +2,48 @@
 #include <iostream>
 #include <string>
 
-#include "SharedFolderNavigatorComponent.h"
-
 #ifdef _DEBUG
 #define TEST main
 void Cerr(const std::string& message);
 #define IN_RED Cerr
 #define TO_STR(s) std::string(#s)
 
-
+#ifndef CURRENT_TEST
 #define TEST_SHARED_FOLDER_NAVIGATOR_SELF   1
 #define TEST_USER_DATA_FILE_COMPONENT       2
 
-#ifndef CURRENT_TEST
 #define CURRENT_TEST TEST_USER_DATA_FILE_COMPONENT
 #endif
 
-#if defined CURRENT_TEST
+
 #if defined TEST_USER_DATA_FILE_COMPONENT
+#if defined CURRENT_TEST
 #if CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
 
+#include "UserDataFileComponent.h"
+using namespace FileShare;   
 int TEST() {
-    std::cout << TO_STR(##CURRENT_TEST) << std::endl;
+    std::cout << TO_STR(TEST_USER_DATA_FILE_COMPONENT) << std::endl;
 
 
 
     return system("pause");
 }
+
 #endif
 #endif
 #endif
 
-#if defined CURRENT_TEST
+
 #if defined TEST_SHARED_FOLDER_NAVIGATOR_SELF 
+#if defined CURRENT_TEST
 #if CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
+#include "SharedFolderNavigatorComponent.h"
 
 using namespace FileShare;
 int TEST() {
+    std::cout << TO_STR(EST_SHARED_FOLDER_NAVIGATOR_SELF) << std::endl;
+
     //for (int i = 0; i < 256; ++i) {
     //    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), i);
     //    std::cout << "i = " << i << std::endl;

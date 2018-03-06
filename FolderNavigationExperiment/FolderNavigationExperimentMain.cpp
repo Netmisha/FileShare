@@ -22,7 +22,6 @@ using String = std::string;
 using Regex = std::basic_regex<TCHAR>;
 
 int main() {
-
     TCHAR tmodulePath[MAX_PATH]{};
     GetModuleFileName(NULL, tmodulePath, MAX_PATH);
 

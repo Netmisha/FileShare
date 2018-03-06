@@ -12,12 +12,24 @@ Data StageFormat::HelloUser()
     };
 }
 
+Data FileShare::StageFormat::MainMenu(){
+    return{
+        OutDelim "Action x"             Endline
+        OutDelim "..."                  Endline
+        OutDelim "My Shared folder"     Endline
+        OutDelim "..."                  Endline
+        OutDelim "Exit"                 Endline
+    };
+}
+
 Data StageFormat::GoodbyeUser() {
     return{
         OutDelim "Goodbye, USER!"       Endline
         OutDelim "Was good to have ya!" Endline
     };
 }
+
+
 
 Data FileShare::StageFormat::Experimental()
 {
