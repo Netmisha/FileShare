@@ -23,21 +23,21 @@ namespace FileShare {
 
         FileVector GetFileList(); 
 
-        void FileCreate(const String&);
-        bool FileRename(const String&, const String&);
-        bool FileDelete(const String&);
-        bool FileOpen(const String&); // text - notepad, picture - paint, music/video - wmplayer
+        String FileCreate(const String& fileName);
+        bool FileRename(const String& nameOld, const String& nameNew);
+        bool FileDelete(const String& fileName);
+        bool FileOpen(const String& fileName); // text - notepad, picture - paint, music/video - wmplayer
+        bool FileExists(const String& fileName);
 
     protected:
         String FileCreateName(const String&);
-
-        bool FileExists(const String&);
+        
         bool SharedFolderExists();
         bool CreateSharedFolder();
-
+        
         const String& ModuleDirectoryPath();
         const String& SharedFolderPath();
-
+        
         FileVector FilesInDirectory(const String&);
 
         const String sharedFolderName;

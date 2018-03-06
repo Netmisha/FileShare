@@ -7,11 +7,9 @@
 #include <regex>
 
 using namespace FileShare;
-using String = std::string;
 using Vector = std::vector<std::string>;
 
-
-FileShare::SharedFolderNavigatorSelf::SharedFolderNavigatorSelf():
+SharedFolderNavigatorSelf::SharedFolderNavigatorSelf():
     sharedFolderName("SharedFolder\\")
 {
     if (!SharedFolderExists())
@@ -22,18 +20,24 @@ FileVector SharedFolderNavigatorSelf::GetFileList(){
     return FilesInDirectory(SharedFolderPath());   
 }
 
-void SharedFolderNavigatorSelf::FileCreate(const String& fileNameUnique)
+String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
+/*
+    since function treats provided name as suggestion
+    and doesnt guarantee much conformity with it
+    newly created file name is returned
+*/
 {
-    String fileName = FileCreateName(fileNameUnique);
-    String filePath = SharedFolderPath() + fileName;
+    String newName = FileCreateName(fileName);
+    String filePath = SharedFolderPath() + newName;
     HANDLE mafile = CreateFile(filePath.c_str(), GENERIC_READ | GENERIC_WRITE, 7/*1+2+4=all*/, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     CloseHandle(mafile);
+    return newName;
 }
 
 bool SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const String& fileNameNew)
 {
     if (!FileExists(fileNameOld))
-        return;
+        return false;
 
     String newName = FileCreateName(fileNameNew);
 
@@ -97,22 +101,15 @@ FileVector FileShare::SharedFolderNavigatorSelf::FilesInDirectory(const String& 
     Vector foundFiles;
     HANDLE fileIter = FindFirstFile((dir + "*.*").c_str(), &findData);
     if (fileIter != INVALID_HANDLE_VALUE) {
-        do
-            foundFiles.push_back(String(findData.cFileName));
+        do {
+            if (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+                continue;
+            else
+                foundFiles.push_back(String(findData.cFileName));
+        }
         while (FindNextFile(fileIter, &findData));
     }
     return foundFiles;
-}
-
-String FileShare::SharedFolderNavigatorSelf::FileCreateName(const String& fileName)
-{
-    String newName = fileName;
-    Vector names = GetFileList();
-    int i = 0;
-    while (FileExists(newName)) {
-        newName = std::regex_replace(fileName, std::regex("[.]"), "("+std::to_string(i)+")");
-    }
-    return newName;
 }
 
 bool NameInVector(const Vector& v, const String& s) 
@@ -123,6 +120,23 @@ bool NameInVector(const Vector& v, const String& s)
     return std::find(v.begin(), v.end(), s) != v.end();
 }
 
+String FileShare::SharedFolderNavigatorSelf::FileCreateName(const String& fileName)
+/*
+    to protect ourselves from files with same names replacing others etc
+    we create new names for files with names already existing
+*/
+{
+    String newName = fileName;
+    Vector names = GetFileList();
+    int i = 1;
+    while (NameInVector(names, newName)) {
+        newName = std::regex_replace(fileName, std::regex("[.]"), "("+std::to_string(i)+").");
+        ++i;
+    }
+    return newName;
+}
+
+
 bool SharedFolderNavigatorSelf::FileExists(const String& fileName)
 {
     Vector names = GetFileList();
@@ -132,7 +146,6 @@ bool SharedFolderNavigatorSelf::FileExists(const String& fileName)
 bool SharedFolderNavigatorSelf::SharedFolderExists()
 {
     Vector foundFiles = FilesInDirectory(ModuleDirectoryPath());
-
     return NameInVector(foundFiles, sharedFolderName);
 }
 

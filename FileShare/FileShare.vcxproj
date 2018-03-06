@@ -113,6 +113,7 @@
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="FileShareMain.cpp" />
     <ClCompile Include="SharedFolderNavigatorComponent.cpp" />
+    <ClCompile Include="SharedFoldernavigatorSelfTest.cpp" />
     <ClCompile Include="Stages.cpp" />
     <ClCompile Include="View.cpp" />
   </ItemGroup>

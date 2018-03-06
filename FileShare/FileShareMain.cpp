@@ -1,3 +1,4 @@
+#ifndef _DEBUG
 #include <iostream>
 
 #include "Model.h"
@@ -17,3 +18,4 @@ int main() {
 
     return system("pause");
 }
+#endif
