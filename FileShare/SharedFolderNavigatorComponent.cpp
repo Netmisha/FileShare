@@ -27,7 +27,7 @@ String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
     newly created file name is returned
 */
 {
-    String newName = FileCreateName(fileName);
+    String newName = FileCreateUniqueName(fileName);
     String filePath = SharedFolderPath() + newName;
     HANDLE mafile = CreateFile(filePath.c_str(), GENERIC_READ | GENERIC_WRITE, 7/*1+2+4=all*/, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     CloseHandle(mafile);
@@ -39,7 +39,7 @@ bool SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const Stri
     if (!FileExists(fileNameOld))
         return false;
 
-    String newName = FileCreateName(fileNameNew);
+    String newName = FileCreateUniqueName(fileNameNew);
 
     String filePathOld = SharedFolderPath() + fileNameOld;
     String filePathNew = SharedFolderPath() + newName;
@@ -120,7 +120,7 @@ bool NameInVector(const Vector& v, const String& s)
     return std::find(v.begin(), v.end(), s) != v.end();
 }
 
-String FileShare::SharedFolderNavigatorSelf::FileCreateName(const String& fileName)
+String FileShare::SharedFolderNavigatorSelf::FileCreateUniqueName(const String& fileName)
 /*
     to protect ourselves from files with same names replacing others etc
     we create new names for files with names already existing

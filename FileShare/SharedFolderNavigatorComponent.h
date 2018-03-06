@@ -24,13 +24,14 @@ namespace FileShare {
         FileVector GetFileList(); 
 
         String FileCreate(const String& fileName);
-        bool FileRename(const String& nameOld, const String& nameNew);
-        bool FileDelete(const String& fileName);
-        bool FileOpen(const String& fileName); // text - notepad, picture - paint, music/video - wmplayer
-        bool FileExists(const String& fileName);
+        bool   FileDelete(const String& fileName);
+        bool   FileOpen  (const String& fileName); // text - notepad, picture - paint, music/video - wmplayer
+        bool   FileExists(const String& fileName);
+        bool   FileRename(const String& nameOld, const String& nameNew);
+
 
     protected:
-        String FileCreateName(const String&);
+        String FileCreateUniqueName(const String&);
         
         bool SharedFolderExists();
         bool CreateSharedFolder();
@@ -53,7 +54,8 @@ namespace FileShare {
 
 
     class SharedFolderNavigatorComponent{
-
-    
+    public:
+        SharedFolderNavigatorSelf& self;
+        SharedFolderNavigatorOther& other;
     };
 }
