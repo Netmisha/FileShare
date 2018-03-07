@@ -24,16 +24,16 @@ namespace FileShare {
         FileVector GetFileList(); 
 
         String FileCreate(const String& fileName);
-        bool   FileDelete(const String& fileName);
-        bool   FileOpen  (const String& fileName); // text - notepad, picture - paint, music/video - wmplayer
-        bool   FileExists(const String& fileName);
-        bool   FileRename(const String& nameOld, const String& nameNew);
+        BOOL   FileDelete(const String& fileName);
+        BOOL   FileOpen  (const String& fileName); // text - notepad, picture - paint, music/video - wmplayer
+        BOOL   FileExists(const String& fileName);
+        BOOL   FileRename(const String& nameOld, const String& nameNew);
 
     protected:
         String FileCreateUniqueName(const String&);
         
-        bool SharedFolderExists();
-        bool CreateSharedFolder();
+        BOOL SharedFolderExists();
+        BOOL CreateSharedFolder();
         
         const String& ModuleDirectoryPath();
         const String& SharedFolderPath();

@@ -1,6 +1,7 @@
 
 
 use [] for commands on collections of stuff
+use - for complicated commands
 like
     message-send some message
     message-whisper [name1, name2] syka bylyat

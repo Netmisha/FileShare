@@ -4,14 +4,17 @@
 #include <utility>
 
 #include "UserDataFileComponent.h"
+#include "tinyxml.h"
 
-FileShare::UserData::UserData(const String& als, const UserAddr & adr, UserStatus sts):
+using namespace FileShare;
+
+UserData::UserData(const String& als, const UserAddr & adr, UserStatus sts):
     alias(als),
     address(adr),
     status(sts)
 {}
 
-FileShare::UserData::operator FileShare::String() const
+UserData::operator String() const
 {
     String format = {
         "<user>" "\n"
@@ -34,24 +37,53 @@ FileShare::UserData::operator FileShare::String() const
     return format;
 }
 
-FileShare::String FileShare::UserData::to_str(UserStatus status){
-    switch (status){
-        case UserData::UserStatus::Self:    return "self";
-        case UserData::UserStatus::Good:    return "good";
-        case UserData::UserStatus::Bad:     return "bad" ;
-        case UserData::UserStatus::Ugly:    return "ugly";
-    }
+bool FileShare::UserData::operator==(const UserData & obj)const
+{
+    return alias == obj.alias && address == obj.address && status==obj.status;
 }
 
-FileShare::String FileShare::UserData::to_str(UserAddr){
+
+
+String UserData::to_str(UserAddr){
     return "default addr";
 }
+String UserData::to_str(UserStatus sts){
+    if (sts == UserStatus::Self)    return UserStatusConsts().Self;
+    if (sts == UserStatus::Good)    return UserStatusConsts().Good;
+    if (sts == UserStatus::Bad)     return UserStatusConsts().Bad;
+    /*(str == UserStatus::Ugly)*/   return UserStatusConsts().Ugly;
+}
+UserData::UserStatus UserData::str_to_status(const String& str)
+{
+    if (str == UserStatusConsts().Self)  return UserStatus::Self;
+    if (str == UserStatusConsts().Good)  return UserStatus::Good;
+    if (str == UserStatusConsts().Bad)   return UserStatus::Bad;
+    /*(str == UserStatusConsts().Ugly)*/ return UserStatus::Ugly;
+}
 
-FileShare::UDFComponent::UDFComponent(){
+UDFComponent::UDFComponent(){
     UserDataFileSetup();
 }
 
-void FileShare::UDFComponent::UserDataFileSetup()
+UserData ConvertTiXmlElementToUserData(const TiXmlElement*);
+TiXmlElement* ConvertUserDataToTiXmlElement(const UserData&);
+
+bool UDFComponent::AppendUser(const UserData& usr){
+    if (UserAlreadyExists(usr))
+        return false;
+
+    auto udf = TiXmlDocument("UDF.xml");
+    if(!udf.LoadFile())
+        return false;
+
+    auto root = udf.RootElement();
+    auto elem = ConvertUserDataToTiXmlElement(usr);
+    root->LinkEndChild(elem);
+
+    return true;
+}
+
+void UDFComponent::UserDataFileSetup()
 {
     CreateFile(
         "UDF.xml",
@@ -63,3 +95,51 @@ void FileShare::UDFComponent::UserDataFileSetup()
         NULL
     );
 }
+
+/**
+    find user in data file
+    converts xmlelemet* to userdata
+*/
+bool UDFComponent::UserAlreadyExists(const UserData& usr)
+{
+    TiXmlDocument udf("UDF.xml");
+    udf.LoadFile();
+
+    auto root = udf.RootElement();
+
+    for (auto iter = root->FirstChildElement("user"); iter; iter = iter->NextSiblingElement("user"))
+        if(ConvertTiXmlElementToUserData(iter) == usr)
+            return true;
+
+    return false;
+}
+
+/**
+xml element -> to user data
+can be chaged later
+*/
+UserData ConvertTiXmlElementToUserData(const TiXmlElement* element) {
+    auto alias = element->Attribute("alias");
+    auto address = UserData::UserAddr(element->Attribute("address"));
+    auto status = UserData::str_to_status(element->Attribute("status"));
+    return UserData(alias, address, status);
+}
+
+/**
+user data -> xml element
+can be chaged later
+*/
+TiXmlElement* ConvertUserDataToTiXmlElement(const UserData& usr) {
+    auto alias   = usr.alias;
+    auto address = UserData::to_str(usr.address);
+    auto status  = UserData::to_str(usr.status);
+
+    auto element = new TiXmlElement("user");
+    
+    element->SetAttribute("alias", alias);
+    element->SetAttribute("address", address);
+    element->SetAttribute("status", status);
+
+    return element;
+}
+

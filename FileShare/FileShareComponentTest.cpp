@@ -8,12 +8,13 @@ void Cerr(const std::string& message);
 #define IN_RED Cerr
 #define TO_STR(s) std::string(#s)
 
-#ifndef CURRENT_TEST
+// tests
 #define TEST_SHARED_FOLDER_NAVIGATOR_SELF   1
 #define TEST_USER_DATA_FILE_COMPONENT       2
 
+#if !defined(CURRENT_TEST)
 #define CURRENT_TEST TEST_USER_DATA_FILE_COMPONENT
-#endif
+#endif // !defined(CURRENT_TEST)
 
 
 #if defined TEST_USER_DATA_FILE_COMPONENT
@@ -30,9 +31,9 @@ int TEST() {
     return system("pause");
 }
 
-#endif
-#endif
-#endif
+#endif // CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
+#endif // CURRENT_TEST
+#endif // TEST_USER_DATA_FILE_COMPONENT
 
 
 #if defined TEST_SHARED_FOLDER_NAVIGATOR_SELF 
@@ -93,9 +94,9 @@ int TEST() {
     }   
     return system("pause");
 }
-#endif
-#endif
-#endif
+#endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
+#endif // defined CURRENT_TEST
+#endif // defined TEST_SHARED_FOLDER_NAVIGATOR_SELF
 
 
 ////////
@@ -106,4 +107,4 @@ void Cerr(const std::string& message) {
 
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
 }
-#endif
+#endif // _DEBUG

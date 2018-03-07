@@ -8,7 +8,6 @@
 #include <regex>
 
 #include"tinyxml.h"
-#include "tinystr.h"
 
 using SPair = std::pair<std::string, std::string>;
 using SMap = std::map<std::string, std::string>;
@@ -71,7 +70,6 @@ void TryMakingUsers1(const VVector& vv) {
     }
     doc.SaveFile("users1.xml");
 }
-
 void TryMakingUsers2(const VVector& vv) {
     TiXmlDocument doc;
 
@@ -148,6 +146,9 @@ void TryModifyingUsers1(const SMap& smCondition, const SMap smCorrection) {
     }
     doc.SaveFile();
 }
+/**
+modifies all users the condition comes true for
+*/
 void TryModifyingUsers2(const SMap& smCondition, const SMap smCorrection) {
     TiXmlDocument doc("users2.xml");
     doc.LoadFile();

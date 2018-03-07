@@ -20,12 +20,12 @@ FileVector SharedFolderNavigatorSelf::GetFileList(){
     return FilesInDirectory(SharedFolderPath());   
 }
 
-String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
-/*
-    since function treats provided name as suggestion
-    and doesnt guarantee much conformity with it
-    newly created file name is returned
+/**
+since function treats provided name as suggestion
+and doesnt guarantee much conformity with it
+newly created file name is returned
 */
+String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
 {
     String newName = FileCreateUniqueName(fileName);
     String filePath = SharedFolderPath() + newName;
@@ -42,7 +42,7 @@ String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
     return newName;
 }
 
-bool SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const String& fileNameNew)
+BOOL SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const String& fileNameNew)
 {
     if (!FileExists(fileNameOld))
         return false;
@@ -55,19 +55,17 @@ bool SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const Stri
     return MoveFile(filePathOld.c_str(), filePathNew.c_str());
 }
 
-bool SharedFolderNavigatorSelf::FileDelete(const String& fileName)
+BOOL SharedFolderNavigatorSelf::FileDelete(const String& fileName)
 {
-    bool rat = false;
-
     if (FileExists(fileName)) {
         String filePath = SharedFolderPath() + fileName;
-        rat = DeleteFile(filePath.c_str());
+        return DeleteFile(filePath.c_str());
     }
 
-    return rat;
+    return FALSE;
 }
 
-bool SharedFolderNavigatorSelf::FileOpen(const String& fileName)
+BOOL SharedFolderNavigatorSelf::FileOpen(const String& fileName)
 /*
     User can open some files from shared folder
     Files are opened via system(start...) in separate threads
@@ -77,8 +75,6 @@ bool SharedFolderNavigatorSelf::FileOpen(const String& fileName)
         music/video - wmplayer
 */
 {
-    bool rat = false;
-
     if (FileExists(fileName)) {
         String filePath = SharedFolderPath() + fileName;
         String executor;
@@ -97,12 +93,14 @@ bool SharedFolderNavigatorSelf::FileOpen(const String& fileName)
         std::thread th([=]() {system(command.c_str());});
         th.detach();
 
-        rat = true;
+        return TRUE;
     }
-
-    return rat;
+    return FALSE;
 }
 
+/**
+    does skip hidden files
+*/
 FileVector FileShare::SharedFolderNavigatorSelf::FilesInDirectory(const String& dir)
 {
     WIN32_FIND_DATA findData;
@@ -120,19 +118,19 @@ FileVector FileShare::SharedFolderNavigatorSelf::FilesInDirectory(const String& 
     return foundFiles;
 }
 
-bool NameInVector(const Vector& v, const String& s) 
-/*
-    helper function that doesnt rly need to be part of the class
+/**
+helper function that doesnt rly need to be part of the class
 */
+BOOL NameInVector(const Vector& v, const String& s) 
 {
     return std::find(v.begin(), v.end(), s) != v.end();
 }
 
-String FileShare::SharedFolderNavigatorSelf::FileCreateUniqueName(const String& fileName)
-/*
-    to protect ourselves from files with same names replacing others etc
-    we create new names for files with names already existing
+/**
+to protect ourselves from files with same names replacing others etc
+we create new names for files with names already existing
 */
+String FileShare::SharedFolderNavigatorSelf::FileCreateUniqueName(const String& fileName)
 {
     String newName = fileName;
     Vector names = GetFileList();
@@ -144,31 +142,30 @@ String FileShare::SharedFolderNavigatorSelf::FileCreateUniqueName(const String& 
     return newName;
 }
 
-
-bool SharedFolderNavigatorSelf::FileExists(const String& fileName)
+BOOL SharedFolderNavigatorSelf::FileExists(const String& fileName)
 {
     Vector names = GetFileList();
     return NameInVector(names, fileName);
 }
 
-bool SharedFolderNavigatorSelf::SharedFolderExists()
+BOOL SharedFolderNavigatorSelf::SharedFolderExists()
 {
     Vector foundFiles = FilesInDirectory(ModuleDirectoryPath());
     return NameInVector(foundFiles, sharedFolderName);
 }
 
-bool SharedFolderNavigatorSelf::CreateSharedFolder()
+BOOL SharedFolderNavigatorSelf::CreateSharedFolder()
 {
     return CreateDirectory((SharedFolderPath()).c_str(), NULL);
 }
 
-const String& SharedFolderNavigatorSelf::ModuleDirectoryPath()
-/*
-    madule directory path is a static string 
-    that is searched for once if empty:
-        we get directory out program instance is runnig from
-        cut *.exe off
+/**
+madule directory path is a static string
+that is searched for once if empty:
+we get directory our program instance is runnig from
+also path is converted to dos-path to extinguish whitespaces
 */
+const String& SharedFolderNavigatorSelf::ModuleDirectoryPath()
 {
     static String directoryPathShort;
 
