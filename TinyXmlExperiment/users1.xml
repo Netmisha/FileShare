@@ -1,0 +1,8 @@
+<!--UserData as attributes-->
+<USERS>
+    <USER IP="1.1.1.1" NAME="Vasyl" STATUS="self" />
+    <USER IP="1.1.1.2" NAME="Petro" STATUS="good" />
+    <USER IP="1.1.1.3" NAME="Ivan" STATUS="bad" />
+    <USER IP="1.1.1.4" NAME="Stepan" STATUS="ugly" />
+    <USER IP="1.1.1.5" NAME="Ochrin" STATUS="vicious" />
+</USERS>

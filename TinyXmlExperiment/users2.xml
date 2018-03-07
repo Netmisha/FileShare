@@ -1,0 +1,28 @@
+<!--UserData as nodes-->
+<USERS>
+    <USER>
+        <IP>1.1.1.1</IP>
+        <NAME>Vasyl</NAME>
+        <STATUS>self</STATUS>
+    </USER>
+    <USER>
+        <IP>1.1.1.2</IP>
+        <NAME>Petro</NAME>
+        <STATUS>good</STATUS>
+    </USER>
+    <USER>
+        <IP>1.1.1.3</IP>
+        <NAME>Ivan</NAME>
+        <STATUS>bad</STATUS>
+    </USER>
+    <USER>
+        <IP>1.1.1.4</IP>
+        <NAME>Stepan</NAME>
+        <STATUS>ugly</STATUS>
+    </USER>
+    <USER>
+        <IP>1.1.1.5</IP>
+        <NAME>Ochrin</NAME>
+        <STATUS>vicious</STATUS>
+    </USER>
+</USERS>
