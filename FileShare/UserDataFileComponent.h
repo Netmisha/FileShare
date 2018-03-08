@@ -4,53 +4,116 @@
 
 namespace FileShare {
     using String = std::string;
-    using UserVector = std::vector<struct UserData>;
-    #define TIXML_USE_STL
-    struct UserData{
-        struct UserAddr {
-            UserAddr(const String&) {}
-            bool operator==(const UserAddr&) const { return false; }
-        };
-        enum class UserStatus{
-            Ugly, 
-            Bad,
-            Good,
-            Self          
-        };
-        static class UserStatusConsts {
+    using UserVector = std::vector<class UserData>;
+    using Bool = BOOL;
+
+    /**
+        UserData started of as a simple construct
+        containing some data elements about USER
+        but then i decided to make it a class
+        with data validation setters
+    */
+    class UserData
+    {
+    public:
+        class UserAddr;
+        class UserStatus;
+        class UserStatusConsts;
+        class TiXmlDocument;
+
+        UserData() = default; // bad data
+        UserData(const String& alias, const UserAddr& address, const UserStatus& status);
+
+        const String&       Alias()     const { return alias; }
+        const UserAddr&     Address()   const { return address; }
+        const UserStatus&   Status()    const { return status; }
+
+        /**
+        ----User.Alias should
+        --------not contain whitespaces
+        --------not contain odd symbols or operator-characters
+        --------begin with word-character
+        ----call of IsBadAlias is better be left to Controller
+        */
+        void Alias(const String& alias);
+        void Address(const UserAddr& address);
+        void Status(const UserStatus& status);
+
+        /**
+        ----IsBadAlias returns int to specify the degree of unfitness
+        */
+        static Bool IsBadAlias(const String& alias);
+
+        bool operator==(const UserData& other) const;
+        bool operator!=(const UserData& other) const;
+
+        class UserAddr {
         public:
-            const String Ugly = "ugly";
-            const String Bad  = "bad ";
-            const String Good = "good";
-            const String Self = "self";
+            UserAddr() = default;
+            /*
+                sockaddr_in?
+                ip, port?
+            */
+            UserAddr(const String&) {}
+            
+            /**
+            yet to make it right
+            */
+            String to_str() const;
+
+            bool operator==(const UserAddr& other) const { return this == &other; }
+            bool operator!=(const UserAddr& other) const { return this != &other; }
         };
 
+        class UserStatus{
+        public:
+            enum class StatusValue{
+                Ugly, 
+                Bad,
+                Good,
+                Self
+            };
+            
+            UserStatus() = default;
+            UserStatus(StatusValue);
+            UserStatus(const String&);
+
+            bool operator== (const UserStatus& other) const { return value == other.value; }
+            bool operator!= (const UserStatus& other) const { return value != other.value; }
+
+            String to_str() const;
+
+            class StatusString{
+            public:
+                static const String Ugly;
+                static const String Bad ;
+                static const String Good;
+                static const String Self;
+            };
+
+            StatusValue value;
+        };
+
+        const static UserData BadData;
+    private:
         String      alias;
-        UserAddr    address;/*??*/
+        UserAddr    address;
         UserStatus  status;
 
-        UserData(const String& alias, const UserAddr& address, UserStatus status);
-
-        operator String() const;
-        bool operator==(const UserData&) const;
-
-        static String to_str(UserStatus);
-        static String to_str(UserAddr);
-        static UserStatus str_to_status(const String&);
+        friend class UDFComponent;
     };
     
     class UDFInterface {
     public:
-        virtual UserVector  FindUsersInFile()                       = 0; // find all (self excluded)        
-        virtual UserVector  FindUsersInFile(UserData::UserStatus)   = 0;        
-        virtual UserData    FindUsersInFile(const String&)          = 0; 
-        virtual UserData    FindUsersInFile(UserData::UserAddr)     = 0;
+        virtual UserVector  FindUsersInFile()                               = 0; // find all (self excluded)        
+        virtual UserVector  FindUsersInFile(const UserData::UserStatus&)    = 0;        
+        virtual UserData    FindUsersInFile(const String&)                  = 0; 
+        virtual UserData    FindUsersInFile(const UserData::UserAddr&)      = 0;
 
         virtual bool AppendUser(const UserData&) = 0;  // first user to append is gonna be SELF
         virtual bool RemoveUser(const UserData&) = 0;  // remove(findinfile(name))
         virtual bool ModifyUser(const UserData&, const UserData&) = 0; 
     protected:
-        virtual void UserDataFileSetup() = 0; // find if exists, create if doesnt
         virtual bool UserAlreadyExists(const UserData&) = 0;
     };
 
@@ -58,18 +121,18 @@ namespace FileShare {
         public UDFInterface
     {
     public:
+        static void UserDataFileSetup();
         UDFComponent();
-        //virtual UserVector  FindUsersInFile()                       override;      
-        //virtual UserVector  FindUsersInFile(UserData::UserStatus)   override;
-        //virtual UserData    FindUsersInFile(const String&)          override;
+        ~UDFComponent();
+        virtual UserVector  FindUsersInFile()                               override;      
+        virtual UserVector  FindUsersInFile(const UserData::UserStatus&)    override;
+        virtual UserData    FindUsersInFile(const String&)                  override;
         //virtual UserData    FindUsersInFile(UserData::UserAddr)     override;
         //
         virtual bool AppendUser(const UserData&)    override;
-        //virtual bool RemoveUser(const UserData&)    override;  
-        //virtual bool ModifyUser(const UserData& oldUD, const UserData& newUD) override;
+        virtual bool RemoveUser(const UserData&)    override;  
+        virtual bool ModifyUser(const UserData& oldUD, const UserData& newUD) override;
     protected:
-        virtual void UserDataFileSetup() override;
         virtual bool UserAlreadyExists(const UserData&) override;
-
     };
 }

@@ -23,10 +23,8 @@ void hello_world_10() {
     element->LinkEndChild(text);    
     doc.LinkEndChild(element);
 
-    TiXmlElement* elem;
-    TiXmlText* txt;
+    TiXmlElement* elem= new TiXmlElement("Goodbye");
 
-    elem = new TiXmlElement("Goodbye");
     doc.LinkEndChild(elem);
     TiXmlElement * elem2 = elem;
     for (auto s : { "C","R","U","E","L" }) {
