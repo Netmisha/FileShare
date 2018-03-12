@@ -1,3 +1,5 @@
+#include"tinyxml.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,7 +9,7 @@
 #include <algorithm>
 #include <regex>
 
-#include"tinyxml.h"
+
 
 using SPair = std::pair<std::string, std::string>;
 using SMap = std::map<std::string, std::string>;

@@ -1,30 +1,75 @@
-#include <Windows.h>
 #include <iostream>
 #include <string>
+
 
 #ifdef _DEBUG
 #define TEST main
 void Cerr(const std::string& message);
 #define IN_RED Cerr
+#define IN_WHITE(s) std::cout << s << std::endl;
 #define TO_STR(s) std::string(#s)
 
 // tests
 #define TEST_SHARED_FOLDER_NAVIGATOR_SELF   1
 #define TEST_USER_DATA_FILE_COMPONENT       2
+#define TEST_PRESENCE_COMPONENT             3
 
 #if !defined(CURRENT_TEST)
-#define CURRENT_TEST TEST_USER_DATA_FILE_COMPONENT
+#define CURRENT_TEST TEST_PRESENCE_COMPONENT
 #endif // !defined(CURRENT_TEST)
 
+#if defined TEST_PRESENCE_COMPONENT
+#include <thread>
+#include <chrono>
+#include "PresenceComponent.h"
+using namespace FileShare;
+using Thread = std::thread;
+
+volatile bool mutex = false;
+
+int TEST() {
+    IN_RED(TO_STR(TEST_PRESENCE_COMPONENT));
+
+    PresenceComponent preCom;
+
+    String str = "0123";
+
+    Thread th_in([&](){
+        for (int i = 1; i; ++i) {
+            String msg = preCom.ReceiveBroadcastedMessage();
+            while (mutex);
+            IN_WHITE(msg);
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    });
+
+    Thread th_out([&]() {
+        for (int i = 1; i ; ++i) {
+            /*String str;
+            std::cin >> str;*/
+            mutex = true;
+            preCom.SendMessageBroadcast(str);
+            mutex = false;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    });
+    
+    th_in.join();
+    th_out.join();
+
+    return system("pause");
+}
+#endif //TEST_PRESENCE_COMPONENT
 
 #if defined TEST_USER_DATA_FILE_COMPONENT
 #if defined CURRENT_TEST
 #if CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
 
+#include <Windows.h>
 #include "UserDataFileComponent.h"
 using namespace FileShare;   
 int TEST() {
-    std::cout << TO_STR(TEST_USER_DATA_FILE_COMPONENT) << std::endl;
+    IN_RED(TO_STR(TEST_USER_DATA_FILE_COMPONENT));
 
     UDFComponent udf;
 
@@ -57,15 +102,14 @@ int TEST() {
         udf.RemoveUser(ud);
     return 0;
 }
-
 #endif // CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
 #endif // CURRENT_TEST
 #endif // TEST_USER_DATA_FILE_COMPONENT
 
-
 #if defined TEST_SHARED_FOLDER_NAVIGATOR_SELF 
 #if defined CURRENT_TEST
 #if CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
+#include <Windows.h>
 #include "SharedFolderNavigatorComponent.h"
 
 using namespace FileShare;

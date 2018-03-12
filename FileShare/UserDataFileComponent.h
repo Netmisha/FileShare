@@ -5,7 +5,7 @@
 namespace FileShare {
     using String = std::string;
     using UserVector = std::vector<class UserData>;
-    using Bool = BOOL;
+    using Bool = int;
 
     /**
         UserData started of as a simple construct

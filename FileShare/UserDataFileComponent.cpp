@@ -93,25 +93,10 @@ const String USER_STATUS statusString[] = {
 USER_STATUS UserStatus(StatusValue sts) :
     value(sts)
 {}
-//USER_STATUS UserStatus(const String & sts)
-//{
-//    //auto s = sts;
-//    //std::locale l;
-//    //for(auto& c: s)
-//    //    std::tolower(c, l);
-//
-//    //std::cout << USER_STATUS_STRING Ugly << " " << USER_STATUS_STRING Bad << std::endl;
-//
-//    if (std::strcmp(sts.c_str(), "self") != 0)  *this = UserStatus (USER_STATUS_VALUE Self);
-//    if (std::strcmp(sts.c_str(), "good") != 0)  *this = UserStatus (USER_STATUS_VALUE Good);
-//    if (std::strcmp(sts.c_str(), "bad") != 0)   *this = UserStatus (USER_STATUS_VALUE Bad);
-//    if (std::strcmp(sts.c_str(), "self") != 0)  *this = UserStatus (USER_STATUS_VALUE Ugly);
-//}
 
 String USER_STATUS to_str() const{
     return statusString[static_cast<int>(value)];
 }
-
 #undef USER_STATUS
 #undef USER_STATUS_STRING
 #undef USER_STATUS_VALUE

@@ -42,7 +42,7 @@ String SharedFolderNavigatorSelf::FileCreate(const String& fileName)
     return newName;
 }
 
-BOOL SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const String& fileNameNew)
+Bool SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const String& fileNameNew)
 {
     if (!FileExists(fileNameOld))
         return false;
@@ -55,7 +55,7 @@ BOOL SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const Stri
     return MoveFile(filePathOld.c_str(), filePathNew.c_str());
 }
 
-BOOL SharedFolderNavigatorSelf::FileDelete(const String& fileName)
+Bool SharedFolderNavigatorSelf::FileDelete(const String& fileName)
 {
     if (FileExists(fileName)) {
         String filePath = SharedFolderPath() + fileName;
@@ -65,7 +65,7 @@ BOOL SharedFolderNavigatorSelf::FileDelete(const String& fileName)
     return FALSE;
 }
 
-BOOL SharedFolderNavigatorSelf::FileOpen(const String& fileName)
+Bool SharedFolderNavigatorSelf::FileOpen(const String& fileName)
 /*
     User can open some files from shared folder
     Files are opened via system(start...) in separate threads
@@ -121,7 +121,7 @@ FileVector FileShare::SharedFolderNavigatorSelf::FilesInDirectory(const String& 
 /**
 helper function that doesnt rly need to be part of the class
 */
-BOOL NameInVector(const Vector& v, const String& s) 
+Bool NameInVector(const Vector& v, const String& s) 
 {
     return std::find(v.begin(), v.end(), s) != v.end();
 }
@@ -142,19 +142,19 @@ String FileShare::SharedFolderNavigatorSelf::FileCreateUniqueName(const String& 
     return newName;
 }
 
-BOOL SharedFolderNavigatorSelf::FileExists(const String& fileName)
+Bool SharedFolderNavigatorSelf::FileExists(const String& fileName)
 {
     Vector names = GetFileList();
     return NameInVector(names, fileName);
 }
 
-BOOL SharedFolderNavigatorSelf::SharedFolderExists()
+Bool SharedFolderNavigatorSelf::SharedFolderExists()
 {
     Vector foundFiles = FilesInDirectory(ModuleDirectoryPath());
     return NameInVector(foundFiles, sharedFolderName);
 }
 
-BOOL SharedFolderNavigatorSelf::CreateSharedFolder()
+Bool SharedFolderNavigatorSelf::CreateSharedFolder()
 {
     return CreateDirectory((SharedFolderPath()).c_str(), NULL);
 }
@@ -199,12 +199,12 @@ FileVector SharedFolderNavigatorOther::GetFileList()
     return FileVector();
 }
 
-BOOL SharedFolderNavigatorOther::SendFileToUser()
+Bool SharedFolderNavigatorOther::SendFileToUser()
 {
     return 0;
 }
 
-BOOL SharedFolderNavigatorOther::ReceiveFileFromUser()
+Bool SharedFolderNavigatorOther::ReceiveFileFromUser()
 {
     return 0;
 }
