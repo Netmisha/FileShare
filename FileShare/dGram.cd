@@ -1,51 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access">
-  <Class Name="FileShare::BasicView">
-    <Position X="6.25" Y="0.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAABAAAAAIAAA=</HashCode>
-      <FileName>View.h</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="model" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="FileShare::ConsoleView">
-    <Position X="3.25" Y="4.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAEAgAAAAAAAAAAQgAIgAAAACAAIEBAQAAAQAAA=</HashCode>
-      <FileName>View.h</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="stage" />
-      <Field Name="dataToPrint" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="FileShare::Model">
-    <Position X="8.75" Y="3" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAIAAAAEACAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Model.h</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="chatMessenger" />
-      <Field Name="sfNavigator" />
-      <Field Name="dataFileNavigator" />
-      <Field Name="yetToGetAGoodName" />
-    </ShowAsAssociation>
-  </Class>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
   <Class Name="FileShare::BasicController">
-    <Position X="6.25" Y="2.25" Width="1.5" />
+    <Position X="3.75" Y="9" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>Controller.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::ConsoleController">
-    <Position X="6.5" Y="4.5" Width="1.5" />
-    <Compartments>
-      <Compartment Name="Nested Types" Collapsed="false" />
-    </Compartments>
+    <Position X="3.25" Y="11" Width="3.5" />
     <NestedTypes>
       <Class Name="FileShare::ConsoleController::CommandReinterpretation" Collapsed="true">
         <TypeIdentifier>
@@ -58,73 +21,188 @@
       <FileName>Controller.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
+      <Field Name="model" />
+      <Field Name="stage" />
       <Field Name="view" />
     </ShowAsAssociation>
   </Class>
+  <Class Name="FileShare::Model">
+    <Position X="13" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAEACAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="chatMessenger" />
+      <Field Name="dataFileNavigator" />
+      <Field Name="sfNavigator" />
+      <Field Name="yetToGetAGoodName" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FileShare::BasicView">
+    <Position X="7.25" Y="3" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAABAAAAAIAAA=</HashCode>
+      <FileName>View.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="model" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FileShare::ConsoleView">
+    <Position X="7.25" Y="5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAgAAAAAAAAAAQgAIgAAAACAAIEBAQAAAQAAA=</HashCode>
+      <FileName>View.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="dataToPrint" />
+      <Field Name="stage" />
+    </ShowAsAssociation>
+  </Class>
   <Class Name="FileShare::MessengerComponent">
-    <Position X="11.5" Y="2.25" Width="1.5" />
+    <Position X="15.75" Y="10.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FileShare::SharedFolderNavigatorComponent">
-    <Position X="13.75" Y="0.5" Width="1.5" />
+  <Class Name="FileShare::BasicPresenceComponentInterface">
+    <Position X="12.25" Y="1.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
-      <FileName>SharedFolderNavigatorComponent.h</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Field Name="self" />
-      <Field Name="other" />
-    </ShowAsAssociation>
-  </Class>
-  <Class Name="FileShare::UserDataFileComponent">
-    <Position X="11.5" Y="4.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>UserDataFileComponent.h</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="FileShare::PresenceComponent" Collapsed="true">
-    <Position X="11.5" Y="3.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAEBAAAAAAAAAAAEAAAgAAAgAAAAAAAAAAAAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FileShare::BasicSharedFolderNavigator" Collapsed="true">
-    <Position X="20" Y="0.75" Width="1.5" />
+  <Class Name="FileShare::ReceiverPresenceComponentInterface">
+    <Position X="8" Y="1" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PresenceComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::SenderBasicPresenceComponentInterface">
+    <Position X="15.5" Y="1.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PresenceComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::PresenceComponent">
+    <Position X="3.25" Y="3.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEBAAQAAEAAAAAEABAiAAAgAAAAAAAAAAIAA=</HashCode>
+      <FileName>PresenceComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::BasicSharedFolderNavigator">
+    <Position X="10" Y="10" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::SharedFolderNavigatorSelf">
-    <Position X="16.25" Y="1.75" Width="1.5" />
+    <Position X="11.25" Y="11.75" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAAAEEAAAAIAAQEQRAAQAAAQQAAAAQgAAAAAAAAAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="FileShare::SharedFolderNavigatorOther">
-    <Position X="16" Y="0.5" Width="1.5" />
+  <Class Name="FileShare::SharedFolderNavigatorComponent">
+    <Position X="7" Y="14.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
+      <FileName>SharedFolderNavigatorComponent.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="other" />
+      <Field Name="self" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FileShare::SharedFolderNavigatorOther">
+    <Position X="8.25" Y="11.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAIAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="FileShare::UserData">
+    <Position X="15" Y="14" Width="3" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="FileShare::UserData::UserAddr">
+        <TypeIdentifier>
+          <NewMemberFileName>UserDataFileComponent.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="FileShare::UserData::UserStatus">
+        <NestedTypes>
+          <Enum Name="FileShare::UserData::UserStatus::StatusValue" Collapsed="true">
+            <TypeIdentifier>
+              <NewMemberFileName>UserDataFileComponent.h</NewMemberFileName>
+            </TypeIdentifier>
+          </Enum>
+        </NestedTypes>
+        <TypeIdentifier>
+          <NewMemberFileName>UserDataFileComponent.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAQACgAEAAIAAAAAAAAAAYAAAAIAAAACAAAAAAAIAAA=</HashCode>
+      <FileName>UserDataFileComponent.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="BadData" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FileShare::UDFComponent">
+    <Position X="11.25" Y="6.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>ACEAAAAAAAAAAAAAAAAAAAAAAgAAwAAAAgAAAQAAAAA=</HashCode>
+      <FileName>UserDataFileComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::UDFInterface">
+    <Position X="11.25" Y="4" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>ACEAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAgAAAAAAAAA=</HashCode>
+      <FileName>UserDataFileComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="FileShare::SockAddrIn">
+    <Position X="0.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAgAAAAAAAAAAIAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>PresenceComponent.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="FileShare::BasicSocketedEntity">
+    <Position X="3.75" Y="1" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AFAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAACAAAAA=</HashCode>
+      <FileName>PresenceComponent.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="inAddrAny" />
+      <Field Name="inAddrBro" />
+      <Field Name="inAddrSdr" />
+    </ShowAsAssociation>
+  </Struct>
   <Typedef Name="FileShare::Data" Collapsed="true">
-    <Position X="0.5" Y="5.5" Width="1.5" />
+    <Position X="7.5" Y="9.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Stages.h</FileName>
     </TypeIdentifier>
   </Typedef>
-  <Enum Name="FileShare::Stage" Collapsed="true">
-    <Position X="2.75" Y="1.75" Width="1.5" />
+  <Enum Name="FileShare::Stage">
+    <Position X="0.5" Y="8" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAgAMAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAABAAAQAAABAAgAMAAAAAAAQAA=</HashCode>
       <FileName>Stages.h</FileName>
     </TypeIdentifier>
   </Enum>
