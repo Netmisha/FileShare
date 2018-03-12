@@ -41,7 +41,7 @@ int main() {
     // find files in dir
     WIN32_FIND_DATA findData{};
     std::vector<std::string> foundFiles;
-    HANDLE fileIter = FindFirstFile((directPath+"*.*").c_str(), &findData);
+    HANDLE fileIter = FindFirstFile((directPathShort+"SharedFolder\\*.*").c_str(), &findData);
     if (fileIter != INVALID_HANDLE_VALUE) {
         do {
             foundFiles.push_back(std::string(findData.cFileName));

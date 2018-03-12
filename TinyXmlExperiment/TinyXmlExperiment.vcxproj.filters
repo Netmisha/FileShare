@@ -43,9 +43,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="HelloWorld.xml" />
-    <Xml Include="HelloWorld(1).xml" />
-    <Xml Include="users1.xml" />
-    <Xml Include="users2.xml" />
+    <Xml Include="users2.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="users1.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="HelloWorld.xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
+    <Xml Include="HelloWorld(1).xml">
+      <Filter>Resource Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>

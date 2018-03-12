@@ -1,11 +1,12 @@
 #include <Windows.h>
 #include <regex>
+#include <algorithm>
 #include <utility>
 #include <exception>
+#include <iostream>
 
 #include "UserDataFileComponent.h"
 #include "tinyxml.h"
-#define TIXML_USE_STL
 
 using namespace FileShare;
 
@@ -22,6 +23,12 @@ USER_DATA UserData(const String& als, const UserAddr& adr, const UserStatus& sts
     address(adr),
     status(sts)
 {}
+//USER_DATA UserData(const String & als, const String & adr, const String & sts):
+//    alias(als),
+//    address(UserAddr(adr)),
+//    status(UserStatus(sts))
+//{}
+
 
 void USER_DATA Alias(const String& als){
     alias = als;
@@ -68,7 +75,7 @@ bool USER_DATA operator!=(const UserData & other) const{
 #define USER_ADDR UserData::UserAddr:: 
 String USER_ADDR to_str() const
 {
-    return "default address";
+    return addr;
 }
 
 #undef USER_ADDR
@@ -76,31 +83,33 @@ String USER_ADDR to_str() const
 
 #ifndef USER_STATUS_PART_OF
 #define USER_STATUS UserData::UserStatus::
-#define USER_STATUS_STRING UserData::UserStatus::StatusString::
 #define USER_STATUS_VALUE UserData::UserStatus::StatusValue::
 
-const String USER_STATUS_STRING Ugly = "ugly";
-const String USER_STATUS_STRING Bad  = "bad" ;
-const String USER_STATUS_STRING Good = "good";
-const String USER_STATUS_STRING Self = "self";
+
+const String USER_STATUS statusString[] = {
+    "ugly", "bad", "good", "self"
+};
 
 USER_STATUS UserStatus(StatusValue sts) :
     value(sts)
 {}
-USER_STATUS UserStatus(const String & sts) :
-    value(StatusValue::Ugly)
-{
-    if (sts == USER_STATUS_STRING Self)  value = USER_STATUS_VALUE Self;
-    if (sts == USER_STATUS_STRING Good)  value = USER_STATUS_VALUE Good;
-    if (sts == USER_STATUS_STRING Bad)   value = USER_STATUS_VALUE Bad;
-}
+//USER_STATUS UserStatus(const String & sts)
+//{
+//    //auto s = sts;
+//    //std::locale l;
+//    //for(auto& c: s)
+//    //    std::tolower(c, l);
+//
+//    //std::cout << USER_STATUS_STRING Ugly << " " << USER_STATUS_STRING Bad << std::endl;
+//
+//    if (std::strcmp(sts.c_str(), "self") != 0)  *this = UserStatus (USER_STATUS_VALUE Self);
+//    if (std::strcmp(sts.c_str(), "good") != 0)  *this = UserStatus (USER_STATUS_VALUE Good);
+//    if (std::strcmp(sts.c_str(), "bad") != 0)   *this = UserStatus (USER_STATUS_VALUE Bad);
+//    if (std::strcmp(sts.c_str(), "self") != 0)  *this = UserStatus (USER_STATUS_VALUE Ugly);
+//}
 
-String USER_STATUS to_str() const
-{
-    if (value == USER_STATUS_VALUE Self) return USER_STATUS_STRING Self;
-    if (value == USER_STATUS_VALUE Good) return USER_STATUS_STRING Good;
-    if (value == USER_STATUS_VALUE Bad ) return USER_STATUS_STRING Bad;
-    /*(str == UserStatus::Ugly)*/        return USER_STATUS_STRING Ugly;
+String USER_STATUS to_str() const{
+    return statusString[static_cast<int>(value)];
 }
 
 #undef USER_STATUS
@@ -115,40 +124,65 @@ String USER_STATUS to_str() const
 const PCHAR udfXml = "UDF.xml";
 
 namespace Udfn {
+    const PCHAR root = "root";
     const PCHAR user = "user";
     const PCHAR alias = "alias";
     const PCHAR address = "address";
     const PCHAR status = "status";
 };
 
-static TiXmlDocument udf(udfXml);
-UDFComponent::UDFComponent()
-{
-    UserDataFileSetup();
-    udf.LoadFile();
+String UdfPath();
+
+static TiXmlDocument udf;
+UDFComponent::UDFComponent(){
+
+    udf.LoadFile(UdfPath().c_str(), TIXML_ENCODING_LEGACY);
+
+    
+    if(udf.NoChildren())
+        udf.LinkEndChild(new TiXmlElement(Udfn::root));
+
+    udf.SaveFile();
 }
 UDFComponent::~UDFComponent() 
 {
-    udf.SaveFile();
+    //udf.SaveFile();
 }
 
-void UDFComponent::UserDataFileSetup()
-{
-    CreateFile(
-        "UDF.xml",
-        GENERIC_READ | GENERIC_WRITE,
-        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-        NULL,
-        OPEN_ALWAYS,
-        FILE_ATTRIBUTE_HIDDEN,
-        NULL
-    );
+String UdfPath() {
+    static String directoryPathShort;
+
+    if (directoryPathShort.empty())
+    {
+        TCHAR tmodulePath[MAX_PATH]{};
+        GetModuleFileName(NULL, tmodulePath, MAX_PATH);
+
+        String directoryPath = std::regex_replace(tmodulePath, std::regex("([^\\\\]+[.]exe)"), "");
+
+        TCHAR tdirectPathShort[MAX_PATH]{};
+        GetShortPathName(directoryPath.c_str(), tdirectPathShort, MAX_PATH);
+
+        directoryPathShort = String(tdirectPathShort);
+    }
+    return directoryPathShort + udfXml;
 }
 
 #ifndef UDF_XML_HELPER_FUNCTIONS
+/**
+xml element -> to user data
+can be chaged later
+*/
 UserData      ConvertTiXmlElementToUserData(const TiXmlElement*);
+/**
+user data -> xml element
+can be chaged later
+*/
 TiXmlElement* ConvertUserDataToTiXmlElement(const UserData&);
-TiXmlElement* FindUserInTiXmlUserDataFile(const TiXmlDocument&, const UserData&);
+/**
+look trough udf to find needed user
+can be chaged later
+*/
+TiXmlElement* FindUserInTiXmlDocument(const TiXmlDocument&, const UserData&);
 #endif //UDF_XML_HELPER_FUNCTIONS
 
 UserVector UDFComponent::FindUsersInFile() {
@@ -158,7 +192,7 @@ UserVector UDFComponent::FindUsersInFile() {
     for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user))
         uv.push_back(ConvertTiXmlElementToUserData(iter));
 
-    return UserVector();
+    return uv;
 }
 UserVector UDFComponent::FindUsersInFile(const UserData::UserStatus& sts)
 {
@@ -173,12 +207,20 @@ UserVector UDFComponent::FindUsersInFile(const UserData::UserStatus& sts)
 
     return uv;
 }
-
 UserData UDFComponent::FindUsersInFile(const String& als){
     auto root = udf.RootElement();
     for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) {
         auto ud = ConvertTiXmlElementToUserData(iter);
         if (ud.Alias() == als)
+            return ud;
+    }
+    return UserData::BadData;
+}
+UserData FileShare::UDFComponent::FindUsersInFile(const UserData::UserAddr& addr){
+    auto root = udf.RootElement();
+    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) {
+        auto ud = ConvertTiXmlElementToUserData(iter);
+        if (ud.Address() == addr)
             return ud;
     }
     return UserData::BadData;
@@ -191,15 +233,13 @@ UserData UDFInterface::FindUsersInFile(const UserData::UserAddr& adr)
         if (ud.Address() == adr)
             return ud;
     }
-    return UserData();
-
     return UserData::BadData;
 }
 
 
 bool UDFComponent::AppendUser(const UserData& usr){
     //try to find if usr already exists in udf
-    if (FindUserInTiXmlUserDataFile(udf, usr))
+    if (FindUserInTiXmlDocument(udf, usr))
         return false; // if exists AppendUser fail
     else {
         auto elem = ConvertUserDataToTiXmlElement(usr); // create new
@@ -215,7 +255,7 @@ bool UDFComponent::AppendUser(const UserData& usr){
 }
 bool UDFComponent::RemoveUser(const UserData& usr)
 {
-    auto elem = FindUserInTiXmlUserDataFile(udf, usr);
+    auto elem = FindUserInTiXmlDocument(udf, usr);
     if (!elem)
         return false;
 
@@ -226,7 +266,7 @@ bool UDFComponent::RemoveUser(const UserData& usr)
 }
 bool UDFComponent::ModifyUser(const UserData & usrOld, const UserData & usrNew)
 {
-    auto elemOld = FindUserInTiXmlUserDataFile(udf, usrOld);
+    auto elemOld = FindUserInTiXmlDocument(udf, usrOld);
     if (!elemOld)
         return false;
     
@@ -242,51 +282,39 @@ bool UDFComponent::ModifyUser(const UserData & usrOld, const UserData & usrNew)
     return true;
 }
 bool UDFComponent::UserAlreadyExists(const UserData& usr){
-    auto elem = FindUserInTiXmlUserDataFile(udf, usr);  
+    auto elem = FindUserInTiXmlDocument(udf, usr);  
     return elem != nullptr;
 }
 
 #ifndef UDF_XML_HELPER_FUNCTIONS
-/**
-xml element -> to user data
-can be chaged later
-*/
 UserData ConvertTiXmlElementToUserData(const TiXmlElement* element) {
     auto alias = String(element->Attribute(Udfn::alias));
     auto address = UserData::UserAddr(element->Attribute(Udfn::address));
-    auto status = UserData::UserStatus((element->Attribute(Udfn::status)));
+    
+    auto status = static_cast<UserData::UserStatus::StatusValue>(std::stoi(element->Attribute(Udfn::status)));
 
     return UserData(alias, address, status);
 }
-
-/**
-user data -> xml element
-can be chaged later
-*/
 TiXmlElement* ConvertUserDataToTiXmlElement(const UserData& usr) {
-    auto alias   = usr.Alias().c_str();
-    auto address = usr.Address().to_str().c_str();
-    auto status  = usr.Status().to_str().c_str();
+    auto alias   = usr.Alias();
+    auto address = usr.Address().to_str();
+    auto status  = static_cast<int>(usr.Status().value);
 
     auto element = new TiXmlElement(Udfn::user);
     
-    element->SetAttribute(Udfn::alias, alias);
-    element->SetAttribute(Udfn::address, address);
-    element->SetAttribute(Udfn::status, status);
+    element->SetAttribute(Udfn::alias, alias.c_str());
+    element->SetAttribute(Udfn::address, address.c_str());
+    element->SetAttribute(Udfn::status, std::to_string(status).c_str());
 
     return element;
 }
-
-/**
-look trough udf to find needed user
-can be chaged later
-*/
-TiXmlElement* FindUserInTiXmlUserDataFile(const TiXmlDocument& udf, const UserData& usr) {
+TiXmlElement* FindUserInTiXmlDocument(const TiXmlDocument& udf, const UserData& usr) {
     auto root = udf.RootElement();
     for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user))
-        if (ConvertTiXmlElementToUserData(iter) == usr)
+        if (ConvertTiXmlElementToUserData(iter).Alias() == usr.Alias())
             return const_cast<TiXmlElement*>(iter);
     return nullptr;
 }
 #endif UDF_XML_HELPER_FUNCTIONS
 #endif //UDF_COMPONENT_PART_O
+

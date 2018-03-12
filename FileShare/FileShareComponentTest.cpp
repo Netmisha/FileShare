@@ -26,9 +26,36 @@ using namespace FileShare;
 int TEST() {
     std::cout << TO_STR(TEST_USER_DATA_FILE_COMPONENT) << std::endl;
 
+    UDFComponent udf;
 
+    for (UserData& ud : UserVector{
+        UserData{"Boi",                 UserData::UserAddr("Next Door"),        UserData::UserStatus::StatusValue::Good},
+        UserData{"Billy",               UserData::UserAddr("Ass We Can"),       UserData::UserStatus::StatusValue::Bad},
+        UserData{"LeatherMan",          UserData::UserAddr("Leather Men Club"), UserData::UserStatus::StatusValue::Good},
+        UserData{"PerformanceArtist",   UserData::UserAddr("Dungeon"),          UserData::UserStatus::StatusValue::Ugly}
+    })
+        udf.AppendUser(ud);
 
-    return system("pause");
+    IN_RED("UDF with some users: ");
+    for (auto& ud : udf.FindUsersInFile())
+        std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
+
+    IN_RED("try to fing good users");
+    for (auto& ud : udf.FindUsersInFile(UserData::UserStatus::StatusValue::Good))
+        std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
+
+    UserData ud = udf.FindUsersInFile("Boi");
+    udf.ModifyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
+
+    IN_RED("Tried modifying user");
+    for (auto& ud : udf.FindUsersInFile())
+        std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
+
+    system("pause");
+
+    for (auto& ud : udf.FindUsersInFile())
+        udf.RemoveUser(ud);
+    return 0;
 }
 
 #endif // CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT

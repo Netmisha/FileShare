@@ -54,20 +54,22 @@ namespace FileShare {
                 sockaddr_in?
                 ip, port?
             */
-            UserAddr(const String&) {}
+            UserAddr(const String& adr): addr(adr) {}
             
             /**
             yet to make it right
             */
             String to_str() const;
 
-            bool operator==(const UserAddr& other) const { return this == &other; }
-            bool operator!=(const UserAddr& other) const { return this != &other; }
+            bool operator==(const UserAddr& other) const { return addr == other.addr; }
+            bool operator!=(const UserAddr& other) const { return !(*this == other); }
+
+            String addr;
         };
 
         class UserStatus{
         public:
-            enum class StatusValue{
+            enum class StatusValue: int{
                 Ugly, 
                 Bad,
                 Good,
@@ -76,20 +78,13 @@ namespace FileShare {
             
             UserStatus() = default;
             UserStatus(StatusValue);
-            UserStatus(const String&);
 
             bool operator== (const UserStatus& other) const { return value == other.value; }
             bool operator!= (const UserStatus& other) const { return value != other.value; }
 
             String to_str() const;
 
-            class StatusString{
-            public:
-                static const String Ugly;
-                static const String Bad ;
-                static const String Good;
-                static const String Self;
-            };
+            static const String statusString[];
 
             StatusValue value;
         };
@@ -121,13 +116,13 @@ namespace FileShare {
         public UDFInterface
     {
     public:
-        static void UserDataFileSetup();
         UDFComponent();
         ~UDFComponent();
-        virtual UserVector  FindUsersInFile()                               override;      
-        virtual UserVector  FindUsersInFile(const UserData::UserStatus&)    override;
-        virtual UserData    FindUsersInFile(const String&)                  override;
-        //virtual UserData    FindUsersInFile(UserData::UserAddr)     override;
+
+        virtual UserVector  FindUsersInFile()                                 override;      
+        virtual UserVector  FindUsersInFile(const UserData::UserStatus& sts)  override;
+        virtual UserData    FindUsersInFile(const String& alias)              override;
+        virtual UserData    FindUsersInFile(const UserData::UserAddr& addr)   override;
         //
         virtual bool AppendUser(const UserData&)    override;
         virtual bool RemoveUser(const UserData&)    override;  

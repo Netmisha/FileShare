@@ -16,7 +16,7 @@ namespace FileShare {
     protected:
         MessengerComponent chatMessenger;
         SharedFolderNavigatorComponent sfNavigator;
-        //UDFComponent dataFileNavigator;
+        UDFComponent dataFileNavigator;
         PresenceComponent yetToGetAGoodName;
         friend class ConsoleController;
     };

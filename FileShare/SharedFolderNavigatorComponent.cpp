@@ -193,3 +193,18 @@ const String& SharedFolderNavigatorSelf::SharedFolderPath(){
 
     return folderPath;
 }
+
+FileVector SharedFolderNavigatorOther::GetFileList()
+{
+    return FileVector();
+}
+
+BOOL SharedFolderNavigatorOther::SendFileToUser()
+{
+    return 0;
+}
+
+BOOL SharedFolderNavigatorOther::ReceiveFileFromUser()
+{
+    return 0;
+}

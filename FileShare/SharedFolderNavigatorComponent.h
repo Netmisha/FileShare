@@ -13,6 +13,7 @@ namespace FileShare {
         /*
             donno if i actualy need this base yet
         */
+        virtual FileVector GetFileList() = 0;
     };
 
     class SharedFolderNavigatorSelf:
@@ -21,7 +22,7 @@ namespace FileShare {
     public:
         SharedFolderNavigatorSelf(); // find out if exists, create if doesnt
 
-        FileVector GetFileList(); 
+        virtual FileVector GetFileList() override; 
 
         String FileCreate(const String& fileName);
         BOOL   FileDelete(const String& fileName);
@@ -48,7 +49,11 @@ namespace FileShare {
     class SharedFolderNavigatorOther:
     protected BasicSharedFolderNavigator
     {
+    public:
+        virtual FileVector GetFileList() override;
 
+        BOOL SendFileToUser();
+        BOOL ReceiveFileFromUser();
     };
 
 
