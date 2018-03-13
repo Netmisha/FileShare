@@ -69,7 +69,7 @@ namespace FileShare {
         PresenceComponent();
         ~PresenceComponent();
 
-        virtual String ReceiveBroadcastedMessage()          override;
+        virtual String ReceiveBroadcastedMessage()         override;
         virtual Int   SendMessageBroadcast(const String&)  override;
 
     protected:

@@ -176,9 +176,6 @@
     <ClInclude Include="View.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dGram.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="note.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +185,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dGram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

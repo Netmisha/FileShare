@@ -16,7 +16,7 @@ void Cerr(const std::string& message);
 
 #if !defined(CURRENT_TEST)
 #define CURRENT_TEST TEST_PRESENCE_COMPONENT
-#endif // !defined(CURRENT_TEST)
+#endif !defined(CURRENT_TEST)
 
 #if defined TEST_PRESENCE_COMPONENT
 #include <thread>
@@ -32,10 +32,8 @@ int TEST() {
 
     PresenceComponent preCom;
 
-    String str = "0123";
-
     Thread th_in([&](){
-        for (int i = 1; i; ++i) {
+        for (int i = 0; i < 10; ++i) {
             String msg = preCom.ReceiveBroadcastedMessage();
             while (mutex);
             IN_WHITE(msg);
@@ -44,9 +42,9 @@ int TEST() {
     });
 
     Thread th_out([&]() {
-        for (int i = 1; i ; ++i) {
-            /*String str;
-            std::cin >> str;*/
+        for (int i = 0; i < 10; ++i) {
+            String str;
+            std::cin >> str;
             mutex = true;
             preCom.SendMessageBroadcast(str);
             mutex = false;
@@ -59,7 +57,7 @@ int TEST() {
 
     return system("pause");
 }
-#endif //TEST_PRESENCE_COMPONENT
+#endif TEST_PRESENCE_COMPONENT
 
 #if defined TEST_USER_DATA_FILE_COMPONENT
 #if defined CURRENT_TEST
@@ -104,7 +102,7 @@ int TEST() {
 }
 #endif // CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
 #endif // CURRENT_TEST
-#endif // TEST_USER_DATA_FILE_COMPONENT
+#endif TEST_USER_DATA_FILE_COMPONENT
 
 #if defined TEST_SHARED_FOLDER_NAVIGATOR_SELF 
 #if defined CURRENT_TEST
@@ -167,7 +165,7 @@ int TEST() {
 }
 #endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
 #endif // defined CURRENT_TEST
-#endif // defined TEST_SHARED_FOLDER_NAVIGATOR_SELF
+#endif defined TEST_SHARED_FOLDER_NAVIGATOR_SELF
 
 
 ////////
@@ -178,4 +176,4 @@ void Cerr(const std::string& message) {
 
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
 }
-#endif // _DEBUG
+#endif _DEBUG

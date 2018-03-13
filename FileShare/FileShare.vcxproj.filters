@@ -58,7 +58,7 @@
       <Filter>tinyxml</Filter>
     </ClCompile>
     <ClCompile Include="PresenceComponent.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\ModelComponents</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,14 +97,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="dGram.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Text Include="note.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Debug\UDF.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="dGram.cd" />
   </ItemGroup>
 </Project>

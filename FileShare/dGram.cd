@@ -33,10 +33,10 @@
       <FileName>Model.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="chatMessenger" />
       <Field Name="dataFileNavigator" />
       <Field Name="sfNavigator" />
       <Field Name="yetToGetAGoodName" />
+      <Field Name="chatMessenger" />
     </ShowAsAssociation>
   </Class>
   <Class Name="FileShare::BasicView">
@@ -59,13 +59,6 @@
       <Field Name="dataToPrint" />
       <Field Name="stage" />
     </ShowAsAssociation>
-  </Class>
-  <Class Name="FileShare::MessengerComponent">
-    <Position X="15.75" Y="10.25" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>MessengerComponent.h</FileName>
-    </TypeIdentifier>
   </Class>
   <Class Name="FileShare::BasicPresenceComponentInterface">
     <Position X="12.25" Y="1.25" Width="2.5" />
@@ -171,6 +164,13 @@
     <TypeIdentifier>
       <HashCode>ACEAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAgAAAAAAAAA=</HashCode>
       <FileName>UserDataFileComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::MessengerComponent">
+    <Position X="15.75" Y="10.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Struct Name="FileShare::SockAddrIn">

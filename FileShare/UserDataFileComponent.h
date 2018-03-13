@@ -7,12 +7,6 @@ namespace FileShare {
     using UserVector = std::vector<class UserData>;
     using Bool = int;
 
-    /**
-        UserData started of as a simple construct
-        containing some data elements about USER
-        but then i decided to make it a class
-        with data validation setters
-    */
     class UserData
     {
     public:

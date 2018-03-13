@@ -14,7 +14,7 @@ namespace FileShare {
     public:
 
     protected:
-        MessengerComponent chatMessenger;
+        //MessengerComponent chatMessenger;
         SharedFolderNavigatorComponent sfNavigator;
         UDFComponent dataFileNavigator;
         PresenceComponent yetToGetAGoodName;
