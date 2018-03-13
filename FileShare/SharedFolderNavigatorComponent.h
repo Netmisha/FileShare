@@ -2,8 +2,6 @@
 #include <string>
 #include <vector>
 
-
-
 namespace FileShare {
     using String = std::string;
     using FileVector = std::vector<std::string>;

@@ -1,6 +1,5 @@
 #pragma once
-#include <afxsock.h>
-//#include <winsock2.h>
+#include <winsock2.h>
 #include <string>
 #include <tuple>
 #include <set>

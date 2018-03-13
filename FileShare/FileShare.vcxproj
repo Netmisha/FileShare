@@ -155,6 +155,7 @@
     <ClCompile Include="..\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="FileShareMain.cpp" />
+    <ClCompile Include="MessengerComponent.cpp" />
     <ClCompile Include="PresenceComponent.cpp" />
     <ClCompile Include="SharedFolderNavigatorComponent.cpp" />
     <ClCompile Include="FileShareComponentTest.cpp" />

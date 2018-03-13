@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
   <Class Name="FileShare::BasicController">
-    <Position X="3.75" Y="9" Width="2.5" />
+    <Position X="2.5" Y="10.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAEAAAAAAAAA=</HashCode>
       <FileName>Controller.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::ConsoleController">
-    <Position X="3.25" Y="11" Width="3.5" />
+    <Position X="2" Y="7.25" Width="3.5" />
     <NestedTypes>
       <Class Name="FileShare::ConsoleController::CommandReinterpretation" Collapsed="true">
         <TypeIdentifier>
@@ -22,25 +22,47 @@
     </TypeIdentifier>
     <ShowAsAssociation>
       <Field Name="model" />
-      <Field Name="stage" />
       <Field Name="view" />
+      <Field Name="stage" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="FileShare::Model">
-    <Position X="13" Y="9.75" Width="1.5" />
+  <Class Name="FileShare::Model" Collapsed="true">
+    <Position X="4.75" Y="4.25" Width="1.5" />
+    <AssociationLine Name="chatMessenger" Type="FileShare::MessengerComponent" FixedFromPoint="true">
+      <Path>
+        <Point X="6.25" Y="4.438" />
+        <Point X="14" Y="4.438" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="sfNavigator" Type="FileShare::SharedFolderNavigatorComponent" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.812" Y="4.812" />
+        <Point X="5.812" Y="10.125" />
+        <Point X="6.844" Y="10.125" />
+        <Point X="6.844" Y="10.5" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="yetToGetAGoodName" Type="FileShare::PresenceComponent" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.75" Y="4.25" />
+        <Point X="5.75" Y="4.097" />
+        <Point X="8.328" Y="4.097" />
+        <Point X="8.328" Y="3.722" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAIAAAAEACAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
       <FileName>Model.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="dataFileNavigator" />
-      <Field Name="sfNavigator" />
-      <Field Name="yetToGetAGoodName" />
       <Field Name="chatMessenger" />
+      <Field Name="sfNavigator" />
+      <Field Name="dataFileNavigator" />
+      <Field Name="yetToGetAGoodName" />
     </ShowAsAssociation>
   </Class>
   <Class Name="FileShare::BasicView">
-    <Position X="7.25" Y="3" Width="2.25" />
+    <Position X="0.5" Y="0.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAABAAAAAIAAA=</HashCode>
       <FileName>View.h</FileName>
@@ -50,78 +72,97 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="FileShare::ConsoleView">
-    <Position X="7.25" Y="5" Width="2.25" />
+    <Position X="0.5" Y="2.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAEAgAAAAAAAAAAQgAIgAAAACAAIEBAQAAAQAAA=</HashCode>
       <FileName>View.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="dataToPrint" />
       <Field Name="stage" />
     </ShowAsAssociation>
   </Class>
   <Class Name="FileShare::BasicPresenceComponentInterface">
-    <Position X="12.25" Y="1.25" Width="2.5" />
+    <Position X="15.75" Y="1.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAEBAAAAAAAAAAAEAAAgAAAgAAAAAAAAAAAAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::ReceiverPresenceComponentInterface">
-    <Position X="8" Y="1" Width="2.75" />
+    <Position X="11.75" Y="1.25" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::SenderBasicPresenceComponentInterface">
-    <Position X="15.5" Y="1.25" Width="3" />
+    <Position X="19.5" Y="1.25" Width="3" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::PresenceComponent">
-    <Position X="3.25" Y="3.25" Width="2.75" />
+    <Position X="7.5" Y="0.5" Width="2.75" />
+    <InheritanceLine Type="FileShare::BasicSocketedEntity" FixedToPoint="true">
+      <Path>
+        <Point X="23.969" Y="1.25" />
+        <Point X="23.969" Y="0.375" />
+        <Point X="10.625" Y="0.375" />
+        <Point X="10.625" Y="0.125" />
+        <Point X="9.312" Y="0.125" />
+        <Point X="9.312" Y="0.5" />
+      </Path>
+    </InheritanceLine>
+    <InheritanceLine Type="FileShare::SenderBasicPresenceComponentInterface" FixedToPoint="true">
+      <Path>
+        <Point X="21" Y="1.25" />
+        <Point X="21" Y="0.375" />
+        <Point X="10.625" Y="0.375" />
+        <Point X="10.625" Y="0.125" />
+        <Point X="9.25" Y="0.125" />
+        <Point X="9.25" Y="0.5" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAAEBAAQAAEAAAAAEABAiAAAgAAAAAAAAAAIAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::BasicSharedFolderNavigator">
-    <Position X="10" Y="10" Width="2.25" />
+    <Position X="8.75" Y="15" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::SharedFolderNavigatorSelf">
-    <Position X="11.25" Y="11.75" Width="2.75" />
+    <Position X="5" Y="12.5" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAAAEEAAAAIAAQEQRAAQAAAQQAAAAQgAAAAAAAAAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::SharedFolderNavigatorComponent">
-    <Position X="7" Y="14.25" Width="2.5" />
+    <Position X="6.75" Y="10.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Field Name="other" />
       <Field Name="self" />
+      <Field Name="other" />
     </ShowAsAssociation>
   </Class>
   <Class Name="FileShare::SharedFolderNavigatorOther">
-    <Position X="8.25" Y="11.75" Width="2.25" />
+    <Position X="8.75" Y="12.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAEAAAAAAAIAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SharedFolderNavigatorComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::UserData">
-    <Position X="15" Y="14" Width="3" />
+    <Position X="11.75" Y="7" Width="3" />
     <Compartments>
       <Compartment Name="Nested Types" Collapsed="false" />
     </Compartments>
@@ -153,35 +194,87 @@
     </ShowAsAssociation>
   </Class>
   <Class Name="FileShare::UDFComponent">
-    <Position X="11.25" Y="6.5" Width="3.25" />
+    <Position X="8" Y="5.25" Width="3.25" />
     <TypeIdentifier>
       <HashCode>ACEAAAAAAAAAAAAAAAAAAAAAAgAAwAAAAgAAAQAAAAA=</HashCode>
       <FileName>UserDataFileComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::UDFInterface">
-    <Position X="11.25" Y="4" Width="3.25" />
+    <Position X="8" Y="8" Width="3.25" />
     <TypeIdentifier>
       <HashCode>ACEAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAgAAAAAAAAA=</HashCode>
       <FileName>UserDataFileComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::MessengerComponent">
-    <Position X="15.75" Y="10.25" Width="1.75" />
+    <Position X="14" Y="3.75" Width="2.75" />
+    <InheritanceLine Type="FileShare::SenderInterface" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="17.25" Y="14.438" />
+        <Point X="15.125" Y="14.438" />
+        <Point X="15.125" Y="6.588" />
+      </Path>
+    </InheritanceLine>
+    <InheritanceLine Type="FileShare::ReceiverInterface" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="17.25" Y="11.75" />
+        <Point X="15.688" Y="11.75" />
+        <Point X="15.688" Y="6.588" />
+      </Path>
+    </InheritanceLine>
+    <InheritanceLine Type="FileShare::ReceiverData" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="17.25" Y="10.062" />
+        <Point X="16.5" Y="10.062" />
+        <Point X="16.5" Y="6.588" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAQAAAAAAAQAAAAAAJAAAAAKAAAgEAAEAAAAAAAAA=</HashCode>
+      <FileName>MessengerComponent.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="listener" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="FileShare::Listener">
+    <Position X="17.75" Y="7" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIAAgAAAAAAAAEAAAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>MessengerComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::TCPSocketedEntity">
+    <Position X="20.75" Y="7.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AJAAgAAAAAAAAAAIAAAAAAAAAACAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>MessengerComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::SenderInterface">
+    <Position X="17.25" Y="14" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>MessengerComponent.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FileShare::ReceiverInterface">
+    <Position X="17.25" Y="11.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAAAQAAAAAAIAAAAACAAAgAAAEAAAAAAAAA=</HashCode>
       <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
   </Class>
   <Struct Name="FileShare::SockAddrIn">
-    <Position X="0.75" Y="0.75" Width="1.5" />
+    <Position X="23.25" Y="4" Width="1.75" />
     <TypeIdentifier>
       <HashCode>ABAAgAAAAAAAAAAIAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Struct>
   <Struct Name="FileShare::BasicSocketedEntity">
-    <Position X="3.75" Y="1" Width="1.75" />
+    <Position X="23.25" Y="1.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AFAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAACAAAAA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
@@ -192,15 +285,15 @@
       <Field Name="inAddrSdr" />
     </ShowAsAssociation>
   </Struct>
-  <Typedef Name="FileShare::Data" Collapsed="true">
-    <Position X="7.5" Y="9.25" Width="1.5" />
+  <Struct Name="FileShare::ReceiverData">
+    <Position X="17.25" Y="9.75" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Stages.h</FileName>
+      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
-  </Typedef>
+  </Struct>
   <Enum Name="FileShare::Stage">
-    <Position X="0.5" Y="8" Width="1.5" />
+    <Position X="0.5" Y="11" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAABAAAQAAABAAgAMAAAAAAAQAA=</HashCode>
       <FileName>Stages.h</FileName>

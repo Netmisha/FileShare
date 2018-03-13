@@ -60,6 +60,9 @@
     <ClCompile Include="PresenceComponent.cpp">
       <Filter>Source Files\ModelComponents</Filter>
     </ClCompile>
+    <ClCompile Include="MessengerComponent.cpp">
+      <Filter>Source Files\ModelComponents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">

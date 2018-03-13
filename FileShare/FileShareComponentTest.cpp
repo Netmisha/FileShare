@@ -13,12 +13,29 @@ void Cerr(const std::string& message);
 #define TEST_SHARED_FOLDER_NAVIGATOR_SELF   1
 #define TEST_USER_DATA_FILE_COMPONENT       2
 #define TEST_PRESENCE_COMPONENT             3
+#define TEST_MESSENGER                      4
 
 #if !defined(CURRENT_TEST)
-#define CURRENT_TEST TEST_PRESENCE_COMPONENT
+#define CURRENT_TEST TEST_MESSENGER
 #endif !defined(CURRENT_TEST)
 
+#if defined TEST_MESSENGER
+#if defined CURRENT_TEST
+#if CURRENT_TEST == TEST_MESSENGER
+
+#include "MessengerComponent.h"
+
+int TEST() {
+    return 0;
+}
+
+#endif CURRENT_TEST == TEST_MESSENGER
+#endif CURRENT_TEST
+#endif TEST_MESSENGER
+
 #if defined TEST_PRESENCE_COMPONENT
+#if defined CURRENT_TEST
+#if CURRENT_TEST == TEST_PRESENCE_COMPONENT
 #include <thread>
 #include <chrono>
 #include "PresenceComponent.h"
@@ -57,6 +74,8 @@ int TEST() {
 
     return system("pause");
 }
+#endif CURRENT_TEST == TEST_PRESENCE_COMPONENT
+#endif CURRENT_TEST
 #endif TEST_PRESENCE_COMPONENT
 
 #if defined TEST_USER_DATA_FILE_COMPONENT

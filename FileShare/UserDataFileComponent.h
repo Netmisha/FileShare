@@ -48,7 +48,7 @@ namespace FileShare {
                 sockaddr_in?
                 ip, port?
             */
-            UserAddr(const String& adr): addr(adr) {}
+            UserAddr(const String& adr, USHORT prt=0): addr(adr), port(prt) {}
             
             /**
             yet to make it right
@@ -59,6 +59,7 @@ namespace FileShare {
             bool operator!=(const UserAddr& other) const { return !(*this == other); }
 
             String addr;
+            USHORT port;
         };
 
         class UserStatus{
