@@ -81,16 +81,17 @@ int main() {
                 if (recv(se.sc, buff, sizeof(buff), NULL) == SOCKET_ERROR)
                     continue;
                 else {
-                    /*char str[INET_ADDRSTRLEN];
-                    inet_ntop(AF_INET, se.addrPtr, str, INET_ADDRSTRLEN);*/
-                    std::cout << (int)ntohs(se.addr.sin_port) << " ";// << se.addr.sin_port << " " << str << " ";
+                    SOCKADDR_IN sin{};
+                    int sinSize = sizeof(sin);
+                    getsockname(se.sc, (SOCKADDR*)&sin, &sinSize);
+                    std::cout << (int)ntohs(sin.sin_port) << " ";
+
                     std::cout << buff << std::endl;
 
                 }
             }
         }
     });
-
     while (true) {
         std::cout << "port msg: ";
 
@@ -103,6 +104,8 @@ int main() {
         SocketedEntity cliToSer(socket(AF_INET, SOCK_STREAM, 0), inet_addr(inetAddr), port);
 
         Connect(cliToSer);
+
+        std::cout << (int)(ntohs(cliToSer.addr.sin_port)) << " ";
 
         if (send(cliToSer.sc, msg.c_str(), msg.length(), NULL) <= 0)
             std::cout << "sending failed< error: " << WSAGetLastError() << std::endl;

@@ -1,13 +1,9 @@
-#include <iostream>
-#include <string>
+#include "Logger.h"
 
+#undef LOGGER
 
 #ifdef _DEBUG
 #define TEST main
-void Cerr(const std::string& message);
-#define IN_RED Cerr
-#define IN_WHITE(s) std::cout << s << std::endl;
-#define TO_STR(s) std::string(#s)
 
 // tests
 #define TEST_SHARED_FOLDER_NAVIGATOR_SELF   1
@@ -23,10 +19,123 @@ void Cerr(const std::string& message);
 #if defined CURRENT_TEST
 #if CURRENT_TEST == TEST_MESSENGER
 
+#include <thread>
 #include "MessengerComponent.h"
 
+using namespace FileShare;
+
+void WsaStartup() {
+    static WSADATA wsaData;
+    int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+    #ifdef LOGGER
+    {
+        IF(error)
+            InRedWithError("wsastartup failed with error: ");
+        ELSE
+            InRed("wsastartup");
+    }
+    #endif
+}
+
+String GetHostIp() {
+    char hostName[1024]{};
+    IF(gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
+        InRedWithError("Your host is nameless somehow");
+    //ELSE
+    //    InRed("Host name: " + String(hostName));
+
+    HOSTENT* hostEnt = gethostbyname(hostName);
+    IN_ADDR** addrList = (IN_ADDR**)hostEnt->h_addr_list;
+    char* hostAddr = inet_ntoa(*addrList[0]);
+    //InRed("Host addr: " + String(hostAddr));
+    
+    return hostAddr;
+}
+
+void TestSendingViaTcpSender() {
+
+    USHORT port;
+    std::cin >> port;
+
+    for (int i = 0; i < 3; ++i) {
+        Sender sender(inet_addr(GetHostIp().c_str()), port);
+
+        while (sender.ConnectToUser() == SOCKET_ERROR)
+            for (int i = 0; i < 100000; ++i);
+
+
+        while (sender.SendMessageToUser("hello") == SOCKET_ERROR)
+            for (int i = 0; i < 100000; ++i);
+    }
+}
+void TestListenerAndReceiver() {
+    USHORT port;
+    std::cin >> port;
+    Listener listener(port);
+
+    listener.Bind();
+    listener.Listen();
+
+    while (true) {
+        InRed("About to enter accepting loop");
+        Receiver se = listener.Accept();
+
+        String buff = se.ReceiveMessage();
+
+        if (buff.empty())
+            continue;
+        else
+            InWhite(buff);
+        for (int i = 0; i < 100000; ++i);
+    }
+}
+void TestListenerSenderAndReceiver() {
+    USHORT listenerPort;
+    std::cin >> listenerPort;
+
+    Listener listener(listenerPort);
+    listener.Bind();
+    listener.Listen();
+
+    std::thread th_accept_and_receive([&]() {
+        while (true) {
+            Receiver receiver = listener.Accept();
+            String message = receiver.ReceiveMessage();
+            if (message.empty())
+                continue;
+            else
+                InWhite(message);
+            for (int i = 0; i < 100000; ++i);
+        }
+    });
+
+    std::thread th_send([&]() {
+        while (true) {
+            USHORT port;
+            String msg;
+            std::cin >> port;
+            std::cin.ignore();
+            std::getline(std::cin, msg);
+
+            Sender sender(GetHostIp(), port);
+            while (sender.ConnectToUser() == SOCKET_ERROR);
+            while (sender.SendMessageToUser(msg) == SOCKET_ERROR);
+        }
+    });
+    
+    th_send.join();
+}
 int TEST() {
-    return 0;
+    WsaStartup();
+
+    //TestSendingViaTcpSender();
+
+    //TestListenerAndReceiver();
+
+    TestListenerSenderAndReceiver();
+
+    return system("pause");
 }
 
 #endif CURRENT_TEST == TEST_MESSENGER
@@ -45,7 +154,7 @@ using Thread = std::thread;
 volatile bool mutex = false;
 
 int TEST() {
-    IN_RED(TO_STR(TEST_PRESENCE_COMPONENT));
+    InRed(TO_STR(TEST_PRESENCE_COMPONENT));
 
     PresenceComponent preCom;
 
@@ -53,7 +162,7 @@ int TEST() {
         for (int i = 0; i < 10; ++i) {
             String msg = preCom.ReceiveBroadcastedMessage();
             while (mutex);
-            IN_WHITE(msg);
+            InWhite(msg);
         }
         std::this_thread::sleep_for(std::chrono::seconds(1));
     });
@@ -86,7 +195,7 @@ int TEST() {
 #include "UserDataFileComponent.h"
 using namespace FileShare;   
 int TEST() {
-    IN_RED(TO_STR(TEST_USER_DATA_FILE_COMPONENT));
+    InRed(TO_STR(TEST_USER_DATA_FILE_COMPONENT));
 
     UDFComponent udf;
 
@@ -98,18 +207,18 @@ int TEST() {
     })
         udf.AppendUser(ud);
 
-    IN_RED("UDF with some users: ");
+    InRed("UDF with some users: ");
     for (auto& ud : udf.FindUsersInFile())
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
-    IN_RED("try to fing good users");
+    InRed("try to fing good users");
     for (auto& ud : udf.FindUsersInFile(UserData::UserStatus::StatusValue::Good))
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
     UserData ud = udf.FindUsersInFile("Boi");
     udf.ModifyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
 
-    IN_RED("Tried modifying user");
+    InRed("Tried modifying user");
     for (auto& ud : udf.FindUsersInFile())
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
@@ -140,24 +249,24 @@ int TEST() {
 
 
     std::cout << "hello, ";
-    IN_RED("world\n");
+    InRed("world\n");
     
     SharedFolderNavigatorSelf self;
-    IN_RED("instance created");
+    InRed("instance created");
 
     String paintmeName = self.FileCreate("paintme.bmp");
     if (paintmeName != "paintme.bmp") {
-        IN_RED("paintme.bmp already existed.");
-        IN_RED("new paintme is created as " + paintmeName);
-        IN_RED("gonna rename " + paintmeName + " somehow");
+        InRed("paintme.bmp already existed.");
+        InRed("new paintme is created as " + paintmeName);
+        InRed("gonna rename " + paintmeName + " somehow");
         self.FileRename(paintmeName, "new_paintme_name_with_blackjack_and_hookers.bmp");
     }
     else
-        IN_RED("paintme.bmp created");
+        InRed("paintme.bmp created");
     {
         FileVector fv = self.GetFileList();
         if (fv.empty())
-            IN_RED("vector empty, smth wrong");
+            InRed("vector empty, smth wrong");
 
         for (const String& fileName : fv)
             std::cout << fileName << std::endl;
@@ -167,10 +276,10 @@ int TEST() {
     std::cout << "file name pls" << std::endl;
     std::cin >> fileName;
 
-    IN_RED("opening " + fileName);
+    InRed("opening " + fileName);
     self.FileOpen(fileName);
 
-    IN_RED("opened file s gonna be deleted afterwards");
+    InRed("opened file s gonna be deleted afterwards");
     system("pause");
 
     self.FileDelete(fileName);
@@ -185,14 +294,4 @@ int TEST() {
 #endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
 #endif // defined CURRENT_TEST
 #endif defined TEST_SHARED_FOLDER_NAVIGATOR_SELF
-
-
-////////
-void Cerr(const std::string& message) {
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 12);
-
-    std::cerr << message << std::endl;
-
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
-}
 #endif _DEBUG

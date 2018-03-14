@@ -16,13 +16,8 @@
 namespace FileShare {
 
     using String = std::string;
-    using Clock = std::chrono::steady_clock;
-    using TimePoint = std::chrono::steady_clock::time_point;
     using Int = int;
     using Bool = int;
-
-    using Message = std::tuple<TimePoint, UserData, String>;
-    using MessageVector = std::vector<Message>;
 
     constexpr USHORT messPort = 54321u;
 
@@ -31,9 +26,15 @@ namespace FileShare {
     {
     public:
         TCPSocketedEntity();
-        TCPSocketedEntity(SOCKET sc, String addr, USHORT port);
+        ~TCPSocketedEntity();
+
         TCPSocketedEntity(SOCKET sc, ULONG addr, USHORT port);
-        
+        TCPSocketedEntity(SOCKET sc, String addr, USHORT port);
+        TCPSocketedEntity(Int scType, Int protocol, ULONG inetAddr, USHORT port);
+
+        TCPSocketedEntity(TCPSocketedEntity&& other);
+        TCPSocketedEntity& operator = (TCPSocketedEntity&& other);
+
         Bool CompareSockaddr(const TCPSocketedEntity& other) const;
 
         SOCKET sc;
@@ -56,20 +57,41 @@ namespace FileShare {
 
 #ifndef TCP_SENDER
     class Sender:
-    public TCPSocketedEntity
+        public TCPSocketedEntity
     {
     public:
-        Sender(const UserData& usr);
-        Int ConnectToUser();
-        Int SendMessageToUser(const String& msg);
-    protected:
-        static TCPSocketedEntity UserDataToSocketedentity(const UserData&);
-    };
+        Sender(SOCKET sc, ULONG addr, USHORT port);
+        Sender(Int scType, Int protocol, ULONG addr, USHORT port);
+        Sender(ULONG addr, USHORT port);
+        Sender(String addr, USHORT port);
 
+        Int ConnectToUser();
+        Int SendMessageToUser(String const& msg);
+    protected:
+        Sender() = delete;
+        //static TCPSocketedEntity UserDataToSocketedentity(const UserData&);
+    };
 #endif TCP_SENDER
+
+#ifndef TCP_RECEIVER
+    class Receiver :
+        public TCPSocketedEntity
+    {
+    public:
+        Receiver(TCPSocketedEntity&&);
+
+        String ReceiveMessage();
+    };
+#endif TCP_RECEIVER
+
 #endif TCP_SOCKETED_ENTITY
 
 #ifndef MESSENGER_COMPONENT
+    using Clock = std::chrono::system_clock;
+    using TimePoint = Clock::time_point;
+    using Message = std::tuple<TimePoint, UserData, String>;
+    using MessageVector = std::vector<Message>;
+
     class SenderInterface 
     {
     public:
