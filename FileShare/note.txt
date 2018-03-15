@@ -8,3 +8,6 @@ like
 
     file-open file0.ext
     file-open [file1.ext, file2.ext]
+
+
+    single messages file

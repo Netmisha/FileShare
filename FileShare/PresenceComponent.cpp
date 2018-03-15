@@ -1,3 +1,4 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "PresenceComponent.h"
 
 using namespace FileShare;
@@ -40,6 +41,23 @@ String PresenceComponent::ReceiveBroadcastedMessage()
 Int PresenceComponent::SendMessageBroadcast(const String& msg)
 {
     return sendto(sc, msg.c_str(), msg.length(), NULL, inAddrBro.addrPtr, inAddrBro.addrSize);
+}
+
+String FileShare::PresenceComponent::GetHostIp()
+{
+    static WSADATA wsaData;
+    int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+    char hostName[1024]{};
+    if (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
+        return String();
+
+    //HOSTENT* hostEnt = gethostbyname(hostName);
+    //IN_ADDR** addrList = (IN_ADDR**)hostEnt->h_addr_list;
+    //char* hostAddr = inet_ntoa(*addrList[0]);
+    //
+    //return hostAddr;
+    return inet_ntoa(*((IN_ADDR**)(gethostbyname(hostName))->h_addr_list)[0]);
 }
 
 Int PresenceComponent::WSAstartup()

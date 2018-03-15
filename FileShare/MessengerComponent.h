@@ -37,6 +37,8 @@ namespace FileShare {
 
         Bool CompareSockaddr(const TCPSocketedEntity& other) const;
 
+        Bool InvalidSocket() const;
+
         SOCKET sc;
         SOCKADDR_IN addr;
         SOCKADDR* addrPtr;
@@ -89,16 +91,18 @@ namespace FileShare {
 #ifndef MESSENGER_COMPONENT
     using Clock = std::chrono::system_clock;
     using TimePoint = Clock::time_point;
-    using Message = std::tuple<TimePoint, UserData, String>;
+    using Message = std::tuple<TimePoint, ULONG, String>;
     using MessageVector = std::vector<Message>;
 
     class SenderInterface 
     {
     public:
+        virtual Int SendMessageTo(const String&, const String&, USHORT) = 0;
+        virtual Int SendMessageTo(const String&, ULONG, USHORT) = 0;
+
         virtual Int SendMessageTo(const String&, const UserData&)   = 0;
         virtual Int SendMessageTo(const String&, const UserVector&) = 0;
     };
-
     class ReceiverInterface {
     public:
         virtual Int ReceiveMessage() = 0;
@@ -126,9 +130,15 @@ namespace FileShare {
     {
     public:
         MessengerComponent();
+        MessengerComponent(USHORT port);
+
+        virtual Int SendMessageTo(const String&, const String&, USHORT) override;
+        virtual Int SendMessageTo(const String&, ULONG, USHORT) override;
+
         virtual Int SendMessageTo(const String&, const UserData&)   override;
         virtual Int SendMessageTo(const String&, const UserVector&) override;
-        virtual Int ReceiveMessage()                 override;
+
+        virtual Int ReceiveMessage() override;
 
         virtual MessageVector& MsgAlrdyRead() override;
         virtual MessageVector& MsgYetUnread() override;
@@ -137,9 +147,6 @@ namespace FileShare {
         virtual Int MessageUnreadCount()    override;
 
         virtual Int MarkAllAsRead()    override;
-
-    //protected:                                     
-    //    virtual void MsgSort() override;
 
         Listener listener;
     };

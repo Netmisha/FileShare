@@ -28,11 +28,11 @@ namespace FileShare {
 
     class BasicPresenceComponentInterface {
     protected:
-        virtual Int WSAstartup() = 0;
-        virtual Int InitializeSockaddr() = 0;
-        virtual Int CreateSocket() = 0;
-        virtual Int CloseSocket() = 0;
-        virtual Int SetSocketOptions() = 0;
+        virtual Int WSAstartup()            = 0;
+        virtual Int InitializeSockaddr()    = 0;
+        virtual Int CreateSocket()          = 0;
+        virtual Int CloseSocket()           = 0;
+        virtual Int SetSocketOptions()      = 0;
     };
 
     class ReceiverPresenceComponentInterface:
@@ -69,7 +69,9 @@ namespace FileShare {
         ~PresenceComponent();
 
         virtual String ReceiveBroadcastedMessage()         override;
-        virtual Int   SendMessageBroadcast(const String&)  override;
+        virtual Int    SendMessageBroadcast(const String&) override;
+
+        virtual String GetHostIp();
 
     protected:
         virtual Int WSAstartup()           override;

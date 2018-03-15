@@ -8,9 +8,6 @@ namespace FileShare {
     using Bool = int;
 
     class BasicSharedFolderNavigator {
-        /*
-            donno if i actualy need this base yet
-        */
         virtual FileVector GetFileList() = 0;
     };
 
@@ -53,7 +50,6 @@ namespace FileShare {
         Bool SendFileToUser();
         Bool ReceiveFileFromUser();
     };
-
 
     class SharedFolderNavigatorComponent{
     public:

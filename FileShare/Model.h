@@ -10,12 +10,12 @@ namespace FileShare {
     class Model
     {
     public:
-
+        friend class ConsoleController;
     protected:
         MessengerComponent chatMessenger;
         SharedFolderNavigatorComponent sfNavigator;
         UDFComponent dataFileNavigator;
         PresenceComponent yetToGetAGoodName;
-        friend class ConsoleController;
+
     };
 }

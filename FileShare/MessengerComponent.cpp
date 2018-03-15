@@ -1,6 +1,8 @@
 #include "MessengerComponent.h"
 #include "Logger.h"
 #include <ctime>
+#include <thread>
+#include <chrono>
 
 using namespace FileShare;
 
@@ -84,6 +86,11 @@ Bool TCPSocketedEntity::CompareSockaddr(const TCPSocketedEntity& s2) const{
     };;
 }
 
+Bool FileShare::TCPSocketedEntity::InvalidSocket() const
+{
+    return sc == INVALID_SOCKET;
+}
+
 #ifndef TCP_LISTENER
 Listener::Listener(USHORT port) :
     TCPSocketedEntity(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP), INADDR_ANY, port)
@@ -160,19 +167,30 @@ Receiver::Receiver(TCPSocketedEntity&& se) :
 }
 String Receiver::ReceiveMessage()
 {
-    char buff[100]{};
-    Int result = recv(sc, buff, sizeof(buff), NULL);
+    Int result;
+
+    #ifdef LOGGER
+    {
+        InRed("Receiver trying to recv");
+    }
+    #endif
+
+    char buff[128]{};
+
+    result = recv(sc, buff, sizeof(buff), NULL);
     
     #ifdef LOGGER
     {
         IF(result == SOCKET_ERROR)
             InRedWithError("Receive failed, error: ");
+        ELIF(result == NULL)
+            InRed("connection ??gracefully?? closed");
         ELSE
             InRed("received smth");
     }
     #endif LOGGGER
 
-    return buff;
+    return String(buff);
 }
 #endif TCP_RECEIVER
 
@@ -222,7 +240,7 @@ Int Sender::SendMessageToUser(const String & buff)
         IF (result < 0)
             InRedWithError("send failed somehow, error: ");
         ELIF(result == 0)
-            InRedWithError("nothing set, error: ");
+            InRedWithError("nothing sent, error: ");
         ELSE
             InRed("message probably sent");
     }
@@ -252,11 +270,11 @@ Int Sender::SendMessageToUser(const String & buff)
 
 #endif !TCP_SOCKETED_ENTITY
 
-
 #ifndef MESSENGER_COMPONENT
 
-MessengerComponent::MessengerComponent():
-    listener(messPort)
+#ifndef MESSENGER_COMPONENT_CONSTRUCTORS
+MessengerComponent::MessengerComponent(USHORT port):
+    listener(port)
 {
     #ifdef LOGGER
     {
@@ -266,27 +284,55 @@ MessengerComponent::MessengerComponent():
     listener.Bind();
     listener.Listen();
 }
-Int MessengerComponent::SendMessageTo(const String& msg, const UserData& usr)
-{
-    String userAddr = usr.Address().to_str();
-    USHORT port = usr.Address().port;
+MessengerComponent::MessengerComponent() :
+    MessengerComponent(messPort)
+{}
+#endif MESSENGER_COMPONENT_CONSTRUCTORS
 
-    Sender sender(userAddr, port);
+Int SendMessageViaSender(const String msg, Sender&& sender) {
 
-    Int result = sender.ConnectToUser();
+    Int result = SOCKET_ERROR;
 
-    if (result != SOCKET_ERROR) {
+    std::chrono::duration<LONG> timeOut = std::chrono::seconds(5);
+
+    #ifdef LOGGER
+    {
+        InRed("gonna try to connect for 5s");
+    }
+    #endif LOGGER
+
+    for (TimePoint then = Clock::now(); Clock::now() - then < timeOut;) {
+        result = sender.ConnectToUser();
+        if (result != SOCKET_ERROR)
+            break;
+    }
+
+    if (result == SOCKET_ERROR) {
         #ifdef LOGGER
         {
-            InRedWithError("MSG component Send failed to connect, error: ");
+            InRedWithError("MSG component Send failed, connect timeout, error: ");
         }
         #endif LOGGER
 
-        result = sender.SendMessageToUser(msg);
-        
+        return result;
+    }
+    else{
+
         #ifdef LOGGER
         {
-            IF(result == SOCKET_ERROR)
+            InRed("gonna try to send for 5s");
+        }
+        #endif LOGGER
+
+        for (TimePoint then = Clock::now(); Clock::now() - then < timeOut;) {
+            result = sender.SendMessageToUser(msg);
+            if (result > 0)
+                break;
+        }
+
+        #ifdef LOGGER
+        {
+            IF(result <= NULL)
                 InRedWithError("MSG component Send failed to send, error: ");
             ELSE
                 InRed("MSG component Send succeeded in sending");
@@ -295,20 +341,127 @@ Int MessengerComponent::SendMessageTo(const String& msg, const UserData& usr)
     }
     return result;
 }
+
+Int MessengerComponent::SendMessageTo(const String& msg, ULONG adr, USHORT port)
+{
+    Int result = SOCKET_ERROR;
+
+    #ifdef LOGGER
+    {
+        InRed("entering SendMessage, creating sender");
+    }
+    #endif LOGGER
+
+    Sender sender(adr, port);
+
+    if (sender.InvalidSocket()) 
+    {
+        #ifdef LOGGER
+        {
+            InRed("sender wasnt created properly");
+        }
+        #endif LOGGER
+
+        result = sender.sc;
+
+    }
+    else 
+    {
+        #ifdef LOGGER
+        {
+            InRed("sender created? trying to send");
+        }
+        #endif LOGGER
+
+        result = SendMessageViaSender(msg, std::move(sender));
+    }
+    
+    return result;
+}
+Int MessengerComponent::SendMessageTo(const String& msg, const String& adr, USHORT port)
+{
+    return SendMessageTo(msg, inet_addr(adr.c_str()), port);
+}
+
+Int MessengerComponent::SendMessageTo(const String& msg, const UserData& usr)
+{
+    String userAddr = usr.Address().to_str();
+    USHORT port = usr.Address().port;
+
+    return SendMessageTo(msg, userAddr, port);
+}
 Int MessengerComponent::SendMessageTo(const String& msg, const UserVector& users)
 {
     int sum = 0;
+
     for (auto& user : users)
         sum+= SendMessageTo(msg, user);
-    return sum;
+
+    return sum + users.size(); 
+    // since SendTo returns SOCKET_ERROR == -1 on fail
+    // return is userCount - failCount == successCount
+    // 0 is total fail
 }
 Int MessengerComponent::ReceiveMessage()
 {
-    TCPSocketedEntity se = listener.Accept();
-   
-    Int result = se.sc;
+    #ifdef LOGGER
+    {
+        InRed("entering MSG_C RecMes");
+    }
+    #endif
 
-    if (result == INVALID_SOCKET) {
+    Int result;
+
+    Receiver rc = listener.Accept();
+
+    #ifdef LOGGER
+    {
+        InRed("listener accepter receiver");
+    }
+    #endif
+
+    String buff = rc.ReceiveMessage();
+
+    #ifdef LOGGER
+    {
+        InRed("Receiver tried hard");
+    }
+    #endif
+
+    if (buff.empty()) {
+        #ifdef LOGGER
+        {
+            InRed("but we got nothing");
+        }
+        #endif
+
+        return 0;
+    }
+    else
+    {
+        #ifdef LOGGER
+        {
+            InRed("and we got smth");
+        }
+        #endif
+
+        result = buff.length();
+
+        TimePoint now = Clock::now();
+        ULONG addr = rc.addr.sin_addr.S_un.S_addr;
+
+        Message msg = std::make_tuple(now, addr, buff);
+
+        yetUnread.push_back(msg);
+    }
+    
+    return result;
+
+    /*TCPSocketedEntity se = listener.Accept();
+
+    if (se.InvalidSocket()) {
+        result = se.sc;
+
         #ifdef LOGGER
         {
             InRedWithError("MSG component Receive: Accept fail, error: ");
@@ -345,8 +498,9 @@ Int MessengerComponent::ReceiveMessage()
             yetUnread.push_back(msg);
         }
     }
-    return result;
+    return result;*/
 }
+
 MessageVector& MessengerComponent::MsgAlrdyRead()
 {
     return alrdyRead;  

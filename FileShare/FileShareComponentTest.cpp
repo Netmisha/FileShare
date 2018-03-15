@@ -1,7 +1,5 @@
 #include "Logger.h"
 
-#undef LOGGER
-
 #ifdef _DEBUG
 #define TEST main
 
@@ -20,6 +18,10 @@
 #if CURRENT_TEST == TEST_MESSENGER
 
 #include <thread>
+#include <ctime>
+#include <mutex>
+#include <sstream>
+#include <regex>
 #include "MessengerComponent.h"
 
 using namespace FileShare;
@@ -53,6 +55,7 @@ String GetHostIp() {
     return hostAddr;
 }
 
+#ifndef TEST_SOCKETED_ENTITIES
 void TestSendingViaTcpSender() {
 
     USHORT port;
@@ -98,20 +101,9 @@ void TestListenerSenderAndReceiver() {
     listener.Bind();
     listener.Listen();
 
-    std::thread th_accept_and_receive([&]() {
-        while (true) {
-            Receiver receiver = listener.Accept();
-            String message = receiver.ReceiveMessage();
-            if (message.empty())
-                continue;
-            else
-                InWhite(message);
-            for (int i = 0; i < 100000; ++i);
-        }
-    });
-
     std::thread th_send([&]() {
         while (true) {
+
             USHORT port;
             String msg;
             std::cin >> port;
@@ -123,9 +115,110 @@ void TestListenerSenderAndReceiver() {
             while (sender.SendMessageToUser(msg) == SOCKET_ERROR);
         }
     });
+
+    std::thread th_accept_and_receive([&]() {
+        while (true) {
+            Receiver receiver = listener.Accept();
+            String message = receiver.ReceiveMessage();
+            if (message.empty())
+                continue;
+            else
+                InWhite(message);
+            for (int i = 0; i < 100000; ++i);
+        }
+    });
     
     th_send.join();
 }
+#endif
+
+void TestMessengerSomehow() {
+    USHORT listenerPort;
+    InRed("Test: chose your port - ");
+    std::cin >> listenerPort;
+
+    MessengerComponent mc(listenerPort);
+
+    std::mutex mx;
+ 
+    std::thread th_receive([&]() {
+        InRed("");
+        InRed("recv_thread started");
+
+        while (true) {
+
+            InRed("Test: ready to recv");
+            mc.ReceiveMessage();
+           
+            mx.lock();
+
+            if (!mc.MsgYetUnread().empty()) {
+                InRed("Test: some msg in");
+                for (Message& msg : mc.MsgYetUnread()) {
+
+                    time_t tt = Clock::to_time_t(std::get<0>(msg));
+                    String time = String(std::ctime(&tt));
+
+                    /*[](String& s) {
+                        String result;
+                        std::regex rx[] = {
+                            std::regex(R"(\d+:.+:\d+)"),
+                            std::regex(R"(\b[^ ][A-Za-z]+\b)"),
+                            std::regex(R"((?<!:)\d\d(?= )\b)")
+                        };
+
+                        for (int i = 0; i < 3; ++i) {
+                            std::smatch match;
+                            std::regex_search(s, match, rx[i]);
+                            result += String(match[i % 2]) + String(i < 2 ? ":" : "");
+                        }
+                        s = result;
+                    }(time);*/
+
+                    IN_ADDR addr{};
+                    addr.S_un.S_addr = std::get<1>(msg);
+                    String ip = inet_ntoa(addr);
+
+                    String txt = std::get<2>(msg);
+
+                    InWhite(time + "[" + ip + "]: " + txt);
+                }
+            }
+            mx.unlock();
+        }
+    });
+    std::thread th_send([&]() {
+        InRed("");
+        InRed("send_thread started");
+
+        while (true) {
+            mx.lock();
+
+            InRed("");
+            InRed("Test: chose port to send to - ");
+            USHORT port;
+            std::cin >> port;
+            
+            InRed("Test: msg - ");
+            String msg;
+            std::cin >> msg;
+            //std::getline(std::cin, msg);
+            //std::cin.ignore();
+
+            InRed("Test: sending...");
+            IF (mc.SendMessageTo(msg, GetHostIp(), port) > 0)
+                InRed("Test: ...msg sent");
+            ELSE
+                InRed("Test: ...msg not sent");
+
+            mx.unlock();
+            for (int i = 0; i < 100000; ++i);
+        }
+    });
+
+    while (true);
+}
+
 int TEST() {
     WsaStartup();
 
@@ -133,7 +226,9 @@ int TEST() {
 
     //TestListenerAndReceiver();
 
-    TestListenerSenderAndReceiver();
+    //TestListenerSenderAndReceiver();
+
+    TestMessengerSomehow();
 
     return system("pause");
 }
@@ -168,9 +263,9 @@ int TEST() {
     });
 
     Thread th_out([&]() {
+        String str;
+        std::cin >> str;
         for (int i = 0; i < 10; ++i) {
-            String str;
-            std::cin >> str;
             mutex = true;
             preCom.SendMessageBroadcast(str);
             mutex = false;
