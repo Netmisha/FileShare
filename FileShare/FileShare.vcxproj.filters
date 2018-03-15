@@ -63,6 +63,9 @@
     <ClCompile Include="MessengerComponent.cpp">
       <Filter>Source Files\ModelComponents</Filter>
     </ClCompile>
+    <ClCompile Include="TcpSocketedEntity.cpp">
+      <Filter>Source Files\ModelComponents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpSocketedEntity.h">
+      <Filter>Header Files\ModelComponents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

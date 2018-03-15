@@ -32,8 +32,3 @@
 }(message)
 
 #endif _DEBUG
-
-#undef LOGGER
-
-
-

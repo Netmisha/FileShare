@@ -42,14 +42,6 @@
         <Point X="6.844" Y="10.5" />
       </Path>
     </AssociationLine>
-    <AssociationLine Name="yetToGetAGoodName" Type="FileShare::PresenceComponent" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="5.75" Y="4.25" />
-        <Point X="5.75" Y="4.097" />
-        <Point X="8.328" Y="4.097" />
-        <Point X="8.328" Y="3.722" />
-      </Path>
-    </AssociationLine>
     <TypeIdentifier>
       <HashCode>AAAAIAAAAEACAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAA=</HashCode>
       <FileName>Model.h</FileName>
@@ -125,7 +117,7 @@
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAEBAAQAAEAAAAAEABAiAAAgAAAAAAAAAAIAA=</HashCode>
+      <HashCode>AAAAAAAAEBAAQAAEAAAAAEABAiAAAgAAAAAAAAAAIBA=</HashCode>
       <FileName>PresenceComponent.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -209,29 +201,8 @@
   </Class>
   <Class Name="FileShare::MessengerComponent">
     <Position X="14" Y="3.75" Width="2.75" />
-    <InheritanceLine Type="FileShare::SenderInterface" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="17.25" Y="14.438" />
-        <Point X="15.125" Y="14.438" />
-        <Point X="15.125" Y="6.588" />
-      </Path>
-    </InheritanceLine>
-    <InheritanceLine Type="FileShare::ReceiverInterface" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="17.25" Y="11.75" />
-        <Point X="15.688" Y="11.75" />
-        <Point X="15.688" Y="6.588" />
-      </Path>
-    </InheritanceLine>
-    <InheritanceLine Type="FileShare::ReceiverData" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
-      <Path>
-        <Point X="17.25" Y="10.062" />
-        <Point X="16.5" Y="10.062" />
-        <Point X="16.5" Y="6.588" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAQAAAAAAAQAAAAAAJAAAAAKAAAgEAAEAAAAAAAAA=</HashCode>
+      <HashCode>AAAAQAAAAAAAAAAAAAABAAAAAKACAAFAAAAAAQAAAAA=</HashCode>
       <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -242,14 +213,14 @@
     <Position X="17.75" Y="7" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AIAAgAAAAAAAAEAAAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
-      <FileName>MessengerComponent.h</FileName>
+      <FileName>TcpSocketedEntity.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::TCPSocketedEntity">
     <Position X="20.75" Y="7.75" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AJAAgAAAAAAAAAAIAAAAAAAAAACAAAAAAAAAAAAAAAI=</HashCode>
-      <FileName>MessengerComponent.h</FileName>
+      <HashCode>AJAAgAAAAAAAAAAIAAAAAgAAAACAAAAAAAAgAAQAAAI=</HashCode>
+      <FileName>TcpSocketedEntity.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="FileShare::SenderInterface">
@@ -262,7 +233,7 @@
   <Class Name="FileShare::ReceiverInterface">
     <Position X="17.25" Y="11.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAQAAAAAAAQAAAAAAIAAAAACAAAgAAAEAAAAAAAAA=</HashCode>
+      <HashCode>AAAAQAAAAAAAAAAAAAAAAAAAACACAABAAAAAAQAAAAA=</HashCode>
       <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -288,7 +259,7 @@
   <Struct Name="FileShare::ReceiverData">
     <Position X="17.25" Y="9.75" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAgAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
       <FileName>MessengerComponent.h</FileName>
     </TypeIdentifier>
   </Struct>
