@@ -8,10 +8,26 @@
 #define TEST_USER_DATA_FILE_COMPONENT       2
 #define TEST_PRESENCE_COMPONENT             3
 #define TEST_MESSENGER                      4
+#define TEST_SHARED_FOLDER_NAVIGATOR_OTHER  5
 
 #if !defined(CURRENT_TEST)
-#define CURRENT_TEST TEST_MESSENGER
-#endif !defined(CURRENT_TEST)
+#define CURRENT_TEST 5
+#endif // !CURRENT_TEST
+
+#if defined TEST_SHARED_FOLDER_NAVIGATOR_OTHER
+#if defined CURRENT_TEST 
+#if CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_OTHER
+
+int TEST() {
+    Log::InRed(TO_STR(TEST_SHARED_FOLDER_NAVIGATOR_OTHER));
+
+    return system("pause");
+}
+
+#endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_OTHER
+#endif // CURRENT_TEST
+#endif // TEST_SHARED_FOLDER_NAVIGATOR_OTHER
+
 
 #if defined TEST_MESSENGER
 #if defined CURRENT_TEST
@@ -221,9 +237,9 @@ int TEST() {
     return system("pause");
 }
 
-#endif CURRENT_TEST == TEST_MESSENGER
-#endif CURRENT_TEST
-#endif TEST_MESSENGER
+#endif //CURRENT_TEST == TEST_MESSENGER
+#endif //CURRENT_TEST
+#endif //TEST_MESSENGER
 
 #if defined TEST_PRESENCE_COMPONENT
 #if defined CURRENT_TEST
@@ -232,6 +248,7 @@ int TEST() {
 #include <chrono>
 #include "PresenceComponent.h"
 using namespace FileShare;
+using namespace Log;
 using Thread = std::thread;
 
 volatile bool mutex = false;
@@ -266,9 +283,9 @@ int TEST() {
 
     return system("pause");
 }
-#endif CURRENT_TEST == TEST_PRESENCE_COMPONENT
-#endif CURRENT_TEST
-#endif TEST_PRESENCE_COMPONENT
+#endif //CURRENT_TEST == TEST_PRESENCE_COMPONENT
+#endif //CURRENT_TEST
+#endif //TEST_PRESENCE_COMPONENT
 
 #if defined TEST_USER_DATA_FILE_COMPONENT
 #if defined CURRENT_TEST
@@ -276,7 +293,8 @@ int TEST() {
 
 #include <Windows.h>
 #include "UserDataFileComponent.h"
-using namespace FileShare;   
+using namespace FileShare; 
+using namespace Log;
 int TEST() {
     InRed(TO_STR(TEST_USER_DATA_FILE_COMPONENT));
 
@@ -313,7 +331,7 @@ int TEST() {
 }
 #endif // CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
 #endif // CURRENT_TEST
-#endif TEST_USER_DATA_FILE_COMPONENT
+#endif // TEST_USER_DATA_FILE_COMPONENT
 
 #if defined TEST_SHARED_FOLDER_NAVIGATOR_SELF 
 #if defined CURRENT_TEST
@@ -322,6 +340,7 @@ int TEST() {
 #include "SharedFolderNavigatorComponent.h"
 
 using namespace FileShare;
+using namespace Log;
 int TEST() {
     std::cout << TO_STR(EST_SHARED_FOLDER_NAVIGATOR_SELF) << std::endl;
 
@@ -376,5 +395,6 @@ int TEST() {
 }
 #endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_SELF
 #endif // defined CURRENT_TEST
-#endif defined TEST_SHARED_FOLDER_NAVIGATOR_SELF
+#endif // TEST_SHARED_FOLDER_NAVIGATOR_SELF
+
 #endif _DEBUG
