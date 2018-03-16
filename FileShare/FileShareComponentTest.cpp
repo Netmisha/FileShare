@@ -1,5 +1,5 @@
 #include "Logger.h"
-
+#include <iostream>
 #ifdef _DEBUG
 #define TEST main
 
@@ -25,6 +25,7 @@
 #include "MessengerComponent.h"
 
 using namespace FileShare;
+using namespace Log;
 
 void WsaStartup() {
     static WSADATA wsaData;
@@ -89,7 +90,7 @@ void TestListenerAndReceiver() {
         if (buff.empty())
             continue;
         else
-            InWhite(buff);
+            InWhite(buff.c_str());
         for (int i = 0; i < 100000; ++i);
     }
 }
@@ -123,7 +124,7 @@ void TestListenerSenderAndReceiver() {
             if (message.empty())
                 continue;
             else
-                InWhite(message);
+                InWhite(message.c_str());
             for (int i = 0; i < 100000; ++i);
         }
     });
@@ -140,9 +141,6 @@ void TestMessengerSomehow() {
     std::cin >> listenerPort;
 
     MessengerComponent mc(listenerPort);
-
-    //std::mutex mx;
-
 
     std::thread th_receive([&]() {
         InRed("recv_thread started");
@@ -164,16 +162,11 @@ void TestMessengerSomehow() {
             std::cin >> command;
 
             if (command == "send") {
-                //InRed("");
-                //InRed("Test: chose port to send to - ");
                 USHORT port;
                 std::cin >> port;
 
-                //InRed("Test: msg - ");
                 String msg;
-                std::cin >> msg;
-                //std::getline(std::cin, msg);
-                //std::cin.ignore();
+                std::getline(std::cin, msg);
 
                 InRed("Test: sending...");
                 IF(mc.SendMessageTo(msg, GetHostIp(), port) > 0)
@@ -184,13 +177,14 @@ void TestMessengerSomehow() {
             }
             else 
                 if (command == "show") {
-                    if (!mc.MsgYetUnread().empty()) {
+                    if (!mc.Messages().empty()) {
                         InRed("Test: some msg in");
-                        for (Message& msg : mc.MsgYetUnread()) {
+                        for (Message& msg : mc.Messages()) {
 
                             time_t tt = Clock::to_time_t(std::get<0>(msg));
                             String time = String(std::ctime(&tt));
-                            time[time.length() - 1] = 0;
+
+                            time = time.substr(0, time.length() - 1);
 
                             IN_ADDR addr{};
                             addr.S_un.S_addr = std::get<1>(msg);

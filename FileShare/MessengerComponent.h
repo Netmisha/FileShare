@@ -11,7 +11,6 @@ namespace FileShare {
 
 #ifndef MESSENGER_COMPONENT
     
-
     class SenderInterface 
     {
     public:
@@ -25,20 +24,16 @@ namespace FileShare {
     public:
         virtual Int ReceiveMessage() = 0;
 
-        virtual MessageVector& MsgAlrdyRead() = 0;
-        virtual MessageVector& MsgYetUnread() = 0;
+        virtual MessageVector& Messages() = 0;
 
         virtual Int MessageReadCount()      = 0;
         virtual Int MessageUnreadCount()    = 0;
         virtual Int MarkAllAsRead()         = 0;
-
-
-    //protected:
-    //    virtual void MsgSort() = 0;
     };
+
     struct ReceiverData {
-        MessageVector alrdyRead{};
-        MessageVector yetUnread{};
+        int unreadCount = 0;
+        MessageVector msgs;
     };
 
     class MessengerComponent:
@@ -58,8 +53,7 @@ namespace FileShare {
 
         virtual Int ReceiveMessage() override;
 
-        virtual MessageVector& MsgAlrdyRead() override;
-        virtual MessageVector& MsgYetUnread() override;
+        virtual MessageVector& Messages() override;
 
         virtual Int MessageReadCount()      override;
         virtual Int MessageUnreadCount()    override;

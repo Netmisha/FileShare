@@ -7,6 +7,7 @@
 #undef LOGGER
 
 using namespace FileShare;
+using namespace Log;
 
 #ifndef MESSENGER_COMPONENT
 
@@ -148,7 +149,7 @@ Int MessengerComponent::ReceiveMessage()
     }
     #endif
 
-    Int result;
+    Int result = 0;
 
     Receiver rc = listener.Accept();
 
@@ -172,8 +173,6 @@ Int MessengerComponent::ReceiveMessage()
             InRed("but we got nothing");
         }
         #endif
-
-        return 0;
     }
     else
     {
@@ -190,7 +189,8 @@ Int MessengerComponent::ReceiveMessage()
 
         Message msg = std::make_tuple(now, addr, buff);
 
-        yetUnread.push_back(msg);
+        msgs.push_back(msg);
+        ++unreadCount;
     }
     
     return result;
@@ -233,42 +233,33 @@ Int MessengerComponent::ReceiveMessage()
 
             UserData ud = UDFComponent().FindUsersInFile(UserData::UserAddr::UserAddr(str));
             Message msg = std::make_tuple(now, ud, buff);
-            yetUnread.push_back(msg);
+            msgs.push_back(msg);
         }
     }
     return result;*/
 }
 
-MessageVector& MessengerComponent::MsgAlrdyRead()
+MessageVector& MessengerComponent::Messages()
 {
-    return alrdyRead;  
-}
-MessageVector& MessengerComponent::MsgYetUnread()
-{
-    return yetUnread;
+    return msgs;  
 }
 
 Int MessengerComponent::MessageReadCount()
 {
-    return alrdyRead.size();
+    return msgs.size() - unreadCount;
 }
 
 Int MessengerComponent::MessageUnreadCount()
 {
-    return yetUnread.size();
+    return unreadCount;
 }
 
 Int MessengerComponent::MarkAllAsRead()
 {
-    Int elemCount = yetUnread.size();
+    Int result = unreadCount;
 
-    auto reEnd = std::end(alrdyRead);
-    auto unBeg = std::begin(yetUnread);
-    auto unEnd = std::end(yetUnread);
+    unreadCount = 0;
 
-    alrdyRead.insert(reEnd, unBeg, unEnd);
-    yetUnread.clear();
-
-    return elemCount;
+    return result;
 }
 #endif !MESSENGER_COMPONENT

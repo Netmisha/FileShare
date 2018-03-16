@@ -22,6 +22,12 @@
     <Filter Include="tinyxml">
       <UniqueIdentifier>{062fc7fb-4156-4f83-8bcf-72ae16885a91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ModelComponents\SharedFolderNavigator">
+      <UniqueIdentifier>{936c2dea-9ffa-487c-82d6-28177d153b87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ModelComponents\SharedFolderNavigator">
+      <UniqueIdentifier>{beb5bf60-cc7b-4f90-a8de-89c32ed54c4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileShareMain.cpp">
@@ -40,9 +46,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UserDataFileComponent.cpp">
-      <Filter>Source Files\ModelComponents</Filter>
-    </ClCompile>
-    <ClCompile Include="SharedFolderNavigatorComponent.cpp">
       <Filter>Source Files\ModelComponents</Filter>
     </ClCompile>
     <ClCompile Include="..\tinyxml\tinystr.cpp">
@@ -66,6 +69,18 @@
     <ClCompile Include="TcpSocketedEntity.cpp">
       <Filter>Source Files\ModelComponents</Filter>
     </ClCompile>
+    <ClCompile Include="SharedFolderNavigatorComponent.cpp">
+      <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedFolderNavigatorSelf.cpp">
+      <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedFolderNavigatorOther.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Model.h">
@@ -86,9 +101,6 @@
     <ClInclude Include="MessengerComponent.h">
       <Filter>Header Files\ModelComponents</Filter>
     </ClInclude>
-    <ClInclude Include="SharedFolderNavigatorComponent.h">
-      <Filter>Header Files\ModelComponents</Filter>
-    </ClInclude>
     <ClInclude Include="PresenceComponent.h">
       <Filter>Header Files\ModelComponents</Filter>
     </ClInclude>
@@ -106,6 +118,18 @@
     </ClInclude>
     <ClInclude Include="TcpSocketedEntity.h">
       <Filter>Header Files\ModelComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedFolderNavigatorComponent.h">
+      <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedFolderNavigatorOther.h">
+      <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicSharedFolderNavigator.h">
+      <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedFolderNavigatorSelf.h">
+      <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

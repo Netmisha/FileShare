@@ -1,8 +1,6 @@
 #include "TcpSocketedEntity.h"
 #include "Logger.h"
 
-#undef LOGGER
-
 using namespace FileShare;
 
 
@@ -11,16 +9,20 @@ TCPSocketedEntity::TCPSocketedEntity(SOCKET s, ULONG inetAddr, USHORT port) :
     sc(s),
     addr{}
 {
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        InRed("Constructing SocketedEntity");
+        ++Log::depth;
+
+        Log::InRed("Constructing SocketedEntity");
 
         IF(sc == INVALID_SOCKET)
-            InRedWithError("Somehow socket invalid, error: ");
+            Log::InRedWithError("Somehow socket invalid, error: ");
         ELSE
-            InRed("socket created alright");
+            Log::InRed("socket created alright");
+
+        --Log::depth;
     }
-#endif LOGGER
+    #endif LOGGER
 
     addr.sin_family = AF_INET;
     addr.sin_addr.S_un.S_addr = inetAddr;
@@ -40,10 +42,6 @@ TCPSocketedEntity::TCPSocketedEntity(SOCKET sc, String addr, USHORT port) :
 {}
 TCPSocketedEntity::TCPSocketedEntity(TCPSocketedEntity&& other) :
     TCPSocketedEntity(other.sc, other.addr.sin_addr.S_un.S_addr, ntohs(addr.sin_port))
-    /*sc(other.sc),
-    addr(other.addr),
-    addrPtr((SOCKADDR*)&addr),
-    addrSize(sizeof(addr))*/
 {
     other.sc = INVALID_SOCKET;
 }
@@ -66,14 +64,23 @@ TCPSocketedEntity::~TCPSocketedEntity()
     Int result{};
     if (sc != INVALID_SOCKET) {
         result = closesocket(sc);
-#ifdef LOGGER
+        #ifdef LOGGER
         {
+            ++Log::depth;
             IF(result == SOCKET_ERROR)
-                InRedWithError("failed to close socket, error: ");
+                Log::InRedWithError("~SocketedEntity failed to close socket, error: ");
             ELSE
-                InRed("socket closed");
+                Log::InRed("~SocketedEntity socket closed");
+            --Log::depth;
         }
-#endif LOGGER
+        #endif LOGGER
+    }
+    else {
+        {
+            #ifdef LOGGER
+            Log::InRed("~SocketedEntity without closing sc");
+            #endif
+        }
     }
 }
 
@@ -95,60 +102,99 @@ Bool FileShare::TCPSocketedEntity::InvalidSocket() const
 Listener::Listener(USHORT port) :
     TCPSocketedEntity(socket(AF_INET, SOCK_STREAM, IPPROTO_TCP), INADDR_ANY, port)
 {
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        InRed("listener constructing");
+        ++Log::depth;
+        Log::InRed("listener constructing");
+        --Log::depth;
     }
-#endif
+    #endif
+}
+Listener::Listener(TCPSocketedEntity&& target):
+    TCPSocketedEntity(std::move(target))
+{
+    #ifdef LOGGER
+    {
+        ++Log::depth;
+        Log::InRed("listener constructing");
+        --Log::depth;
+    }
+    #endif
 }
 Int Listener::Bind()
 {
-    Int result = bind(sc, addrPtr, addrSize);
+    Int result = SOCKET_ERROR;
 
-#ifdef LOGGER
+    #ifdef LOGGER
+    {
+        ++Log::depth;
+        Log::InRed("listener trying to bind");
+    }
+    #endif LOGGER
+
+    result = bind(sc, addrPtr, addrSize);
+
+    #ifdef LOGGER
     {
         IF(result == SOCKET_ERROR)
-            InRedWithError("listener socket bind failed, error: ");
+            Log::InRedWithError("listener socket bind failed, error: ");
         ELSE
-            InRed("listener socket bound");
+            Log::InRed("listener socket bound");
+        --Log::depth;
     }
-#endif LOGGER
+    #endif LOGGER
 
     return result;
 }
 Int Listener::Listen()
 {
-    Int result = listen(sc, 1);
+    Int result = SOCKET_ERROR;
 
-#ifdef LOGGER
+    #ifdef LOGGER
+    {
+        ++Log::depth;
+        Log::InRed("listener starts to listen");
+    }
+    #endif
+
+    result = listen(sc, 1);
+
+    #ifdef LOGGER
     {
         IF(result == SOCKET_ERROR)
-            InRedWithError("listener socket failed to start listening, error: ");
+            Log::InRedWithError("listener socket failed to start listening, error: ");
         ELSE
-            InRed("listener socket is listening alright");
+            Log::InRed("listener socket is listening alright");
+        --Log::depth;
     }
-#endif LOGGER
+    #endif LOGGER
 
     return result;
 }
 TCPSocketedEntity Listener::Accept()
 {
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        InRed("creating invalid socket for acceptance");
+        ++Log::depth;
+        Log::InRed("listener trying to accept");
+        Log::InRed("creating invalid socket for acceptance");
     }
-#endif LOGGER
+    #endif LOGGER
+
     TCPSocketedEntity se;
     se.sc = accept(sc, se.addrPtr, &se.addrSize);
 
-#ifdef LOGGER
+    #ifdef LOGGER
     {
         IF(se.sc == INVALID_SOCKET)
-            InRedWithError("accepted socket invalid");
+            Log::InRedWithError("accepted socket invalid");
         ELSE
-            InRed("socket accepted alright");
+            Log::InRed("socket accepted alright");
+
+        Log::InRed("moving SocEnt");
+        --Log::depth;
     }
-#endif LOGGER
+    #endif LOGGER
 
     return std::move(se);
 }
@@ -156,39 +202,42 @@ TCPSocketedEntity Listener::Accept()
 
 #ifndef TCP_RECEIVER
 
-Receiver::Receiver(TCPSocketedEntity&& se) :
-    TCPSocketedEntity(std::move(se))
+Receiver::Receiver(TCPSocketedEntity&& target) :
+    TCPSocketedEntity(std::move(target))
 {
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        InRed("receiver created");
+        ++Log::depth;
+        Log::InRed("receiver created");
+        --Log::depth;
     }
-#endif
+    #endif
 }
 String Receiver::ReceiveMessage()
 {
     Int result;
 
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        InRed("Receiver trying to recv");
+        ++Log::depth;
+        Log::InRed("Receiver trying to recv");
     }
-#endif
+    #endif
 
     char buff[128]{};
 
     result = recv(sc, buff, sizeof(buff), NULL);
 
-#ifdef LOGGER
+    #ifdef LOGGER
     {
         IF(result == SOCKET_ERROR)
-            InRedWithError("Receive failed, error: ");
+            Log::InRedWithError("Receive failed, error: ");
         ELIF(result == NULL)
-            InRed("connection ??gracefully?? closed");
+            Log::InRed("connection ??gracefully?? closed");
         ELSE
-            InRed("received smth");
+            Log::InRed("received smth");
     }
-#endif LOGGGER
+    #endif LOGGGER
 
     return String(buff);
 }
@@ -196,15 +245,28 @@ String Receiver::ReceiveMessage()
 
 #ifndef TCP_SENDER
 
+Sender::Sender(TCPSocketedEntity&& target):
+    TCPSocketedEntity(std::move(target))
+{
+    {
+        #ifdef LOGGER
+        ++Log::depth;
+        Log::InRed("Created sender");
+        --Log::depth;
+        #endif LOGGER
+    }
+}
+
 Sender::Sender(SOCKET sc, ULONG addr, USHORT port) :
     TCPSocketedEntity(sc, addr, port)
 {
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        InRed("Created sender");
+        ++Log::depth;
+        Log::InRed("Created sender");
+        --Log::depth;
     }
-#endif LOGGER
-
+    #endif LOGGER
 }
 Sender::Sender(Int scType, Int ptc, ULONG addr, USHORT port) :
     Sender(socket(AF_INET, scType, ptc), addr, port)
@@ -218,33 +280,55 @@ Sender::Sender(String addr, USHORT port) :
 
 Int Sender::ConnectToUser()
 {
-    Int result = connect(sc, addrPtr, addrSize);
+    Int result = SOCKET_ERROR;
 
-#ifdef LOGGER
+    #ifdef LOGGER
     {
-        IF(result == SOCKET_ERROR)
-            InRedWithError("failed to connect, error: ");
-        ELSE
-            InRed("socket connected alright");
+        ++Log::depth;
+        Log::InRed("sender trying to connect");
     }
-#endif LOGGER
+    #endif
+    
+    result = connect(sc, addrPtr, addrSize);
+
+    #ifdef LOGGER
+    {
+        ++Log::depth;
+        IF(result == SOCKET_ERROR)
+            Log::InRedWithError("failed to connect, error: ");
+        ELSE
+            Log::InRed("socket connected alright");
+        --Log::depth;
+    }
+    #endif LOGGER
 
     return result;
 }
 Int Sender::SendMessageToUser(const String & buff)
 {
-    Int result = send(sc, buff.c_str(), buff.length(), NULL);
+    Int result = SOCKET_ERROR;
 
-#ifdef LOGGER
+    #ifdef LOGGER
+    {
+        ++Log::depth;
+        Log::InRed("sender trying to send");
+    }
+    #endif
+
+    result = send(sc, buff.c_str(), buff.length(), NULL);
+
+    #ifdef LOGGER
     {
         IF(result < 0)
-            InRedWithError("send failed somehow, error: ");
+            Log::InRedWithError("send failed, error: ");
         ELIF(result == 0)
-            InRedWithError("nothing sent, error: ");
+            Log::InRedWithError("nothing sent, error: ");
         ELSE
-            InRed("message probably sent");
+            Log::InRed("message probably sent");
+
+        --Log::depth;
     }
-#endif LOGGER
+    #endif LOGGER
 
     return result;
 }

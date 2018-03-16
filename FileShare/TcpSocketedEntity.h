@@ -18,7 +18,7 @@ namespace FileShare {
     using Int = int;
     using Bool = int;
 
-    constexpr USHORT messPort = 54321u;
+    #define messPort (USHORT)54321
 
 
 #ifndef TCP_SOCKETED_ENTITY
@@ -50,6 +50,7 @@ namespace FileShare {
         public TCPSocketedEntity
     {
     public:
+        Listener(TCPSocketedEntity&&);
         Listener(USHORT port);
         Int Bind();
         Int Listen();
@@ -62,6 +63,7 @@ namespace FileShare {
         public TCPSocketedEntity
     {
     public:
+        Sender(TCPSocketedEntity&&);
         Sender(SOCKET sc, ULONG addr, USHORT port);
         Sender(Int scType, Int protocol, ULONG addr, USHORT port);
         Sender(ULONG addr, USHORT port);
@@ -80,7 +82,6 @@ namespace FileShare {
     {
     public:
         Receiver(TCPSocketedEntity&&);
-
         String ReceiveMessage();
     };
 #endif TCP_RECEIVER
