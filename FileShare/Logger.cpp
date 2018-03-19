@@ -4,14 +4,12 @@
 
 namespace Log {
     int depth = 0;
-    using String = std::string;
-
     void Indent(int dpt)
     {
         while (dpt--) std::cerr << "  ";
     }
 
-    void InColor(const String& message, int color, bool error=false)
+    void InColor(const std::string& message, int color, bool error=false)
     {
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
         Indent(depth);
@@ -22,17 +20,17 @@ namespace Log {
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
     }
 
-    void InRed(const String& message)
+    void InRed(const std::string& message)
     {
         InColor(message, 12);
     }
 
-    void InRedWithError(const String& message)
+    void InRedWithError(const std::string& message)
     {
         InColor(message, 12, true);
     }
 
-    void InWhite(const String& message)
+    void InWhite(const std::string& message)
     {
         InColor(message, 15);
     }
