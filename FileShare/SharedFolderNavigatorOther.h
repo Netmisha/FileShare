@@ -40,14 +40,17 @@ namespace FileShare {
         public Listener
     {
     public:
-        FileListener(Listener&&target);
+        FileListener(USHORT port);
     };
     class FileReceiver :
         public Receiver
     {
         using Receiver::ReceiveMessage;
+        FileReceiver();
     public:
         FileReceiver(Receiver&& target);
+        FileReceiver& operator = (Receiver&& other);
+
         Int ReceiveFile(const String& filePath);
     };
     class FileSender :
@@ -55,9 +58,11 @@ namespace FileShare {
     {
         using Sender::SendMessageToUser;
     public:
-        FileSender(Sender&& target);
+        FileSender(ULONG addr, USHORT port);
+        FileSender(const String& addr, USHORT port);
+
         Int ConnectToUser();
-        Int SendFile(const String& filePath);
+        Int SendFile(const String& filePath, Int chunkSize = 4);
     };
     #endif
 

@@ -1,5 +1,6 @@
 #include "Logger.h"
 #include <iostream>
+#include <exception>
 #ifdef _DEBUG
 #define TEST main
 
@@ -18,10 +19,125 @@
 #if defined CURRENT_TEST 
 #if CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_OTHER
 
-int TEST() {
-    Log::InRed(TO_STR(TEST_SHARED_FOLDER_NAVIGATOR_OTHER));
+#include <thread>
+#include <chrono>
+#include "SharedFolderNavigatorOther.h"
 
+using namespace FileShare;
+using Clock = std::chrono::system_clock;
+
+
+String GetHostIp();
+void TrySendingFile();
+void TryReceivingFile();
+
+String hostIp = GetHostIp();
+String folderPath = R"(C:\Users\oleh.kostiv\Documents\Visual Studio 2015\Projects\FileShare\Debug\)";
+String folderFrom = R"(SharedFolder\)";
+String folderTo = R"(OtherFolder\)";
+String fileName = "writeme.txt";
+
+USHORT filePort = 11111;
+
+int TEST() {
+    //*****************************************************
+    Log::InRed(TO_STR(TEST_SHARED_FOLDER_NAVIGATOR_OTHER));
+    //*****************************************************
+
+    WSADATA wsaData;
+    int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
+
+
+    int sendRecv;
+    std::cin >> sendRecv;
+    switch (sendRecv) {
+        case 1:TrySendingFile(); break;
+        case 2:TryReceivingFile(); break;
+    }
     return system("pause");
+}
+
+String GetHostIp()
+{
+    WSADATA wsaData;
+    int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    char hostName[1024]{};
+    if (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
+        return{};
+    return inet_ntoa(*((IN_ADDR**)(gethostbyname(hostName))->h_addr_list)[0]);
+}
+
+void TrySendingFile()
+try {
+    ++Log::depth;
+    Log::InRed("Try sending file");
+
+    bool keepAtIt = true;
+    while (true) {
+        ++Log::depth;
+        Log::InRed("Creating FS");
+
+        FileSender fs(hostIp, filePort);
+
+        if (fs.InvalidSocket()) {
+            Log::InRedWithError("FS invalid");
+            continue;
+        }
+
+        Int someResult = SOCKET_ERROR;
+
+        for (auto then = Clock::now(); Clock::now() - then < std::chrono::seconds(4); std::this_thread::sleep_for(std::chrono::seconds(1))) {
+            someResult = fs.ConnectToUser();
+            if (someResult != SOCKET_ERROR)
+                break;
+        }
+
+        if (someResult == SOCKET_ERROR) {
+            Log::InRed("failed to connect");
+        }
+        else {
+            for (auto then = Clock::now(); Clock::now() - then < std::chrono::seconds(4); std::this_thread::sleep_for(std::chrono::seconds(1))) {
+                someResult = fs.SendFile(folderPath + folderFrom + fileName, 8);
+                if (someResult != SOCKET_ERROR) {
+                    break;
+                    keepAtIt = false;
+                }
+            }
+            if (someResult == SOCKET_ERROR) {
+                Log::InRed("failed to send");
+            }
+        }
+        --Log::depth;
+    }
+}
+catch (std::exception& ex) {
+    Log::InRed("tried sending, got: " + String(ex.what()));
+}
+
+
+
+void TryReceivingFile() {
+    ++Log::depth;
+    Log::InRed("Try recv file");
+    
+    std::thread th([&]() {
+        Log::InRed("Creating FL");
+
+        FileListener fl(filePort);
+        fl.Bind();
+        fl.Listen();
+
+        while (true) {
+            ++Log::depth;
+            FileReceiver fr = fl.Accept();
+            if (fr.ReceiveFile(folderPath + folderTo + fileName) != SOCKET_ERROR)
+                break;
+            --Log::depth;
+        }
+    });
+
+    th.join();
+    --Log::depth;
 }
 
 #endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_OTHER
@@ -83,7 +199,6 @@ void TestSendingViaTcpSender() {
 
         while (sender.ConnectToUser() == SOCKET_ERROR)
             for (int i = 0; i < 100000; ++i);
-
 
         while (sender.SendMessageToUser("hello") == SOCKET_ERROR)
             for (int i = 0; i < 100000; ++i);
@@ -230,9 +345,9 @@ int TEST() {
 
     //TestListenerAndReceiver();
 
-    //TestListenerSenderAndReceiver();
+    TestListenerSenderAndReceiver();
 
-    TestMessengerSomehow();
+    //TestMessengerSomehow();
 
     return system("pause");
 }

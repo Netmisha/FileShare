@@ -75,11 +75,11 @@
     <ClCompile Include="SharedFolderNavigatorSelf.cpp">
       <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
     </ClCompile>
-    <ClCompile Include="SharedFolderNavigatorOther.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedFolderNavigatorOther.cpp">
+      <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

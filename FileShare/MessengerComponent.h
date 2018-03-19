@@ -24,8 +24,7 @@ namespace FileShare {
     public:
         virtual Int ReceiveMessage() = 0;
 
-        virtual MessageVector& Messages() = 0;
-
+        virtual MessageVector& Messages()   = 0;
         virtual Int MessageReadCount()      = 0;
         virtual Int MessageUnreadCount()    = 0;
         virtual Int MarkAllAsRead()         = 0;

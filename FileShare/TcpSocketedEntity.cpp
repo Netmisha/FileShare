@@ -44,6 +44,13 @@ TCPSocketedEntity::TCPSocketedEntity(TCPSocketedEntity&& other) :
     TCPSocketedEntity(other.sc, other.addr.sin_addr.S_un.S_addr, ntohs(addr.sin_port))
 {
     other.sc = INVALID_SOCKET;
+    {
+        #ifdef LOGGER
+        ++Log::depth;
+        Log::InRed("SE move-constructed");
+        --Log::depth;
+        #endif
+    }
 }
 TCPSocketedEntity& TCPSocketedEntity::operator=(TCPSocketedEntity&& other)
 {
@@ -53,6 +60,14 @@ TCPSocketedEntity& TCPSocketedEntity::operator=(TCPSocketedEntity&& other)
     addrSize = sizeof(addr);
 
     other.sc = INVALID_SOCKET;
+
+    {
+        #ifdef LOGGER
+        ++Log::depth;
+        Log::InRed("SE move-assigned");
+        --Log::depth;
+        #endif
+    }
 
     return *this;
 }
@@ -64,21 +79,25 @@ TCPSocketedEntity::~TCPSocketedEntity()
     Int result{};
     if (sc != INVALID_SOCKET) {
         result = closesocket(sc);
-        #ifdef LOGGER
-        {
-            ++Log::depth;
-            IF(result == SOCKET_ERROR)
-                Log::InRedWithError("~SocketedEntity failed to close socket, error: ");
-            ELSE
-                Log::InRed("~SocketedEntity socket closed");
-            --Log::depth;
-        }
-        #endif LOGGER
-    }
-    else {
         {
             #ifdef LOGGER
+            {
+                ++Log::depth;
+                IF(result == SOCKET_ERROR)
+                    Log::InRedWithError("~SocketedEntity failed to close socket, error: ");
+                ELSE
+                    Log::InRed("~SocketedEntity socket closed");
+                --Log::depth;
+            }
+            #endif LOGGER
+        }
+    }
+    else {
+        {    
+            #ifdef LOGGER
+            ++Log::depth;
             Log::InRed("~SocketedEntity without closing sc");
+            --Log::depth;
             #endif
         }
     }
@@ -110,17 +129,7 @@ Listener::Listener(USHORT port) :
     }
     #endif
 }
-Listener::Listener(TCPSocketedEntity&& target):
-    TCPSocketedEntity(std::move(target))
-{
-    #ifdef LOGGER
-    {
-        ++Log::depth;
-        Log::InRed("listener constructing");
-        --Log::depth;
-    }
-    #endif
-}
+
 Int Listener::Bind()
 {
     Int result = SOCKET_ERROR;
@@ -245,18 +254,6 @@ String Receiver::ReceiveMessage()
 
 #ifndef TCP_SENDER
 
-Sender::Sender(TCPSocketedEntity&& target):
-    TCPSocketedEntity(std::move(target))
-{
-    {
-        #ifdef LOGGER
-        ++Log::depth;
-        Log::InRed("Created sender");
-        --Log::depth;
-        #endif LOGGER
-    }
-}
-
 Sender::Sender(SOCKET sc, ULONG addr, USHORT port) :
     TCPSocketedEntity(sc, addr, port)
 {
@@ -289,11 +286,11 @@ Int Sender::ConnectToUser()
     }
     #endif
     
+
     result = connect(sc, addrPtr, addrSize);
 
     #ifdef LOGGER
     {
-        ++Log::depth;
         IF(result == SOCKET_ERROR)
             Log::InRedWithError("failed to connect, error: ");
         ELSE
