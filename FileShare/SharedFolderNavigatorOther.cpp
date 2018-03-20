@@ -36,12 +36,9 @@ FileVector SplitString(const String& str, const String& del) {
     String::size_type pre = 0;
 
     while ((pos = str.find(del, pre)) != String::npos) {
-        list.push_back(str.substr(pre, pos));
+        list.push_back(str.substr(pre, pos-pre));
         pre = pos + 1;
     }
-
-    if (pre != String::npos)
-        list.push_back(str.substr(pre));
 
     return list;
 }
@@ -63,11 +60,11 @@ RequestReceiver::RequestReceiver(Receiver&& target) :
     Receiver(std::move(target))
 {
     {
-    #ifdef LOGGER
-    ++Log::depth;
-    Log::InRed("RequestReceiver created");
-    --Log::depth;
-    #endif
+        #ifdef LOGGER
+        ++Log::depth;
+        Log::InRed("RequestReceiver created");
+        --Log::depth;
+        #endif
     }
 }
 String RequestReceiver::ReceiveRequest()
@@ -216,9 +213,9 @@ FileSender::FileSender(ULONG addr, USHORT port) :
 {
     {
         #ifdef LOGGER
-        ++Log::depth;
+        __Begin;
         Log::InRed("FileSender()");
-        --Log::depth;
+        __End;
         #endif
     }
 }
@@ -231,7 +228,7 @@ Int FileReceiver::ReceiveFile(const String& filePath)
     Int result = SOCKET_ERROR;
     {
         #ifdef LOGGER
-        ++Log::depth;
+        __Begin;
         Log::InRed("FileReceiver.ReceiveFile {");
         Log::InRed("opening file");
         #endif
@@ -298,10 +295,11 @@ Int FileReceiver::ReceiveFile(const String& filePath)
             #endif 
         }
     }
+   
     {
         #ifdef LOGGER
         Log::InRed("} FileReceiver.ReceiveFile");
-        --Log::depth;
+        __End;
         #endif 
     }
     return result;
@@ -309,23 +307,21 @@ Int FileReceiver::ReceiveFile(const String& filePath)
 Int FileSender::ConnectToUser()
 {
     Int result = SOCKET_ERROR;
-
-    #ifdef LOGGER
     {
-        ++Log::depth;
+        #ifdef LOGGER
+        __Begin;
         Log::InRed("FileSender trying to connect");
+        #endif
     }
-    #endif
 
     result = Sender::ConnectToUser();
 
-    #ifdef LOGGER
     {
+        #ifdef LOGGER
         Log::InRed("FileSender done connecting");
-        --Log::depth;
+        __End;
+        #endif
     }
-    #endif
-
     return result;
 }
 
@@ -351,8 +347,8 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
         
         INT fileSize;
         {
-            INT end = file.seekg(0, file.end).tellg();
-            INT beg = file.seekg(0, file.beg).tellg();
+            auto end = file.seekg(0, file.end).tellg();
+            auto beg = file.seekg(0, file.beg).tellg();
             fileSize = end - beg;
             {
                 #ifdef LOGGER
@@ -431,25 +427,33 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
 }
 
 SharedFolderNavigatorOther::SharedFolderNavigatorOther() :
-    requestListener(requestPort),
-    fileListener(sharePort)
+    SharedFolderNavigatorOther(requestPort, sharePort)
+{}
+
+SharedFolderNavigatorOther::SharedFolderNavigatorOther(USHORT reqPort, USHORT fshPort):
+    requestListener(reqPort),
+    fileListener(fshPort)
 {
     {
         #ifdef LOGGER
-        ++Log::depth;
-        Log::InRed("SFNO{");
-        #endif
-    }
+        __Begin;
+        Log::InRed("SfnO() {");
+        #endif // LOGGER
 
+    }
+    
     requestListener.Bind();
     requestListener.Listen();
 
+    fileListener.Bind();
+    fileListener.Listen();
+
     {
         #ifdef LOGGER
-        --Log::depth;
-        Log::InRed("}SFNO");
-        #endif
-    }  
+        Log::InRed("} SfnO()");
+        __End;
+        #endif // LOGGER
+    }
 }
 
 FileVector SharedFolderNavigatorOther::RequestFileList(const String & addr, USHORT port)
