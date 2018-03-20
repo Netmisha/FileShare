@@ -28,18 +28,18 @@
     <Filter Include="Source Files\ModelComponents\SharedFolderNavigator">
       <UniqueIdentifier>{beb5bf60-cc7b-4f90-a8de-89c32ed54c4e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\MVC">
+      <UniqueIdentifier>{f120ef3a-0747-4f71-b3fb-db4e0947ecc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MVC">
+      <UniqueIdentifier>{568db5e6-9573-4e20-9ae5-7cc026718f77}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileShareMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="View.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Stages.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Controller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FileShareComponentTest.cpp">
@@ -81,17 +81,14 @@
     <ClCompile Include="SharedFolderNavigatorOther.cpp">
       <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
     </ClCompile>
+    <ClCompile Include="View.cpp">
+      <Filter>Source Files\MVC</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller.cpp">
+      <Filter>Source Files\MVC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="View.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Controller.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Stages.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -130,6 +127,15 @@
     </ClInclude>
     <ClInclude Include="SharedFolderNavigatorSelf.h">
       <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\MVC</Filter>
+    </ClInclude>
+    <ClInclude Include="View.h">
+      <Filter>Header Files\MVC</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
+      <Filter>Header Files\MVC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

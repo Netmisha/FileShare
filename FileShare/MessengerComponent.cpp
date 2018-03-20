@@ -34,11 +34,13 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
 
     std::chrono::duration<LONG> timeOut = std::chrono::seconds(5);
 
-    #ifdef LOGGER
     {
-        InRed("gonna try to connect for 5s");
+        #ifdef LOGGER
+        {
+            InRed("gonna try to connect for 5s");
+        }
+        #endif LOGGER
     }
-    #endif LOGGER
 
     for (TimePoint then = Clock::now(); Clock::now() - then < timeOut;) {
         result = sender.ConnectToUser();
@@ -194,49 +196,6 @@ Int MessengerComponent::ReceiveMessage()
     }
     
     return result;
-
-    /*TCPSocketedEntity se = listener.Accept();
-
-    if (se.InvalidSocket()) {
-        result = se.sc;
-
-        #ifdef LOGGER
-        {
-            InRedWithError("MSG component Receive: Accept fail, error: ");
-        }
-        #endif LOGGER
-    }
-    else{
-        char buff[100]{};
-        result = recv(se.sc, buff, sizeof(buff), NULL);
-        if (result == SOCKET_ERROR){
-            #ifdef LOGGER
-            {
-                InRedWithError("MSG component Receive: recv fail, error: ");
-            }
-            #endif LOGGER
-        }
-        else {
-            TimePoint now = Clock::now();
-            char str[100]{};
-            inet_ntop(AF_INET, se.addrPtr, str, sizeof(str));
-
-            #ifdef LOGGER
-            {
-                time_t tt = Clock::to_time_t(now);
-                String time = String(std::ctime(&tt));
-
-                String log = "Rcvd msg: " +  time + " " + str + " " + buff;
-                InRed(log);
-            }
-            #endif LOGGER
-
-            UserData ud = UDFComponent().FindUsersInFile(UserData::UserAddr::UserAddr(str));
-            Message msg = std::make_tuple(now, ud, buff);
-            msgs.push_back(msg);
-        }
-    }
-    return result;*/
 }
 
 MessageVector& MessengerComponent::Messages()

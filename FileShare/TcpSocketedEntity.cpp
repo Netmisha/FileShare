@@ -245,6 +245,7 @@ String Receiver::ReceiveMessage()
             Log::InRed("connection ??gracefully?? closed");
         ELSE
             Log::InRed("received smth");
+        --Log::depth;
     }
     #endif LOGGGER
 

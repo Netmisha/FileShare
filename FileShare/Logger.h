@@ -17,4 +17,8 @@ namespace Log {
     void InWhite(const std::string& message);
 };
 
+#define __Begin {++Log::depth;{
+
+#define __End }--Log::depth;}
+
 #endif // _DEBUG

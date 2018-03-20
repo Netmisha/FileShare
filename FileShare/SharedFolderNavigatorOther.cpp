@@ -3,7 +3,12 @@
 
 #include <fstream>
 #include <regex>
+#include <chrono>
+
+#ifdef _DEBUG
 #include <iostream>
+#include <type_traits>
+#endif
 
 using namespace FileShare;
 using namespace Log;
@@ -12,7 +17,11 @@ using Ifstream = std::ifstream;
 using Ofstream = std::ofstream;
 using Ios = std::ios;
 
-constexpr UINT fileChunk = 8;//b
+using Clock = std::chrono::system_clock;
+using Duration = std::chrono::duration<INT>;
+using TimePoint = std::chrono::system_clock::time_point;
+using Seconds = std::chrono::seconds;
+
 #ifndef FS_STRING_HELPERS
 String JoinString(const FileVector& list, const String& del) {
     String str;
@@ -38,8 +47,8 @@ FileVector SplitString(const String& str, const String& del) {
 }
 #endif
 
-RequestListener::RequestListener(Listener && target) :
-    Listener(std::move(target))
+RequestListener::RequestListener(USHORT port):
+    Listener(port)
 {
     {
         #ifdef LOGGER
@@ -49,6 +58,7 @@ RequestListener::RequestListener(Listener && target) :
         #endif
     }
 }
+
 RequestReceiver::RequestReceiver(Receiver&& target) :
     Receiver(std::move(target))
 {
@@ -73,26 +83,44 @@ String RequestReceiver::ReceiveRequest()
 
     {
         #ifdef LOGGER
-            IF(request.empty())
-                Log::InRed("request received empty");
-            ELSE
-                Log::InRed("request received");
-            --depth;
+        IF(request.empty())
+            Log::InRed("request received empty");
+        ELSE
+            Log::InRed("request received");
+        --Log::depth;
         #endif
     }
 
     return request;
 }
-RequestSender::RequestSender(Sender && target):
-    Sender(std::move(target))
+
+RequestSender::RequestSender(Sender && other):
+    Sender(other.sc, other.addr.sin_addr.S_un.S_addr, 0)
+{
+    addr.sin_port = other.addr.sin_port;
+    other.sc = INVALID_SOCKET;
+}
+
+RequestSender::RequestSender(RequestReceiver&& other):
+    //Sender(other.sc, other.addr.sin_addr.S_un.S_addr, other.)
+    Sender(std::move((Sender&)(other)))
+{
+}
+
+RequestSender::RequestSender(const String & addr, USHORT port):
+    RequestSender(inet_addr(addr.c_str()), port)
+{}
+
+RequestSender::RequestSender(ULONG addr, USHORT port):
+    Sender(addr, port)
 {
     {
         #ifdef LOGGER
         ++Log::depth;
         Log::InRed("RequestReceiver created");
-        --Log::depth; 
+        --Log::depth;
         #endif
-    }  
+    }
 }
 Int RequestSender::ConnectToUser()
 {
@@ -218,21 +246,6 @@ Int FileReceiver::ReceiveFile(const String& filePath)
 
         INT fileSize = sizes[0];
         INT chunkSize = sizes[1];
-        //{
-        //    /*String preSendMessage = ReceiveMessage();
-
-        //    auto v = SplitString(preSendMessage, ";");
-        //    fileSize = std::stoi(v[0]);
-        //    chunkSize = std::stoi(v[1]);*/
-
-        //    {
-        //        #ifdef LOGGER
-        //        Log::InRed("recved preSM: <" 
-        //                   + std::to_string(fileSize) + ";" 
-        //                   + std::to_string(chunkSize) + ">");
-        //        #endif
-        //    }
-        //}
      
         if (PCHAR fileBuff = new CHAR[fileSize]) 
         {
@@ -245,8 +258,8 @@ Int FileReceiver::ReceiveFile(const String& filePath)
 
                 result = recv(sc, ptr, chunk, NULL);
 
-                for (int i = 0; i < chunk; ++i)
-                std::cout << ptr[i];
+                /*for (int i = 0; i < chunk; ++i)
+                std::cout << ptr[i];*/
 
                 if (result == SOCKET_ERROR) {
                     {
@@ -259,18 +272,16 @@ Int FileReceiver::ReceiveFile(const String& filePath)
                 }
                 else if (result > 0)
                 {
-                    ptr += chunk;
+                    ptr += result;//chunk;
+                    DOUBLE percent = (DOUBLE)(ptr - fileBuff) / fileSize * 100;
+                   
                     {
                         #ifdef LOGGER
-                        Log::InRed("chunk recved");
+                        String prc = std::to_string(percent);
+                        Log::InRed("chunk recved " + prc.substr(0, prc.length()-5) + "%");
                         #endif 
                     }
                 }
-                /*else if (result == 0) {
-                    std::cout << chunk << " " << diff << " " << step;
-                    if (diff <= step)
-                        break;
-                }*/
             }
 
             file.write(fileBuff, fileSize);        
@@ -294,72 +305,6 @@ Int FileReceiver::ReceiveFile(const String& filePath)
         #endif 
     }
     return result;
-
-    //Int result = SOCKET_ERROR;
-    //{
-    //    #ifdef LOGGER
-    //    ++Log::depth;
-    //    Log::InRed("FileReceiver.ReceiveFile{");
-    //    Log::InRed("opening file");
-    //    #endif
-    //}
-    //Ofstream file(filePath, Ios::out | Ios::binary);
-
-    //if (!file.is_open())
-    //{
-    //    result = -2; // HFILE_ERROR == SOCKET_ERROR
-    //    {
-    //        #ifdef LOGGER
-    //        Log::InRed("ofstream() failed");
-    //        #endif 
-    //    }
-    //}
-
-    //else
-    //{ 
-    //    {
-    //        #ifdef LOGGER
-    //        Log::InRed("start recv");
-    //        #endif 
-    //    }
-    //    CHAR buff[fileChunk]{};
-    //    while (result = recv(sc, buff, sizeof(buff), NULL)) 
-    //    {
-    //        if (result == SOCKET_ERROR) 
-    //        {
-    //            {
-    //                #ifdef LOGGER
-    //                Log::InRed("recv failed");
-    //                #endif // 
-
-    //            }
-    //            break;
-    //        }
-    //        else
-    //        {
-    //            {
-    //                #ifdef LOGGER
-    //                Log::InRed("writing recv chunk to file");
-    //                #endif // 
-
-    //            }
-    //            file.write(buff, result);
-    //        }
-    //    }
-    //    {
-    //        #ifdef LOGGER
-    //        Log::InRed("doney recv'ing");
-    //        #endif // 
-
-    //    }
-    //}
-    //{
-    //    #ifdef LOGGER
-    //    Log::InRed("}FileReceiver.ReceiveFile");
-    //    --Log::depth;
-    //    #endif 
-    //}
-    //return result;
 }
 Int FileSender::ConnectToUser()
 {
@@ -406,7 +351,7 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
         
         INT fileSize;
         {
-            Int end = file.seekg(0, file.end).tellg();
+            INT end = file.seekg(0, file.end).tellg();
             INT beg = file.seekg(0, file.beg).tellg();
             fileSize = end - beg;
             {
@@ -415,14 +360,6 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
                 #endif
             }
         }
-        /*String preSendMessage = std::to_string(fileSize) + ";" + std::to_string(chunkSize);
-        SendMessageToUser(preSendMessage);
-        {
-            #ifdef LOGGER
-            Log::InRed("premessage: {" + preSendMessage + "}");
-            #endif
-        }
-        */
 
         INT sizes[] = { fileSize, chunkSize };
 
@@ -446,8 +383,8 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
                 
                 result = send(sc, ptr, chunk, NULL);
 
-                for (int i = 0; i < chunk; ++i)
-                    std::cout << ptr[i];
+                /*for (int i = 0; i < chunk; ++i)
+                    std::cout << ptr[i];*/
 
                 if (result == SOCKET_ERROR) {
                     {
@@ -459,10 +396,13 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
                 }
                 else if(result > 0)
                 {
-                    ptr += chunk;
+                    ptr += result;
+                    DOUBLE percent = (DOUBLE)(ptr - fileBuff) / fileSize * 100;
+
                     {
                         #ifdef LOGGER
-                        Log::InRed("chunk sent");
+                        String prc = std::to_string(percent);
+                        Log::InRed("chunk sent " + prc.substr(0, prc.length() - 5) + "%");
                         #endif 
                     }
                 }
@@ -488,80 +428,6 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
         #endif
     }
     return result;
-
-
-    //Int result = SOCKET_ERROR;
-    //{
-    //    #ifdef LOGGER
-    //    ++Log::depth;
-    //    Log::InRed("FileSender.SendFile{");
-    //    ++Log::depth;
-    //    Log::InRed("opening file");
-    //    #endif
-    //}
-    //Ifstream file(filePath, Ios::in | Ios::binary);
-    //if (!file.is_open()){
-    //    result = -2; // HFILE_ERROR == SOCKET_ERROR
-    //    {   
-    //        #ifdef LOGGER
-    //        Log::InRed("ifstream() failed");
-    //        #endif 
-    //    }
-    //}
-    //else{
-    //    {
-    //        #ifdef LOGGER
-    //        Log::InRed("file opened, trying to send");
-    //        #endif
-    //    }
-    //    for(;;) 
-    //    {
-    //        if (file.eof()) {
-    //            {
-    //                #ifdef LOGGER
-    //                Log::InRed("FileSender probably succeded");
-    //                #endif 
-    //            }
-
-    //            result = 1;
-    //            break;
-    //        } 
-    //        else
-    //        {
-    //            CHAR buff[fileChunk];
-    //            
-    //            file.read(buff, sizeof(buff));
-
-    //            result = send(sc, buff, sizeof(buff), NULL);
-
-    //            if (result == SOCKET_ERROR) {  
-    //                {
-    //                    #ifdef LOGGER
-    //                    Log::InRedWithError("FileSender failed, error: ");
-    //                    #endif
-    //                }
-    //                break;
-    //            }
-    //            else if (result != 0) {
-    //                {
-    //                    #ifdef LOGGER
-    //                    Log::InRed("chunk sent");
-    //                    #endif 
-    //                }
-    //            }
-    //        } 
-    //    }
-    //    file.close();
-    //}
-
-    //{
-    //    #ifdef LOGGER
-    //    --Log::depth;
-    //    Log::InRed("}FileSender.SendFile");
-    //    --Log::depth;
-    //    #endif 
-    //}
-    //return result;
 }
 
 SharedFolderNavigatorOther::SharedFolderNavigatorOther() :
@@ -604,7 +470,7 @@ FileVector SharedFolderNavigatorOther::RequestFileList(const String & addr, USHO
         #endif
     }
 
-    RequestSender rs(std::move(Sender(addr, port)));
+    RequestSender rs(Sender(addr, port));
 
     {
         #ifdef LOGGER
@@ -742,70 +608,102 @@ Int SharedFolderNavigatorOther::SendMyFileList(const FileVector& list, const Str
     return result;
 }
 
-Int SharedFolderNavigatorOther::SendFileToUser(const String & filePath, const String & addr, USHORT port)
+Int SharedFolderNavigatorOther::SendFileToUser(const String& filePath, UINT chunkSize, const String& addr, USHORT port)
 {
     Int result = SOCKET_ERROR;
     {
         #ifdef LOGGER
-        ++Log::depth;
-        Log::InRed("SFNO.SendFileToUser{");
-        #endif
+        Log::InRed("SfnO::SendFileToUser(){");
+        __Begin;
+        Log::InRed("entering keepTrying loop");
+        #endif // 
+    }
+    
+    for (Bool keepTrying = TRUE; keepTrying;) 
+    {
+        {
+            #ifdef LOGGER
+            __Begin;
+            Log::InRed("creating FileSender");
+            #endif 
+        }
+        FileSender fs(addr, port);
+        if (!fs.InvalidSocket())
+        {
+            {
+                #ifdef LOGGER
+                Log::InRed("FileSender trying to connect");
+                __Begin;
+                #endif // LOGGER
+            }
+            for (auto then = Clock::now(); Clock::now() - then < Seconds(5);) 
+            {
+                result = fs.ConnectToUser();
+                if (result != SOCKET_ERROR)
+                    break;
+            }
+            {
+                #ifdef LOGGER
+                __End;
+                #endif // LOGGER
+            }
+
+            if (result != SOCKET_ERROR) {
+                {
+                    #ifdef LOGGER
+                    Log::InRed("FileSender trying to send");
+                    __Begin;
+                    #endif // LOGGER
+                }
+                for (auto then = Clock::now(); Clock::now() - then < Seconds(5);)
+                {
+                    result = fs.SendFile(filePath, chunkSize);
+                    if (result != SOCKET_ERROR) 
+                    {
+                        {
+                            #ifdef LOGGER
+                            Log::InRed("file probably sent");
+                            #endif // LOGGER
+                        }
+                        keepTrying = FALSE;
+                        break;
+                    }
+                }
+                {
+                    #ifdef LOGGER
+                    __End;
+                    #endif // LOGGER
+                }
+            }
+            else
+            {
+                {
+                    #ifdef LOGGER
+                    Log::InRed("FileSender failed to connect");
+                    #endif // LOGGER
+                }
+            }
+        }
+        else
+        {
+            {
+                #ifdef LOGGER
+                Log::InRed("FileSender failed");
+                #endif // LOGGER
+            }
+        }
+        {
+            #ifdef LOGGER
+            __End;
+            #endif
+        }
     }
     {
         #ifdef LOGGER
-        Log::InRed("creating FileSender");
-        #endif
-    }
-    FileSender fs(addr, port);
-    if (!fs.InvalidSocket()) {
-        {
-            #ifdef LOGGER
-            Log::InRed("connecting FileSender");
-            #endif
-        }
-        result = fs.ConnectToUser();
-        if (result != SOCKET_ERROR) {
-            {
-                #ifdef LOGGER
-                Log::InRed("FileSender connected");
-                #endif
-            }
-            result = fs.SendFile(filePath);
-        }
-        else {
-            {
-                #ifdef LOGGER
-                Log::InRed("FileSender connect fail");
-                #endif
-            }
-        }
-    }
-    else {
-        result = fs.sc;
-        {
-            #ifdef LOGGER
-            Log::InRed("creating FileSender fail");
-            #endif
-        }
-    }
-    {
-        #ifdef LOGGER
-        Log::InRed("}SFNO.SendFileToUser");
-        --Log::depth;
-        #endif
+        Log::InRed("keepTrying loop ended");
+        __End;
+        Log::InRed("}SfnO::SendFileToUser()");
+        #endif // LOGGER
     }
     return result;
 }
-
-Int SharedFolderNavigatorOther::ReceiveFileFromUser(const String & filePath)
-{
-    Int result = SOCKET_ERROR;
-
-    /*
-    for tomorrow
-    */
-
-
-    return result;
-}
-

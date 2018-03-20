@@ -25,19 +25,24 @@
 
 using namespace FileShare;
 using Clock = std::chrono::system_clock;
+using Duration = std::chrono::duration<INT>;
+using TimePoint = std::chrono::system_clock::time_point;
+using Seconds = std::chrono::seconds;
 
 
 String GetHostIp();
-void TrySendingFile();
-void TryReceivingFile();
+
+void TestFileListenerSenderReceiver(); //works ok
+void TestRequestListenerSenderReceiver_TryMakeItAsItIsSupposedToBe(); // kinda works
 
 String hostIp = GetHostIp();
 String folderPath = R"(C:\Users\oleh.kostiv\Documents\Visual Studio 2015\Projects\FileShare\Debug\)";
 String folderFrom = R"(SharedFolder\)";
 String folderTo = R"(OtherFolder\)";
-String fileName = "writeme.txt";
+String fileName = "paintme.bmp";
 
-USHORT filePort = 11111;
+USHORT filePort = 0x2b67;
+USHORT requPort = 0x56ce;
 
 int TEST() {
     //*****************************************************
@@ -47,13 +52,13 @@ int TEST() {
     WSADATA wsaData;
     int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
+    //TestFileListenerSenderReceiver(); 
 
-    int sendRecv;
-    std::cin >> sendRecv;
-    switch (sendRecv) {
-        case 1:TrySendingFile(); break;
-        case 2:TryReceivingFile(); break;
-    }
+    // the plan is to turn request sender 
+    // into request receiver 
+    // after SendRequest is complete
+    TestRequestListenerSenderReceiver_TryMakeItAsItIsSupposedToBe();
+
     return system("pause");
 }
 
@@ -62,82 +67,240 @@ String GetHostIp()
     WSADATA wsaData;
     int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
     char hostName[1024]{};
-    if (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
+    IF (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
         return{};
     return inet_ntoa(*((IN_ADDR**)(gethostbyname(hostName))->h_addr_list)[0]);
 }
-
-void TrySendingFile()
-try {
+void Wait(const Duration dur) {
+    std::this_thread::sleep_for(dur);
+}
+void TrySendingFile(){
     ++Log::depth;
     Log::InRed("Try sending file");
 
     bool keepAtIt = true;
-    while (true) {
+    while (keepAtIt) {
         ++Log::depth;
         Log::InRed("Creating FS");
 
         FileSender fs(hostIp, filePort);
 
-        if (fs.InvalidSocket()) {
+        IF (fs.InvalidSocket()) {
             Log::InRedWithError("FS invalid");
             continue;
         }
 
         Int someResult = SOCKET_ERROR;
 
-        for (auto then = Clock::now(); Clock::now() - then < std::chrono::seconds(4); std::this_thread::sleep_for(std::chrono::seconds(1))) {
+        for (auto then = Clock::now(); Clock::now() - then < Seconds(4); Wait(Seconds(1))) 
+        {
             someResult = fs.ConnectToUser();
-            if (someResult != SOCKET_ERROR)
+            IF (someResult != SOCKET_ERROR)
                 break;
         }
 
-        if (someResult == SOCKET_ERROR) {
+        IF (someResult == SOCKET_ERROR) {
             Log::InRed("failed to connect");
         }
-        else {
-            for (auto then = Clock::now(); Clock::now() - then < std::chrono::seconds(4); std::this_thread::sleep_for(std::chrono::seconds(1))) {
-                someResult = fs.SendFile(folderPath + folderFrom + fileName, 8);
-                if (someResult != SOCKET_ERROR) {
-                    break;
+        ELSE {
+            for (auto then = Clock::now(); Clock::now() - then < Seconds(4); Wait(Seconds(1))) 
+            {
+                someResult = fs.SendFile(folderPath + folderFrom + fileName, 1024);
+                IF (someResult != SOCKET_ERROR) {
                     keepAtIt = false;
+                    break;
                 }
             }
-            if (someResult == SOCKET_ERROR) {
+            IF (someResult == SOCKET_ERROR) {
                 Log::InRed("failed to send");
             }
         }
         --Log::depth;
     }
 }
-catch (std::exception& ex) {
-    Log::InRed("tried sending, got: " + String(ex.what()));
-}
-
-
-
 void TryReceivingFile() {
     ++Log::depth;
     Log::InRed("Try recv file");
-    
-    std::thread th([&]() {
-        Log::InRed("Creating FL");
 
-        FileListener fl(filePort);
-        fl.Bind();
-        fl.Listen();
+    Log::InRed("Creating FL");
 
-        while (true) {
-            ++Log::depth;
-            FileReceiver fr = fl.Accept();
-            if (fr.ReceiveFile(folderPath + folderTo + fileName) != SOCKET_ERROR)
-                break;
-            --Log::depth;
-        }
-    });
+    FileListener fl(filePort);
+    fl.Bind();
+    fl.Listen();
 
-    th.join();
+    while (true) {
+        ++Log::depth;
+        FileReceiver fr = fl.Accept();
+        IF(fr.ReceiveFile(folderPath + folderTo + fileName) != SOCKET_ERROR)
+            break;
+        --Log::depth;
+    }
+
     --Log::depth;
+}
+void TestFileListenerSenderReceiver()
+{
+    int sendRecv;
+    std::cin >> sendRecv;
+    switch (sendRecv) {
+        case 1:TrySendingFile(); break;
+        case 2:TryReceivingFile(); break;
+    }
+}
+
+bool TimeOut(const TimePoint& then, const Duration& timeOut = Seconds(5)) {
+    auto now = Clock::now();
+    IF (now - then < timeOut)
+        return false;
+    ELSE
+        return true;
+}
+
+INT RequestSenderTryConnect(RequestSender& rs) {
+    INT result = SOCKET_ERROR;
+    for (TimePoint now = Clock::now();;)
+    __Begin
+        result = rs.ConnectToUser();
+        IF(result != SOCKET_ERROR) {
+            Log::InRed("Connected alright");
+            break;
+        }
+        ELIF(TimeOut(now)) {
+            Log::InRed("Connect timeout");
+            break;
+        }
+        Wait(std::chrono::seconds(1));
+    __End
+    return result;
+}
+INT RequestSenderTrySend(RequestSender& rs, const String& request) {
+    INT result = SOCKET_ERROR;
+    for (TimePoint now = Clock::now();;)
+    __Begin
+        result = rs.SendRequest(request);
+        IF(result != SOCKET_ERROR) {
+            Log::InRed("Request sent");
+            break;
+        }
+        ELIF(TimeOut(now)) {
+            Log::InRed("Send timeout");
+            break;
+        }
+        Wait(std::chrono::seconds(1));
+    __End
+    return result;
+}
+INT RequestReceiverTryReceive(RequestReceiver& rr) {
+    for (int i = 0; i < 10; ++i)
+    __Begin
+        String response = rr.ReceiveRequest();
+        if (!response.empty())
+            Log::InWhite(response);
+
+        Wait(std::chrono::seconds(1));
+    __End
+    return 0;
+}
+void TrySendingRequest() {
+    Log::InRed("Trying to send request");
+    ++Log::depth;
+
+    for (bool keepGoing = true; keepGoing; Log::InRed("Cycle complete"))
+    {
+        ++Log::depth;
+        Log::InRed("Creqte request sender");
+        RequestSender rs(hostIp, requPort);
+        {
+            IF (rs.InvalidSocket()) 
+            {
+                Log::InRed("rs socket fail, try again");
+                continue;
+            }
+            ELSE{
+                INT result = RequestSenderTryConnect(rs);
+
+                IF (result != SOCKET_ERROR) 
+                {
+                    String request = "This Is My Request";
+
+                    result = RequestSenderTrySend(rs, request);
+
+                    IF(result != SOCKET_ERROR) 
+                    {
+                        Log::InRed("Trying RS->RR");
+                        RequestReceiver rr = std::move(dynamic_cast<TCPSocketedEntity&>(rs));
+                        RequestReceiverTryReceive(rr);
+
+                        keepGoing = false;
+                    }
+                }
+            }
+        }
+        --Log::depth;
+    }
+    --Log::depth;
+}
+void TryReceiveRequestAndRespondSomehow() {
+    Log::InRed("Try receive Request and respond to it");
+    __Begin
+        RequestListener rl(requPort);
+        rl.Bind();
+        rl.Listen();
+
+        while (true)
+        __Begin
+        {
+            TCPSocketedEntity se = rl.Accept();
+
+            if (!se.InvalidSocket()) {
+
+                auto threadFun = [](TCPSocketedEntity se) {
+                    __Begin
+                    {
+                        RequestReceiver rr(std::move(Receiver(std::move(se))));
+
+                        String request;
+                        while(request.empty())
+                            request = rr.ReceiveRequest();
+                        Log::InWhite(request);
+
+                        RequestSender rs(std::move(rr));
+                        for(int i=0; i< 10; ++i) 
+                        {
+                            rs.SendRequest("response to " + request);
+                            Wait(Seconds(2));
+                        }
+                    }
+                    __End
+                };
+
+                std::thread th(threadFun, std::move(se));
+                th.detach();
+            }
+        }
+        __End
+    __End
+}
+void TestRequestListenerSenderReceiver_TryMakeItAsItIsSupposedToBe()
+{
+    for (bool badChoice = true; badChoice; badChoice = [&]()
+    {   
+        bool result = false;
+        CHAR sendRecv = std::cin.get();
+        switch (sendRecv) 
+        {
+            case '1':
+                TrySendingRequest();
+                break;
+            case '2':
+                TryReceiveRequestAndRespondSomehow();
+                break;
+            default:
+                result = true;
+                break;
+        }
+        return result;
+    }());
 }
 
 #endif // CURRENT_TEST == TEST_SHARED_FOLDER_NAVIGATOR_OTHER
@@ -218,9 +381,9 @@ void TestListenerAndReceiver() {
 
         String buff = se.ReceiveMessage();
 
-        if (buff.empty())
+        IF (buff.empty())
             continue;
-        else
+        ELSE
             InWhite(buff.c_str());
         for (int i = 0; i < 100000; ++i);
     }
@@ -252,9 +415,9 @@ void TestListenerSenderAndReceiver() {
         while (true) {
             Receiver receiver = listener.Accept();
             String message = receiver.ReceiveMessage();
-            if (message.empty())
+            IF (message.empty())
                 continue;
-            else
+            ELSE
                 InWhite(message.c_str());
             for (int i = 0; i < 100000; ++i);
         }
@@ -286,13 +449,13 @@ void TestMessengerSomehow() {
         InRed("");
 
         while (true) {
-            if (showMessages)
+            IF (showMessages)
                 std::this_thread::yield();
 
             String command;
             std::cin >> command;
 
-            if (command == "send") {
+            IF (command == "send") {
                 USHORT port;
                 std::cin >> port;
 
@@ -306,9 +469,9 @@ void TestMessengerSomehow() {
                     InRed("Test: ...msg not sent");
 
             }
-            else 
-                if (command == "show") {
-                    if (!mc.Messages().empty()) {
+            ELSE 
+                IF (command == "show") {
+                    IF (!mc.Messages().empty()) {
                         InRed("Test: some msg in");
                         for (Message& msg : mc.Messages()) {
 
@@ -328,7 +491,7 @@ void TestMessengerSomehow() {
                             for (int i = 0; i < 100000; ++i);
                         }
                     }
-                    else
+                    ELSE
                         InRed("Test: msg none");
                     showMessages = false;
                 }
@@ -432,9 +595,9 @@ int TEST() {
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
     UserData ud = udf.FindUsersInFile("Boi");
-    udf.ModifyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
+    udf.ModIFyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
 
-    InRed("Tried modifying user");
+    InRed("Tried modIFying user");
     for (auto& ud : udf.FindUsersInFile())
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
@@ -444,6 +607,7 @@ int TEST() {
         udf.RemoveUser(ud);
     return 0;
 }
+
 #endif // CURRENT_TEST == TEST_USER_DATA_FILE_COMPONENT
 #endif // CURRENT_TEST
 #endif // TEST_USER_DATA_FILE_COMPONENT
@@ -472,17 +636,17 @@ int TEST() {
     InRed("instance created");
 
     String paintmeName = self.FileCreate("paintme.bmp");
-    if (paintmeName != "paintme.bmp") {
+    IF (paintmeName != "paintme.bmp") {
         InRed("paintme.bmp already existed.");
         InRed("new paintme is created as " + paintmeName);
         InRed("gonna rename " + paintmeName + " somehow");
         self.FileRename(paintmeName, "new_paintme_name_with_blackjack_and_hookers.bmp");
     }
-    else
+    ELSE
         InRed("paintme.bmp created");
     {
         FileVector fv = self.GetFileList();
-        if (fv.empty())
+        IF (fv.empty())
             InRed("vector empty, smth wrong");
 
         for (const String& fileName : fv)

@@ -14,6 +14,7 @@ namespace FileShare {
         public Listener
     {
     public:
+        RequestListener(USHORT port);
         RequestListener(Listener&& target);
     };
     class RequestReceiver :
@@ -29,7 +30,11 @@ namespace FileShare {
     {
         using Sender::SendMessageToUser;
     public:
-        RequestSender(Sender&& target);
+        RequestSender(Sender&& other);
+        RequestSender(RequestReceiver&& other);
+
+        RequestSender(const String& addr, USHORT port);
+        RequestSender(ULONG addr, USHORT port);
         Int ConnectToUser();
         Int SendRequest(const String& request);
     };
@@ -58,8 +63,8 @@ namespace FileShare {
     {
         using Sender::SendMessageToUser;
     public:
-        FileSender(ULONG addr, USHORT port);
-        FileSender(const String& addr, USHORT port);
+        FileSender(ULONG addr, USHORT port = sharePort);
+        FileSender(const String& addr, USHORT port = sharePort);
 
         Int ConnectToUser();
         Int SendFile(const String& filePath, Int chunkSize = 4);
@@ -75,8 +80,7 @@ namespace FileShare {
         FileVector RequestFileList(const String& addr, USHORT port = requestPort);
         Int SendMyFileList(const FileVector&, const String& addr, USHORT port = requestPort);
 
-        Int SendFileToUser(const String& filePath, const String& addr, USHORT port = sharePort);
-        Int ReceiveFileFromUser(const String& filePath);
+        Int SendFileToUser(const String& filePath, UINT chunkSize, const String& addr, USHORT port = sharePort);
 
     protected:
         RequestListener requestListener;
