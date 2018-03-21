@@ -45,46 +45,46 @@ ConsoleController::~ConsoleController()
 
 void FileShare::ConsoleController::OnLoad()
 {
-    view.Render();
-
-    Data command;
-    Data format;
-    Data result;
-    
-    for(bool forever=true; forever;){
-        command = GetCommand();
-
-        //auto commReint = ReinterpretCommand(command);
-        int commReint =  std::regex_match(command, std::regex("e(xit|!)|q(uit|!)")) ? 0 : -1;
-     
-        switch (commReint) {
-
-        /// the example of doing stuff
-        case (int)(Stage::Experimental) :
-            view.stage = Stage::Experimental;
-            /*
-            switch(commReint.Action)
-            case ModelActSomeWay:
-            actors params = getParams(commReint.params)
-            model.SomeComponent.ActSomeWay(params);
-
-            */
-            break;
-
-        case (int)(Stage::Exit):
-            view.stage = Stage::Exit;
-            command = "Mister";
-            forever = false;
-            break;
-        }
-
-        format = view.ProvideStageFormat();
-        std::regex re("%s");
-        result = std::regex_replace(format, re, command);
-
-        view.dataToPrint = result;
-        view.Render();
-    }
+//    view.Render();
+//
+//    Data command;
+//    Data format;
+//    Data result;
+//    
+//    for(bool forever=true; forever;){
+//        command = GetCommand();
+//
+//        //auto commReint = ReinterpretCommand(command);
+//        int commReint =  std::regex_match(command, std::regex("e(xit|!)|q(uit|!)")) ? 0 : -1;
+//     
+//        switch (commReint) {
+//
+//        /// the example of doing stuff
+//        case (int)(Stage::Experimental) :
+//            view.stage = Stage::Experimental;
+//            /*
+//            switch(commReint.Action)
+//            case ModelActSomeWay:
+//            actors params = getParams(commReint.params)
+//            model.SomeComponent.ActSomeWay(params);
+//
+//            */
+//            break;
+//
+//        case (int)(Stage::Exit):
+//            view.stage = Stage::Exit;
+//            command = "Mister";
+//            forever = false;
+//            break;
+//        }
+//
+//        format = view.ProvideStageFormat();
+//        std::regex re("%s");
+//        result = std::regex_replace(format, re, command);
+//
+//        view.dataToPrint = result;
+//        view.Render();
+//    }
 }
 
 Data FileShare::ConsoleController::GetCommand()
@@ -117,25 +117,12 @@ void ConsoleController::OnLoad2()
     
     for (bool keepGoing = true; keepGoing;) {
         view.Render();
-        switch (view.stage) {
-            case Stage::Inception:
-                StageInception();
-                break;
-            case Stage::HelloUser:
-                StageHelloUser();
-                break;
-            case Stage::HelloUserNameless:
-                StageHelloUserNameless();
-                break;
-            case Stage::MainMenu:
-                StageMainMenu();
-                break;
-
-
-            case Stage::Exit:
-                StageExit();
-                keepGoing = false;
-                break;
+        switch (view.stage.value) {
+            case Stage::ViewStage::Value::Inception            :   StageInception();               break;
+            case Stage::ViewStage::Value::HelloUser            :   StageHelloUser();               break;
+            case Stage::ViewStage::Value::HelloUserNameless    :   StageHelloUserNameless();       break;
+            case Stage::ViewStage::Value::MainMenu             :   StageMainMenu();                break;
+            case Stage::ViewStage::Value::Exit                 :   StageExit();keepGoing = false;  break;
         }
 
     }
@@ -192,6 +179,7 @@ void ConsoleController::StageInception(){
     }
     else
     {
+        view.stage.value = Stage::HelloUser.value;
         view.stage = Stage::HelloUser;
         format = view.ProvideStageFormat();
         
@@ -239,10 +227,17 @@ void ConsoleController::StageHelloUserNameless()
         __Begin;
         #endif
     }
-
+    String format;
     while (true) 
     {
         STR userName = view.GetDataFromInput();
+
+        if (std::regex_match(userName, std::regex("(h(!|elp)|[?])"))) 
+        {
+            format = view.ProvideStageFormat() + view.stage.help;
+            break;
+        }
+
         INT bad = UserData::IsBadAlias(userName);
         if (!bad) {
             auto selfAddress = model.presenceAura.GetHostIp();
@@ -251,6 +246,10 @@ void ConsoleController::StageHelloUserNameless()
             UserData self(userName, selfAddress, selfStatus);
 
             model.udfNavigator.AppendUser(self);
+
+            view.stage = Stage::Inception;
+            format = view.ProvideStageFormat();
+
             break;
         }         
         else
@@ -261,8 +260,7 @@ void ConsoleController::StageHelloUserNameless()
                 case 4: break;// bad prefix
             }  
     }
-    view.stage = Stage::Inception;
-    String format = view.ProvideStageFormat();
+    
     view.SetDataToPrint(format);
 
     {

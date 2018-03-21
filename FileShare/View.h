@@ -37,7 +37,7 @@ namespace FileShare {
         
         virtual Data GetDataFromInput();
         virtual Data ProvideStageFormat();
-        virtual Data StageToData(Stage);
+        //virtual Data StageToData(Stage);
 
         virtual void ClearConsole();
         virtual void SetDataToPrint(const Data&);
@@ -46,7 +46,7 @@ namespace FileShare {
         InStream& istrm;
         OutStream& ostrm;
         
-        Stage stage;
+        Stage::ViewStage stage;
         Data dataToPrint;
 
         friend class ConsoleController;
