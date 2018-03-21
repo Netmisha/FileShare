@@ -4,6 +4,8 @@
 #include <tuple>
 #include <set>
 #include <utility>
+#include <vector>
+#include <thread>
 
 /*
     Presence component is gonna spam local area with <notice-me> msgs
@@ -14,12 +16,17 @@
 */
 
 namespace FileShare {
-    using String = std::string;
+    using STR = std::string;
+    using Aura = std::pair<ULONG, USHORT>;
+    using AuraSet = std::set<Aura>;
+    using Thread = std::thread;
     using Int = int;
-    constexpr int preComPort = 14088;
+
+    #define preComPort (USHORT)14088
 
     struct SockAddrIn {
         SockAddrIn();
+        SockAddrIn(USHORT port);
 
         sockaddr_in addr;
         sockaddr* addrPtr;
@@ -40,39 +47,46 @@ namespace FileShare {
     {
     protected:
         virtual Int BindSocket() = 0;
-        virtual String ReceiveBroadcastedMessage() = 0;
+        virtual STR ReceiveBroadcastedMessage() = 0;
     };
 
     class SenderBasicPresenceComponentInterface :
         virtual protected BasicPresenceComponentInterface
     {
     protected:
-        virtual Int SendMessageBroadcast(const String&) = 0;
+        virtual Int SendMessageBroadcast(const STR&) = 0;
     };
 
     struct BasicSocketedEntity {
+        BasicSocketedEntity() = default;
+        BasicSocketedEntity(USHORT port);
+
         WSADATA wsa;
         SOCKET sc;
         Int scOptions = 1;
 
-        SockAddrIn inAddrAny{}; // inaddr_any - bind
-        SockAddrIn inAddrBro{}; // inaddr_broadcast send
+        SockAddrIn inAddrAny; // inaddr_any - bind
+        SockAddrIn inAddrBro; // inaddr_broadcast send
         SockAddrIn inAddrSdr{}; // inaddr_sender receive from
     };
+
     class PresenceComponent :
-        protected BasicSocketedEntity,
+        public BasicSocketedEntity,
         virtual protected ReceiverPresenceComponentInterface,
         virtual protected SenderBasicPresenceComponentInterface
     { 
     public:
         PresenceComponent();
+        PresenceComponent(USHORT presenceComponentPort);
         ~PresenceComponent();
 
-        virtual String ReceiveBroadcastedMessage()         override;
-        virtual Int    SendMessageBroadcast(const String&) override;
+        virtual STR ReceiveBroadcastedMessage()      override;
+        virtual Int SendMessageBroadcast(const STR&) override;
 
-        virtual String GetHostIp();
+        virtual STR GetHostIp();
 
+        Int GetAuraCount();
+        AuraSet activeLocalBroadcasters;
     protected:
         virtual Int WSAstartup()           override;
         virtual Int InitializeSockaddr()   override;

@@ -1,25 +1,53 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "PresenceComponent.h"
+#include "Logger.h"
 
 using namespace FileShare;
 
 SockAddrIn::SockAddrIn():
+    SockAddrIn(preComPort)
+{}
+
+SockAddrIn::SockAddrIn(USHORT port):
     addr{}
 {
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(preComPort);
-
+    addr.sin_port = htons(port);
     addrPtr = reinterpret_cast<sockaddr*>(&addr);
     addrSize = sizeof(addr);
 }
 
-PresenceComponent::PresenceComponent()
+
+BasicSocketedEntity::BasicSocketedEntity(USHORT port) :
+    inAddrAny(port),
+    inAddrBro(port)
+{}
+
+
+PresenceComponent::PresenceComponent():
+    PresenceComponent(preComPort)
+{}
+
+PresenceComponent::PresenceComponent(USHORT pcPort) :
+    BasicSocketedEntity(pcPort)
 {
+    {
+        #ifdef LOGGER
+        Log::TextInRed(PresenceComponent()->);
+        __Begin;
+        #endif
+    }
     WSAstartup();
     InitializeSockaddr();
     CreateSocket();
     SetSocketOptions();
     BindSocket();
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-PresenceComponent());
+        #endif
+    }
 }
 
 PresenceComponent::~PresenceComponent()
@@ -27,9 +55,9 @@ PresenceComponent::~PresenceComponent()
     CloseSocket();
 }
 
-String PresenceComponent::ReceiveBroadcastedMessage()
+STR PresenceComponent::ReceiveBroadcastedMessage()
 {   
-    String buff(100, 0);
+    STR buff(100, 0);
 
     recvfrom(sc, &buff.front(), buff.capacity(), NULL, inAddrSdr.addrPtr, &inAddrSdr.addrSize);
 
@@ -38,19 +66,19 @@ String PresenceComponent::ReceiveBroadcastedMessage()
     return buff;
 }
 
-Int PresenceComponent::SendMessageBroadcast(const String& msg)
+Int PresenceComponent::SendMessageBroadcast(const STR& msg)
 {
     return sendto(sc, msg.c_str(), msg.length(), NULL, inAddrBro.addrPtr, inAddrBro.addrSize);
 }
 
-String FileShare::PresenceComponent::GetHostIp()
+STR PresenceComponent::GetHostIp()
 {
     static WSADATA wsaData;
     int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     char hostName[1024]{};
     if (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
-        return String();
+        return STR();
 
     //HOSTENT* hostEnt = gethostbyname(hostName);
     //IN_ADDR** addrList = (IN_ADDR**)hostEnt->h_addr_list;
@@ -60,38 +88,123 @@ String FileShare::PresenceComponent::GetHostIp()
     return inet_ntoa(*((IN_ADDR**)(gethostbyname(hostName))->h_addr_list)[0]);
 }
 
+Int PresenceComponent::GetAuraCount()
+{
+    return activeLocalBroadcasters.size();
+}
+
 Int PresenceComponent::WSAstartup()
 {
-    return WSAStartup(MAKEWORD(2, 2), &wsa);
+    Int wsaStartupResult;
+    {
+        #ifdef LOGGER
+        Log::TextInRed(WSAstartup()->);
+        __Begin;
+        #endif
+    }
+    wsaStartupResult = WSAStartup(MAKEWORD(2, 2), &wsa);
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-WSAstartup());
+        #endif
+    }
+    return wsaStartupResult;
 }
 Int PresenceComponent::InitializeSockaddr()
 {
+    {
+        #ifdef LOGGER
+        Log::TextInRed(InitializeSockaddr()->);
+        __Begin;
+        #endif
+    }
     inAddrAny.addr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
     inAddrBro.addr.sin_addr.S_un.S_addr = htonl(INADDR_BROADCAST); 
-
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-InitializeSockaddr());
+        #endif
+    }
     return 0;
 }
 Int PresenceComponent::CreateSocket()
 {
+    {
+        #ifdef LOGGER
+        Log::TextInRed(->CreateSocket());
+        __Begin;
+        #endif
+    }
     sc = socket(AF_INET, SOCK_DGRAM, NULL);
-
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-CreateSocket());
+        #endif
+    }
     return sc;
 }
 Int PresenceComponent::SetSocketOptions()
 {
-    char* scOptPtr = reinterpret_cast<char*>(&scOptions);
-
-    return{
-        setsockopt(sc, SOL_SOCKET, SO_REUSEADDR, scOptPtr, sizeof(int))
-        +
-        setsockopt(sc, SOL_SOCKET, SO_BROADCAST, scOptPtr, sizeof(int))
-    };
+    Int result = 0;
+    {
+        char* scOptPtr = reinterpret_cast<char*>(&scOptions);
+        {
+            #ifdef LOGGER
+            Log::TextInRed(SetSocketOptions()->);
+            __Begin;
+            #endif
+        }
+        result += setsockopt(sc, SOL_SOCKET, SO_REUSEADDR, scOptPtr, sizeof(Int));
+        result += setsockopt(sc, SOL_SOCKET, SO_BROADCAST, scOptPtr, sizeof(Int));
+        {
+            #ifdef LOGGER
+            __End;
+            Log::TextInRed(<-SetSocketOptions());
+            #endif
+        }
+    }
+    return result;
 }
 Int PresenceComponent::BindSocket()
 {
-    return bind(sc, inAddrAny.addrPtr, inAddrAny.addrSize);
+    Int result;
+    {
+        {
+            #ifdef LOGGER
+            Log::TextInRed(BindSocket()->);
+            __Begin;
+            #endif
+        }
+        result = bind(sc, inAddrAny.addrPtr, inAddrAny.addrSize);
+        {
+            #ifdef LOGGER
+            __End;
+            Log::TextInRed(<-BindSocket());
+            #endif
+        }
+    }
+    return result;
 }
 Int PresenceComponent::CloseSocket()
 {
-    return closesocket(sc);
+    Int result;
+    {    
+        {
+            #ifdef LOGGER
+            Log::TextInRed(CloseSocket()->);
+            __Begin;
+            #endif
+        }
+        result = closesocket(sc);
+        {
+            #ifdef LOGGER
+            __End;
+            Log::TextInRed(<-CloseSocket());
+            #endif
+        }
+    }
+    return result;
 }
