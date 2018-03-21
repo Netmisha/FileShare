@@ -7,6 +7,7 @@
 
 #include "UserDataFileComponent.h"
 #include "tinyxml.h"
+#include "Logger.h"
 
 using namespace FileShare;
 
@@ -14,38 +15,35 @@ using namespace FileShare;
     ifndef used for outlining
 */
 #ifndef USER_DATA_PART_OF
-#define USER_DATA UserData::
 
-const UserData USER_DATA BadData = UserData();
+const UserData UserData::BadData = UserData();
 
-USER_DATA UserData(const String& als, const UserAddr& adr, const UserStatus& sts):
+UserData::UserData(const String& als, const UserAddr& adr, const UserStatus& sts):
     alias(als),
     address(adr),
     status(sts)
 {}
-//USER_DATA UserData(const String & als, const String & adr, const String & sts):
-//    alias(als),
-//    address(UserAddr(adr)),
-//    status(UserStatus(sts))
-//{}
 
-
-void USER_DATA Alias(const String& als){
+void UserData::Alias(const String& als){
     alias = als;
 }
-void USER_DATA Address(const UserAddr& addr){
+void UserData::Address(const UserAddr& addr){
     address = addr;
 }
-void USER_DATA Status(const UserStatus& sts){
+void UserData::Status(const UserStatus& sts){
     status = sts;
 }
-Bool USER_DATA IsBadAlias(const String &als){
+Bool UserData::IsBadAlias(const String &als){
     Bool soBad = FALSE;
     
-    std::regex whiteSpace(R"(\s)");
-    std::regex notWordOrNumber(R"(\W)");
-    std::regex badPrefix(R"(^\b\d+.*)");//"^\\b\\d+.*");
+    std::regex whiteSpace(R"(^(.*\s+.*)+$)");
+    std::regex notWordOrNumber(R"(^(.*\W+.*)+$)");
+    std::regex badPrefix(R"(^\b\d+.*)");
     
+    ++soBad;
+    if (als.empty())
+        return soBad;
+
     ++soBad;
     if (std::regex_match(als, whiteSpace))
         return soBad;
@@ -60,20 +58,19 @@ Bool USER_DATA IsBadAlias(const String &als){
 
     return FALSE;
 }  
-bool USER_DATA operator==(const UserData & other) const{
+bool UserData::operator==(const UserData & other) const{
     return{
         alias == other.alias &&
         address == other.address &&
         status == other.status
     };
 }
-bool USER_DATA operator!=(const UserData & other) const{
+bool UserData::operator!=(const UserData & other) const{
     return !(*this==other);
 }
 
 #ifndef USER_ADDRESS_PART_OF
-#define USER_ADDR UserData::UserAddr:: 
-String USER_ADDR to_str() const
+String UserData::UserAddr::to_str() const
 {
     return addr;
 }
@@ -82,26 +79,18 @@ String USER_ADDR to_str() const
 #endif //USER_ADDRESS_PART_OF
 
 #ifndef USER_STATUS_PART_OF
-#define USER_STATUS UserData::UserStatus::
-#define USER_STATUS_VALUE UserData::UserStatus::StatusValue::
 
-
-const String USER_STATUS statusString[] = {
+const String UserData::UserStatus::statusString[] = {
     "ugly", "bad", "good", "self"
 };
-
-USER_STATUS UserStatus(StatusValue sts) :
+UserData::UserStatus::UserStatus(StatusValue sts) :
     value(sts)
 {}
-
-String USER_STATUS to_str() const{
+String UserData::UserStatus::to_str() const{
     return statusString[static_cast<int>(value)];
 }
-#undef USER_STATUS
-#undef USER_STATUS_STRING
-#undef USER_STATUS_VALUE
+
 #endif //USER_STATUS_PART_OF
-#undef USER_DATA
 #endif
 
 #ifndef UDF_COMPONENT_PART_OF
@@ -120,14 +109,48 @@ String UdfPath();
 
 static TiXmlDocument udf;
 UDFComponent::UDFComponent(){
+    {
+        #ifdef LOGGER
+        Log::TextInRed(UDF()->);
+        __Begin;
+        #endif // LOGGERsd
+    }
 
-    udf.LoadFile(UdfPath().c_str(), TIXML_ENCODING_LEGACY);
-
-    
-    if(udf.NoChildren())
+    bool loadResult = udf.LoadFile(UdfPath().c_str(), TIXML_ENCODING_LEGACY);
+    {
+        #ifdef LOGGER
+        IF(loadResult)
+            Log::TextInRed(udf.LoadFile()+);
+        ELSE
+            Log::TextInRed(udf.LoadFile()-);
+        #endif // LOGGER
+    }
+   
+    if (udf.NoChildren()) {
+        {
+            #ifdef LOGGER
+            Log::TextInRed(udf no root creating one);
+            #endif
+        }
         udf.LinkEndChild(new TiXmlElement(Udfn::root));
+    }
 
-    udf.SaveFile();
+    bool saveResult = udf.SaveFile();
+    {
+        #ifdef LOGGER
+        IF(saveResult)
+            Log::TextInRed(udf.SaveFile()+);
+        ELSE
+            Log::TextInRed(udf.SaveFile()-);
+        #endif // LOGGER
+    }
+
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-UDF());
+        #endif // LOGER
+    }
 }
 UDFComponent::~UDFComponent() 
 {
@@ -136,18 +159,35 @@ UDFComponent::~UDFComponent()
 
 String UdfPath() {
     static String directoryPathShort;
-
-    if (directoryPathShort.empty())
     {
-        TCHAR tmodulePath[MAX_PATH]{};
-        GetModuleFileName(NULL, tmodulePath, MAX_PATH);
+        {
+            #ifdef LOGGER
+            Log::TextInRed(UdfPath()->);
+            __Begin;
+            #endif // LOGGER
+        }
+        if (directoryPathShort.empty())
+        {
+            TCHAR tmodulePath[MAX_PATH]{};
+            GetModuleFileName(NULL, tmodulePath, MAX_PATH);
+            String directoryPath = std::regex_replace(tmodulePath, std::regex("([^\\\\]+[.]exe)"), "");
+            TCHAR tdirectPathShort[MAX_PATH]{};
+            GetShortPathName(directoryPath.c_str(), tdirectPathShort, MAX_PATH);
+            directoryPathShort = String(tdirectPathShort);
+        }
 
-        String directoryPath = std::regex_replace(tmodulePath, std::regex("([^\\\\]+[.]exe)"), "");
+        {
+            #ifdef LOGGER
+            Log::InRed("UdfPath: " + directoryPathShort);
+            #endif
+        }
 
-        TCHAR tdirectPathShort[MAX_PATH]{};
-        GetShortPathName(directoryPath.c_str(), tdirectPathShort, MAX_PATH);
-
-        directoryPathShort = String(tdirectPathShort);
+        {
+            #ifdef LOGGER
+            __End;
+            Log::TextInRed(<-UdfPath());
+            #endif // LOGGER
+        }
     }
     return directoryPathShort + udfXml;
 }
@@ -274,8 +314,7 @@ bool UDFComponent::UserAlreadyExists(const UserData& usr){
 #ifndef UDF_XML_HELPER_FUNCTIONS
 UserData ConvertTiXmlElementToUserData(const TiXmlElement* element) {
     auto alias = String(element->Attribute(Udfn::alias));
-    auto address = UserData::UserAddr(element->Attribute(Udfn::address));
-    
+    auto address = UserData::UserAddr(element->Attribute(Udfn::address));  
     auto status = static_cast<UserData::UserStatus::StatusValue>(std::stoi(element->Attribute(Udfn::status)));
 
     return UserData(alias, address, status);

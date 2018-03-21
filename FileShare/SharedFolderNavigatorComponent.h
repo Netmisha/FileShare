@@ -8,8 +8,11 @@ namespace FileShare {
 
     class SharedFolderNavigatorComponent{
     public:
-        SfnSelf& self;
-        SfnOther& other;
+        SharedFolderNavigatorComponent() = default;
+        SharedFolderNavigatorComponent(USHORT, USHORT);
+
+        SharedFolderNavigatorSelf self;
+        SharedFolderNavigatorOther other;
     };
 
     using SfnComponent = SharedFolderNavigatorComponent;

@@ -10,10 +10,211 @@
 #define TEST_PRESENCE_COMPONENT             3
 #define TEST_MESSENGER                      4
 #define TEST_SHARED_FOLDER_NAVIGATOR_OTHER  5
+#define TEST_MABITCH_MODEL_OUT              6
+#define TEST_TRYING_TO_VIEW                 7
+#define TEST_TRYING_TO_CONTROL              8
 
 #if !defined(CURRENT_TEST)
-#define CURRENT_TEST 5
+#define CURRENT_TEST 8
 #endif // !CURRENT_TEST
+
+#ifdef TEST_TRYING_TO_CONTROL
+#ifdef CURRENT_TEST
+#if CURRENT_TEST==TEST_TRYING_TO_CONTROL
+
+#include "Model.h"
+#include "View.h"
+#include "Controller.h"
+
+using namespace FileShare;
+void WsaStartup() {
+    static WSADATA wsaData;
+    int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
+}
+int TEST() {
+    WsaStartup();
+
+    {
+        #ifdef LOGGER
+        Log::TextInRed(Model:);
+        ++Log::depth;
+        #endif // LOGGER
+    }
+    Model model;
+    {
+        #ifdef LOGGER
+        --Log::depth;
+        Log::TextInRed(:Model);
+        #endif // LOGGER
+    }
+
+    {
+        #ifdef LOGGER
+        Log::TextInRed(ConsoleView:);
+        ++Log::depth;
+        #endif // LOGGER
+    }
+    ConsoleView view(model, std::cin, std::cout);
+    {
+        #ifdef LOGGER
+        --Log::depth;
+        Log::TextInRed(:ConsoleView);
+        #endif // LOGGER
+    }
+
+
+    {
+        #ifdef LOGGER
+        Log::TextInRed(ConsoleController:);
+        ++Log::depth;
+        #endif // LOGGER
+    }
+    ConsoleController controller(model, view);
+    {
+        #ifdef LOGGER        
+        --Log::depth;
+        Log::TextInRed(:ConsoleController);
+        #endif // LOGGER
+    }
+
+
+    controller.OnLoad2();
+
+    return system("pause");
+}
+
+
+#endif // CURRENT_TEST==TEST_TRYING_TO_CONTROL
+#endif // CURRENT_TEST
+#endif // TEST_TRYING_TO_CONTROL
+
+#ifdef TEST_TRYING_TO_VIEW
+#ifdef CURRENT_TEST
+#if CURRENT_TEST == TEST_TRYING_TO_VIEW
+
+#include "View.h"
+using namespace FileShare;
+
+int TEST() {
+
+    Model mdl;
+    ConsoleView cv(mdl, std::cin, std::cout);
+
+    cv.SetDataToPrint("lol kek" "\n");
+
+    while (true) {
+        cv.Render();
+
+        for (int i = (int)Stage::Experimental; i < 10; ++i) {
+            Log::InRed(cv.StageToData((Stage)i));
+        }
+
+        String str = cv.GetDataFromInput();
+
+        cv.SetDataToPrint("++" + str + "++" + "\n"); 
+    }
+
+    system("pause");
+}
+
+#endif // 
+#endif // CURRENT_TEST
+#endif // TEST_TRYING_TO_VIEW
+
+#ifdef TEST_MABITCH_MODEL_OUT
+#ifdef CURRENT_TEST
+#if CURRENT_TEST == TEST_MABITCH_MODEL_OUT
+
+#include "Model.h"
+using namespace FileShare;
+
+void WsaStartup() {
+    static WSADATA wsaData;
+    int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
+}
+
+VOID TestUdfComponent(Model&);
+
+
+using namespace FileShare;
+int TEST() {
+    Log::InRed(TO_STR(TEST_MABITCH_MODEL_OUT));
+    {
+        #ifdef LOGGER
+        Log::InRed("creating Model");
+        #endif // LOGGER
+    }
+
+    WsaStartup();
+
+    Model mdl;
+
+    TestUdfComponent(mdl);
+    return system("pause");
+}
+
+VOID TestUdfComponent(Model& mdl) {
+    Log::TextInRed(TestUdfComponent{ );
+    __Begin;
+    for (bool repeatThisTest = TRUE; repeatThisTest;)
+    {
+        Log::InRed("Get good userName");
+        String userName;
+        {
+            __Begin;
+            for (bool keepGoing = true; keepGoing;) {
+                std::getline(std::cin, userName);
+
+                if (userName == "quit")
+                    repeatThisTest = FALSE;
+
+                switch (Bool bad = UserData::IsBadAlias(userName)) {
+                    case 0:
+                        Log::InRed("Good name");
+                        keepGoing = false;
+                        break;
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                        Log::InRed("Bad name: " + std::to_string(bad));
+                }
+            }
+            __End;
+        }
+
+        Log::InRed("Checking if user exists");
+        BOOL userExists;
+        {
+            __Begin;
+            UserData userFound = mdl.udfNavigator.FindUsersInFile(userName);
+            userExists = (userFound != UserData::BadData);
+            __End;
+        }
+
+        if (userExists) {
+            Log::InRed("userName exists");
+        }
+        else
+        {
+            Log::InRed("userName doesnt exist. adding");
+            __Begin;
+            String ip = mdl.presenceAura.GetHostIp();
+            UserData::UserStatus sts = UserData::UserStatus::StatusValue::Good;
+            UserData newUser(userName, ip, sts);
+
+            mdl.udfNavigator.AppendUser(newUser);
+            __End;
+        }
+    }
+    __End;
+    Log::TextInRed(}TestUdfComponent);
+}
+
+#endif // CURRENT_TEST == TEST_MABITCH_MODEL_OUT
+#endif // CURRENT_TEST
+#endif // TEST_MABITCH_MODEL_OUT
+
 
 #if defined TEST_SHARED_FOLDER_NAVIGATOR_OTHER
 #if defined CURRENT_TEST 
@@ -28,7 +229,6 @@ using Clock = std::chrono::system_clock;
 using Duration = std::chrono::duration<INT>;
 using TimePoint = std::chrono::system_clock::time_point;
 using Seconds = std::chrono::seconds;
-
 
 String GetHostIp();
 
@@ -595,7 +795,7 @@ int TEST() {
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
     UserData ud = udf.FindUsersInFile("Boi");
-    udf.ModIFyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
+    udf.ModifyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
 
     InRed("Tried modIFying user");
     for (auto& ud : udf.FindUsersInFile())

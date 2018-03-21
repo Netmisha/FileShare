@@ -345,7 +345,7 @@ Int FileSender::SendFile(const String & filePath, Int chunkSize){
             #endif
         }
         
-        INT fileSize;
+        INT fileSize; INT_MAX;
         {
             auto end = file.seekg(0, file.end).tellg();
             auto beg = file.seekg(0, file.beg).tellg();

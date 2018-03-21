@@ -41,18 +41,14 @@ namespace FileShare {
         bool operator==(const UserData& other) const;
         bool operator!=(const UserData& other) const;
 
-        class UserAddr {
+        class UserAddr 
+        {
         public:
             UserAddr() = default;
-            /*
-                sockaddr_in?
-                ip, port?
-            */
-            UserAddr(const String& adr, USHORT prt=0): addr(adr), port(prt) {}
+
+            UserAddr(const String& addr) { this->addr = addr;}
+            UserAddr(const String& adr, USHORT prt): addr(adr), port(prt) {}
             
-            /**
-            yet to make it right
-            */
             String to_str() const;
 
             bool operator==(const UserAddr& other) const { return addr == other.addr; }

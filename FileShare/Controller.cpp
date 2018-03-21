@@ -1,19 +1,47 @@
 #include "Controller.h"
 #include "CommandReinterpretation.h"
 #include "Model.h"
+#include "Logger.h"
 
 #include <regex>
+#include <conio.h>
 
 #pragma warning(disable : 4996) 
 
 using namespace FileShare;
+using STR = std::string;
 using CommandReinterpretation = ConsoleController::CommandReinterpretation;
 
-FileShare::ConsoleController::ConsoleController(Model& mdl, ConsoleView& vw):
+BasicController::~BasicController()
+{
+    {
+        #ifdef LOGGER
+        Log::TextInRed(~BasicController() :);
+        #endif // LOGGER
+    }
+}
+
+
+ConsoleController::ConsoleController(Model& mdl, ConsoleView& vw):
     model(mdl),
-    view(vw),
-    stage(vw.stage)
-{}
+    view(vw)
+{
+    {
+        #ifdef LOGGER
+        Log::TextInRed(ConsoleController() :);
+        #endif // LOGGER
+    }
+}
+
+ConsoleController::~ConsoleController()
+{
+    {
+        #ifdef LOGGER
+        Log::TextInRed(~ConsoleController() :);
+        #endif // LOGGER
+    }
+}
+
 
 void FileShare::ConsoleController::OnLoad()
 {
@@ -33,20 +61,18 @@ void FileShare::ConsoleController::OnLoad()
 
         /// the example of doing stuff
         case (int)(Stage::Experimental) :
-            stage = Stage::Experimental;
+            view.stage = Stage::Experimental;
             /*
             switch(commReint.Action)
             case ModelActSomeWay:
             actors params = getParams(commReint.params)
             model.SomeComponent.ActSomeWay(params);
 
-
-
             */
             break;
 
         case (int)(Stage::Exit):
-            stage = Stage::Exit;
+            view.stage = Stage::Exit;
             command = "Mister";
             forever = false;
             break;
@@ -71,9 +97,209 @@ CommandReinterpretation ConsoleController::ReinterpretCommand(const Data& comman
     return CommandReinterpretation();
 }
 
-void FileShare::ConsoleController::GetModelToAct(const CommandReinterpretation &)
+void ConsoleController::GetModelToAct(const CommandReinterpretation &)
 {
     /*
         model act
     */
 }
+
+
+void ConsoleController::OnLoad2()
+{
+    {
+        #ifdef LOGGER
+        __Begin;
+        Log::InRed("OnLoad2(){");
+        #endif // LOGGER
+
+    }
+    
+    for (bool keepGoing = true; keepGoing;) {
+        view.Render();
+        switch (view.stage) {
+            case Stage::Inception:
+                StageInception();
+                break;
+            case Stage::HelloUser:
+                StageHelloUser();
+                break;
+            case Stage::HelloUserNameless:
+                StageHelloUserNameless();
+                break;
+            case Stage::MainMenu:
+                StageMainMenu();
+                break;
+
+
+            case Stage::Exit:
+                StageExit();
+                keepGoing = false;
+                break;
+        }
+
+    }
+
+    {
+        #ifdef LOGGER
+        Log::InRed("} OnLoad2()");
+        __End;
+        #endif // LOGGER
+
+    } 
+}
+void ConsoleController::StageExit() {
+    model.stupidThreadsDie = true;
+    getch();
+}
+void ConsoleController::StageInception(){
+
+    {
+        #ifdef LOGGER
+        __Begin;
+        Log::TextInRed(StageInception()->);
+        #endif // LOGGER
+
+    }
+    String userName;
+    {
+        {
+            #ifdef LOGGER
+            __Begin;
+            Log::InRed("searching udf for userName");
+            #endif // LOGGER
+        }
+        auto selfStatus = UserData::UserStatus::StatusValue::Self;
+        auto vec = model.udfNavigator.FindUsersInFile(selfStatus);
+        if (!vec.empty())
+            userName = vec.at(0).Alias();
+
+        {
+            #ifdef LOGGER
+            Log::InRed("we got a name");
+            __End;
+            #endif // LOGGER
+        }
+    }
+
+    String format;
+
+    if (userName.empty())
+    {
+        view.stage = Stage::HelloUserNameless;
+        format = view.ProvideStageFormat();
+        
+    }
+    else
+    {
+        view.stage = Stage::HelloUser;
+        format = view.ProvideStageFormat();
+        
+        std::regex user("USER");
+        format = std::regex_replace(format, user, userName);
+    }
+    
+    view.SetDataToPrint(format);
+
+
+    {
+        #ifdef LOGGER
+        Log::TextInRed(<-StageInception());
+        __End;
+        #endif // LOGGER
+    }
+}
+void ConsoleController::StageHelloUser()
+{
+    {
+        #ifdef LOGGER
+        Log::TextInRed(StageHelloUser()->);
+        __Begin;
+        #endif
+    }
+
+    getch();
+
+    view.stage = Stage::MainMenu;
+    String format = view.ProvideStageFormat();
+    view.SetDataToPrint(format);
+
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-StageHelloUser());
+        #endif
+    }
+}
+void ConsoleController::StageHelloUserNameless() 
+{  
+    {
+        #ifdef LOGGER
+        Log::TextInRed(StageHelloUserNameless()->);
+        __Begin;
+        #endif
+    }
+
+    while (true) 
+    {
+        STR userName = view.GetDataFromInput();
+        INT bad = UserData::IsBadAlias(userName);
+        if (!bad) {
+            auto selfAddress = model.presenceAura.GetHostIp();
+            auto selfStatus = UserData::UserStatus::StatusValue::Self;
+            
+            UserData self(userName, selfAddress, selfStatus);
+
+            model.udfNavigator.AppendUser(self);
+            break;
+        }         
+        else
+            switch (bad) {
+                case 1: break;// empty
+                case 2: break;// whitespace
+                case 3: break;// bad characters
+                case 4: break;// bad prefix
+            }  
+    }
+    view.stage = Stage::Inception;
+    String format = view.ProvideStageFormat();
+    view.SetDataToPrint(format);
+
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-StageHelloUserNameless());
+        #endif
+    }
+}
+
+void ConsoleController::StageMainMenu()
+{
+    {
+        #ifdef LOGGER
+        Log::TextInRed(StageMainMenu()->);
+        __Begin;
+        #endif
+    }
+
+    String format;
+    for (bool keepGoing = true; keepGoing;)
+    {
+        String command = view.GetDataFromInput();
+
+        if (std::regex_match(command, std::regex("e(xit|!)|q(uit|!)"))) {
+            view.stage = Stage::Exit;
+            keepGoing = false;
+        }
+
+    }
+    format = view.ProvideStageFormat();
+    view.SetDataToPrint(format);
+    {
+        #ifdef LOGGER
+        __End;
+        Log::TextInRed(<-StageMainMenu());
+        #endif
+    }
+}
+

@@ -12,6 +12,7 @@ namespace FileShare {
     class BasicView {
     protected:      
         BasicView(Model&);
+        ~BasicView();
 
         BasicView() = delete;
         BasicView(const BasicView&) = delete;
@@ -25,11 +26,13 @@ namespace FileShare {
     {
     public:
         ConsoleView(Model&, InStream&, OutStream&);
+        ~ConsoleView();
         
         ConsoleView() = delete;
         ConsoleView(const ConsoleView&) = delete;
 
     protected:
+    public:
         virtual void Render()    override;
         
         virtual Data GetDataFromInput();

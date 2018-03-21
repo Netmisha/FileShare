@@ -2,12 +2,16 @@
 #include <string>
 namespace FileShare 
 {
-    typedef std::string Data;
+    using Data = std::string;
     
     enum class Stage:int
     {   Experimental = -1,
         Exit = 0,
+
+        Inception,
+
         HelloUser,
+            HelloUserNameless,
         MainMenu,
             SharedFolder,
                 SharedFolderSelf,
@@ -27,7 +31,9 @@ namespace FileShare
     };
     
     namespace StageFormat {
-        Data HelloUser();
+        Data Inception();
+        Data HelloUserNamed();
+        Data HelloUserNameless();
         Data MainMenu();
 
         Data GoodbyeUser();

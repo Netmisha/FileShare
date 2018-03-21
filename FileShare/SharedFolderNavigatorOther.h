@@ -15,7 +15,6 @@ namespace FileShare {
     {
     public:
         RequestListener(USHORT port);
-        RequestListener(Listener&& target);
     };
     class RequestReceiver :
         public Receiver
@@ -76,6 +75,7 @@ namespace FileShare {
     {
     public:  
         SharedFolderNavigatorOther();
+        SharedFolderNavigatorOther(USHORT reqPort, USHORT fshPort);
 
         FileVector RequestFileList(const String& addr, USHORT port = requestPort);
         Int SendMyFileList(const FileVector&, const String& addr, USHORT port = requestPort);
