@@ -44,18 +44,22 @@ namespace FileShare {
         void OnLoad2();
     protected:
         virtual Data GetCommand();
-        virtual CommandReinterpretation ReinterpretCommand(const Data&);
-        virtual void GetModelToAct(const CommandReinterpretation&);
     protected:
         Model& model;
         ConsoleView& view;
     protected:
         ///STAGES
-        virtual void StageExit()                override;
-        virtual void StageInception()           override;
-        virtual void StageHelloUser()           override;
-        virtual void StageHelloUserNameless()   override;
-        virtual void StageMainMenu();
+        virtual void StageExit()              ;
+        virtual void StageInception()         ;
+        virtual void StageHelloUser()         ;
+        virtual void StageHelloUserNameless() ;
+        virtual void StageMainMenu()          ;
+
+        virtual void Exit();
+        virtual void Inception();
+        virtual void HelloUser();
+        virtual void HelloNoName();
+        virtual void MainMenu();
     };
 }
 
