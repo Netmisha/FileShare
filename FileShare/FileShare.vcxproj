@@ -176,7 +176,6 @@
     <ClInclude Include="..\tinyxml\tinystr.h" />
     <ClInclude Include="..\tinyxml\tinyxml.h" />
     <ClInclude Include="BasicSharedFolderNavigator.h" />
-    <ClInclude Include="CommandReinterpretation.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="MessengerComponent.h" />

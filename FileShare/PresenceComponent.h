@@ -1,11 +1,8 @@
 #pragma once
 #include <winsock2.h>
 #include <string>
-#include <tuple>
 #include <set>
 #include <utility>
-#include <vector>
-#include <thread>
 
 /*
     Presence component is gonna spam local area with <notice-me> msgs
@@ -19,7 +16,6 @@ namespace FileShare {
     using STR = std::string;
     using Aura = std::pair<ULONG, USHORT>;
     using AuraSet = std::set<Aura>;
-    using Thread = std::thread;
     using Int = int;
 
     #define preComPort (USHORT)14088

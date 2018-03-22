@@ -52,7 +52,7 @@ namespace FileShare {
         /**
             should does skip hidden files
         */
-        FileVector FilesInDirectory(const String&);
+        FileVector FilesInDirectory(const String& directoryPath, const String& key = "*.*");
 
         const String sharedFolderName;
 

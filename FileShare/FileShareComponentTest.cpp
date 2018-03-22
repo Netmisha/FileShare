@@ -62,7 +62,6 @@ int TEST() {
         #endif // LOGGER
     }
 
-
     {
         #ifdef LOGGER
         Log::TextInRed(ConsoleController:);
@@ -78,9 +77,8 @@ int TEST() {
     }
 
 
-    controller.OnLoad2();
-
-    return system("pause");
+    controller.OnLoad();
+    return 0;
 }
 
 

@@ -3,23 +3,20 @@
 #include <thread>
 #include "SharedFolderNavigatorSelf.h"
 
-
 using namespace FileShare;
 using Vector = std::vector<std::string>;
 
-#ifndef SFNS
-#define SFNS SharedFolderNavigatorSelf
-
-SFNS::SFNS() :
+SharedFolderNavigatorSelf::SharedFolderNavigatorSelf() :
     sharedFolderName("SharedFolder\\")
 {
     if (!SharedFolderExists())
         CreateSharedFolder();
 }
-FileVector SFNS::GetFileList() {
+FileVector SharedFolderNavigatorSelf::GetFileList() 
+{
     return FilesInDirectory(SharedFolderPath());
 }
-String  SFNS::FileCreate(const String& fileName)
+String  SharedFolderNavigatorSelf::FileCreate(const String& fileName)
 {
     String newName = FileCreateUniqueName(fileName);
     String filePath = SharedFolderPath() + newName;
@@ -35,7 +32,7 @@ String  SFNS::FileCreate(const String& fileName)
     CloseHandle(mafile);
     return newName;
 }
-Bool SFNS::FileRename(const String& fileNameOld, const String& fileNameNew)
+Bool SharedFolderNavigatorSelf::FileRename(const String& fileNameOld, const String& fileNameNew)
 {
     if (!FileExists(fileNameOld))
         return false;
@@ -47,18 +44,20 @@ Bool SFNS::FileRename(const String& fileNameOld, const String& fileNameNew)
 
     return MoveFile(filePathOld.c_str(), filePathNew.c_str());
 }
-Bool SFNS::FileDelete(const String& fileName)
+Bool SharedFolderNavigatorSelf::FileDelete(const String& fileName)
 {
-    if (FileExists(fileName)) {
+    if (FileExists(fileName)) 
+    {
         String filePath = SharedFolderPath() + fileName;
         return DeleteFile(filePath.c_str());
     }
 
     return FALSE;
 }
-Bool SFNS::FileOpen(const String& fileName)
+Bool SharedFolderNavigatorSelf::FileOpen(const String& fileName)
 {
-    if (FileExists(fileName)) {
+    if (FileExists(fileName)) 
+    {
         String filePath = SharedFolderPath() + fileName;
         String executor;
 
@@ -80,18 +79,21 @@ Bool SFNS::FileOpen(const String& fileName)
     }
     return FALSE;
 }
-FileVector SFNS::FilesInDirectory(const String& dir)
+FileVector SharedFolderNavigatorSelf::FilesInDirectory(const String& dir, const String& key)
 {
-    WIN32_FIND_DATA findData;
     Vector foundFiles;
-    HANDLE fileIter = FindFirstFile((dir + "*.*").c_str(), &findData);
-    if (fileIter != INVALID_HANDLE_VALUE) {
-        do {
-            if (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
-                continue;
-            else
-                foundFiles.push_back(String(findData.cFileName));
-        } while (FindNextFile(fileIter, &findData));
+    {
+        WIN32_FIND_DATA findData;
+        HANDLE fileIter = FindFirstFile((dir + key).c_str(), &findData);
+        if (fileIter != INVALID_HANDLE_VALUE)
+        {
+            do {
+                if (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+                    continue;
+                else
+                    foundFiles.push_back(String(findData.cFileName));
+            } while (FindNextFile(fileIter, &findData));
+        }
     }
     return foundFiles;
 }
@@ -102,32 +104,42 @@ Bool NameInVector(const Vector& v, const String& s)
 {
     return std::find(v.begin(), v.end(), s) != v.end();
 }
-String SFNS::FileCreateUniqueName(const String& fileName)
+String SharedFolderNavigatorSelf::FileCreateUniqueName(const String& fileName)
 {
     String newName = fileName;
     Vector names = GetFileList();
-    int i = 1;
-    while (NameInVector(names, newName)) {
-        newName = std::regex_replace(fileName, std::regex("[.]"), "(" + std::to_string(i) + ").");
-        ++i;
+
+    for (int i = 1; NameInVector(names, newName); ++i)
+    {
+        std::regex dot("[.]");
+        String numberInParentheses = "(" + std::to_string(i) + ").";
+        newName = std::regex_replace(fileName, dot, numberInParentheses);
     }
+
+    /*int i = 1;
+    while (NameInVector(names, newName)) {
+        std::regex dot("[.]");
+        String numberInParentheses = "(" + std::to_string(i) + ").";
+        newName = std::regex_replace(fileName, dot, numberInParentheses);
+        ++i;
+    }*/
     return newName;
 }
-Bool SFNS::FileExists(const String& fileName)
+Bool SharedFolderNavigatorSelf::FileExists(const String& fileName)
 {
     Vector names = GetFileList();
     return NameInVector(names, fileName);
 }
-Bool SFNS::SharedFolderExists()
+Bool SharedFolderNavigatorSelf::SharedFolderExists()
 {
     Vector foundFiles = FilesInDirectory(ModuleDirectoryPath());
     return NameInVector(foundFiles, sharedFolderName);
 }
-Bool SFNS::CreateSharedFolder()
+Bool SharedFolderNavigatorSelf::CreateSharedFolder()
 {
     return CreateDirectory((SharedFolderPath()).c_str(), NULL);
 }
-const String& SFNS::ModuleDirectoryPath()
+const String& SharedFolderNavigatorSelf::ModuleDirectoryPath()
 {
     static String directoryPathShort;
 
@@ -146,7 +158,7 @@ const String& SFNS::ModuleDirectoryPath()
 
     return directoryPathShort;
 }
-const String& SFNS::SharedFolderPath() {
+const String& SharedFolderNavigatorSelf::SharedFolderPath() {
     static String folderPath;
 
     if (folderPath.empty())
@@ -154,5 +166,3 @@ const String& SFNS::SharedFolderPath() {
 
     return folderPath;
 }
-
-#endif // !SFNS

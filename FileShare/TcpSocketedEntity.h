@@ -1,16 +1,10 @@
 #pragma once
-
 #define _WINSOCK_DEPRECATED_NO_WARNINGS 
 
-//#include <WinSock2.h>
 #include <WS2tcpip.h>
-
 #pragma comment(lib, "ws2_32.lib")
 
-#include <vector>
-#include <tuple>
 #include <string>
-#include <chrono>
 
 namespace FileShare {
 
@@ -19,7 +13,6 @@ namespace FileShare {
     using Bool = int;
 
     #define messPort (USHORT)0x1488
-
 
 #ifndef TCP_SOCKETED_ENTITY
     class TCPSocketedEntity
@@ -81,7 +74,6 @@ namespace FileShare {
     {
     public:
         Receiver(TCPSocketedEntity&&);
-        //Receiver& operator = (TCPSocketedEntity&&);
         String ReceiveMessage();
     };
 #endif TCP_RECEIVER

@@ -95,9 +95,6 @@
     <ClInclude Include="Stages.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CommandReinterpretation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MessengerComponent.h">
       <Filter>Header Files\ModelComponents</Filter>
     </ClInclude>

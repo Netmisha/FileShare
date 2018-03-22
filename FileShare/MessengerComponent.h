@@ -2,6 +2,10 @@
 #include "TcpSocketedEntity.h"
 #include "UserDataFileComponent.h"
 
+#include <chrono>
+#include <tuple>
+#include <vector>
+
 namespace FileShare {
 
     using Clock = std::chrono::system_clock;

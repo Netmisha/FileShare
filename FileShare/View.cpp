@@ -25,7 +25,7 @@ BasicView::~BasicView()
     }
 }
 
-ConsoleView::ConsoleView(Model& mdl, InStream& in, OutStream& out) :
+ConsoleView::ConsoleView(Model& mdl, InStream& in, OtStream& out) :
     BasicView(mdl),
     istrm(in),
     ostrm(out),
@@ -37,7 +37,6 @@ ConsoleView::ConsoleView(Model& mdl, InStream& in, OutStream& out) :
         Log::TextInRed(ConsoleView() :);
         #endif // LOGGER
     }
-
 }
 
 FileShare::ConsoleView::~ConsoleView()
@@ -47,10 +46,25 @@ FileShare::ConsoleView::~ConsoleView()
         Log::TextInRed(~ConsoleView() :);
         #endif // LOGGER
     }
+    {
+        #ifdef NDEBUG
+        ClearConsole();
+        #endif // _RELEASE
+    }
 }
 
 void ConsoleView::Render(){
     ClearConsole();
+
+    Data toPrint = stage.format;
+
+    if (stage.provideHelp)
+    {
+        toPrint += stage.help;
+        stage.provideHelp = false;
+    }
+    
+    SetDataToPrint(toPrint);
     PrintData();
 }
 
@@ -89,33 +103,12 @@ void FileShare::ConsoleView::PrintData()
     ostrm << dataToPrint;
 }
 
-Data ConsoleView::ProvideStageFormat(){
+void FileShare::ConsoleView::PrintData(const Data& data)
+{
+    ostrm << data;
+}
+
+Data ConsoleView::ProvideStageFormat()
+{
     return stage.format;
 }
-//
-//Data ConsoleView::StageToData(Stage stg)
-//{
-//    switch (stg) {
-//        case Stage::Experimental:
-//            return StageFormat::Experimental();
-//
-//        case Stage::Inception:
-//            return StageFormat::Inception();
-//
-//        case Stage::HelloUser:
-//            return StageFormat::HelloUserNamed();
-//        case Stage::HelloUserNameless:
-//            return StageFormat::HelloUserNameless();
-//
-//        case Stage::MainMenu:
-//            return StageFormat::MainMenu();
-//        /*
-//        ...
-//        */
-//        case Stage::Exit:
-//            return StageFormat::GoodbyeUser();
-//
-//        default:
-//            return Data{ "yet to be implemented" };
-//    }
-//}

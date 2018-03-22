@@ -7,15 +7,12 @@
 namespace FileShare {
     using Data = std::string;
     using InStream = std::istream;
-    using OutStream = std::ostream;
+    using OtStream = std::ostream;
 
     class BasicView {
     protected:      
         BasicView(Model&);
         ~BasicView();
-
-        BasicView() = delete;
-        BasicView(const BasicView&) = delete;
 
         virtual void Render() = 0;
         Model& model;
@@ -24,31 +21,26 @@ namespace FileShare {
     class ConsoleView :
         protected BasicView
     {
+        friend class ConsoleController;
+        friend int main();
     public:
-        ConsoleView(Model&, InStream&, OutStream&);
+        ConsoleView(Model&, InStream&, OtStream&);
         ~ConsoleView();
-        
-        ConsoleView() = delete;
-        ConsoleView(const ConsoleView&) = delete;
-
     protected:
-    public:
         virtual void Render()    override;
         
         virtual Data GetDataFromInput();
         virtual Data ProvideStageFormat();
-        //virtual Data StageToData(Stage);
 
         virtual void ClearConsole();
         virtual void SetDataToPrint(const Data&);
         virtual void PrintData();
+        virtual void PrintData(const Data&);
         
         InStream& istrm;
-        OutStream& ostrm;
+        OtStream& ostrm;
         
         Stage::ViewStage stage;
         Data dataToPrint;
-
-        friend class ConsoleController;
     };
 }

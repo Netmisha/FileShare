@@ -1,6 +1,24 @@
 #include "Logger.h"
 #include "Model.h"
 
+#include <thread>
+using Thread = std::thread;
+
+#include <chrono>
+using Clock = std::chrono::system_clock;
+using TimePoint = Clock::time_point;
+using Duration = std::chrono::seconds;
+
+#include <string>
+using String = std::string;
+#include <vector>
+#include <utility>
+using Request = std::pair<String, String>; // received
+using RequestVector = std::vector<Request>;
+using FileVector = std::vector<String>;
+
+
+
 using namespace FileShare;
 Model::Model():
     chatMessenger(),
@@ -55,9 +73,7 @@ void Model::StartAuraThreadIn()
         }
         TimePoint lastRefresh = Clock::now();
         Duration refreshRate = Duration(10);
-        while (true) {
-            if (stupidThreadsDie)
-                return;
+        while (!stupidThreadsDie) {
             if (Clock::now() - lastRefresh > refreshRate) {
                 {
                     #ifdef LOGGER
@@ -102,10 +118,8 @@ void Model::StartAuraThreadOut()
             __End;
             #endif
         }
-        while (true) 
+        while (!stupidThreadsDie)
         {
-            if (stupidThreadsDie)
-                return;
             presenceAura.SendMessageBroadcast(msgStandard);
             std::this_thread::sleep_for(Duration(2));
         }
