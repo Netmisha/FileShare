@@ -19,6 +19,8 @@ Stage::ViewStage& Stage::ViewStage::operator=(const ViewStage& other)
 #define dOut ">> "
 #define TB "\t"
 #define LF "\n"
+#define Line_Small "--------"
+#define Line "================================="
 
 const Stage::ViewStage Stage::Experimental{
     Stage::ViewStage::Value::Experimental,
@@ -74,7 +76,30 @@ const Stage::ViewStage Stage::Exit{
 const Stage::ViewStage Stage::UserDataFile{
     Stage::ViewStage::Value::UserData,
 {
-    dOut    "not ready yet"         LF
+    "USRS"         LF
+    Line           LF
+},
+{
+    dOut        "User Data File commands"       LF
+    TB  dOut    "append userName ip status"     LF
+    TB  dOut    "modify oldName newUser"        LF
+    TB  dOut    "remove userName"               LF
+    TB  dOut    "back"                          LF
+    dOut                                        LF
+    dOut        "Valid userName should"         LF
+    TB  dOut    "not be empty"                  LF
+    TB  dOut    "not contain whitespaces"       LF
+    TB  dOut    "not contain odd symbols"       LF
+    TB  dOut    "not begin with number"         LF
+    dOut                                        LF
+    dOut        "Valid ip should"               LF
+    TB  dOut    "be in a.b.c.d format"          LF
+    TB  dOut    "have [a,b,c,d] in 0..255"      LF
+    dOut                                        LF
+    dOut        "Valid statuses are"            LF
+    TB  dOut    "good: your favs"               LF
+    TB  dOut    "bad: ppl u know"               LF
+    TB  dOut    "ugly: ppl to rather ignore"    LF
 }
 };
 
@@ -94,11 +119,79 @@ const Stage::ViewStage Stage::MainMenu{
     TB  dOut    "u!; user data; udf;"      LF
     TB  dOut    "s!; shared; sf;"          LF
     TB  dOut    "q!; quit; e!; exit;"      LF
-    TB  dOut    "r!; refresh; refr;"       LF
 }
 };
-//const Stage::ViewStage Stage::CheckPresence;
-//const Stage::ViewStage Stage::Messenger;
-//const Stage::ViewStage Stage::SharedFolder;
-//const Stage::ViewStage Stage::SharedFolderSelf;
-//const Stage::ViewStage Stage::SharedFolderOther;
+const Stage::ViewStage Stage::CheckPresence{
+    Stage::ViewStage::Value::Aura,
+{
+    dOut "Active Auras [LCH]"       LF
+    "AURAS"                         LF
+},
+{
+    dOut "Aura Component Commands"   LF
+    TB  dOut    "add ip name status" LF
+    TB  dOut    "refresh"            LF
+    TB  dOut    "back"               LF
+}
+};
+const Stage::ViewStage Stage::Messenger{
+    Stage::ViewStage::Value::Messenger,
+{
+    "USRS"   LF
+    Line                LF
+    "MSGS"    LF
+},
+{
+    dOut "Messenger Commands"               LF
+    TB  dOut    "send all msg"             LF
+    TB  dOut    "send all-status msg"      LF
+    TB  dOut    "send name msg"            LF
+    TB  dOut    "send [name1;name2;] msg"  LF
+    TB  dOut    "back"                      LF
+}
+};
+const Stage::ViewStage Stage::SharedFolder
+{
+    Stage::ViewStage::Value::SharedFolder,
+{   
+    dOut "Self Shared Folder [FILES]"   LF
+    dOut "Others Shared Folder [OTH]"   LF
+},
+{
+    dOut "SF Commands"                  LF
+    TB dOut     "self"                  LF
+    TB dOut     "other"                 LF
+    TB dOut     "back"                  LF
+}
+};
+const Stage::ViewStage Stage::SharedFolderSelf{
+    Stage::ViewStage::Value::SharedFolderSelf,
+{
+    "PATH"  LF
+    Line    LF
+    "FILES" LF
+},
+{
+    dOut "SF Self Commands"                 LF
+    TB dOut     "screate filename.ext"      LF
+    TB dOut     "open filename.ext"         LF
+    TB dOut     "rename old.ext new.ext"    LF
+    TB dOut     "delete filename.ext"       LF
+    TB dOut     "upload file"               LF
+    TB dOut     "refresh"                   LF
+    TB dOut     "back"                      LF
+}
+};
+const Stage::ViewStage Stage::SharedFolderOther{
+    Stage::ViewStage::Value::SharedFolderOther,
+{
+        "OTHER"     LF
+        Line        LF 
+},
+{
+    dOut "SF Other Commands"                 LF
+    TB dOut     "request user filename.ext"  LF
+    TB dOut     "refresh"                    LF
+    TB dOut     "back"                       LF
+}
+};

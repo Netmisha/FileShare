@@ -78,6 +78,8 @@ namespace FileShare {
         SharedFolderNavigatorOther(USHORT reqPort, USHORT fshPort);
 
         FileVector RequestFileList(const String& addr, USHORT port = requestPort);
+
+        //int request file
         Int SendMyFileList(const FileVector&, const String& addr, USHORT port = requestPort);
 
         Int SendFileToUser(const String& filePath, UINT chunkSize, const String& addr, USHORT port = sharePort);

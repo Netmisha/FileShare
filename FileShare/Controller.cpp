@@ -4,55 +4,78 @@
 
 #include <regex>
 #include <conio.h>
-#include <functional>
+#include <ctime>
+#include <sstream>
 
 #pragma warning(disable : 4996) 
 
 using namespace FileShare;
 using STR = std::string;
 using Regex = std::regex;
+using StrStream = std::stringstream;
+
+#ifndef rxConst
+const Regex rxMessenger(R"(m(!|sg|essenger))");
+
+const Regex rxHelp(R"((h(!|elp)|[?]))");
+const Regex rxExit(R"(e(!|xit)|q(!|uit))");
+const Regex rxBack("b(!|ack)");
+
+const Regex rxRefr(R"(r(efresh|efr|!))");
+const Regex rxShared(R"(s(hared|f|!))");
+const Regex rxUdf(R"(u(ser[ _]data|df|!))");
+const Regex rxUser("USER");
+
+const Regex rxUsers("USRS");
+const Regex rxUnread("URMSG");
+const Regex rxReadMs("RMSG");
+
+const Regex rxMsgs("MSGS");
+
+const Regex rxSend("s(end)?");
+const Regex rxAll("a(ll)?");
+const Regex rxAllStatus("a(ll)?-(g(ood)?|b(ad)?|u(gly)?)");
+const Regex rxAllGood("a(ll)?-g(ood)?");
+const Regex rxAllBad("a(ll)?-b(ad)?");
+const Regex rxAllUgly("a(ll)?-u(gly)?");
+
+const Regex rxAppend("a(!|ppend)");
+const Regex rxModify("m(!|odify)");
+const Regex rxRemove("r(!|emove)");
+
+#define _0_255 "(0[0-9]?[0-9]?|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))"
+#define _dot_ "[.]"
+
+const Regex rxIp("(" _0_255 "[.]" "){3}" _0_255);
+#endif // !rxConst
+
 
 BasicController::~BasicController()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(~BasicController() :);
-        #endif // LOGGER
-    }
+    Log::TextInRed(~BasicController() :);
 }
-
-
 ConsoleController::ConsoleController(Model& mdl, ConsoleView& vw):
     model(mdl),
     view(vw)
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(ConsoleController() :);
-        #endif // LOGGER
-    }
+    Log::TextInRed(ConsoleController() :);
 }
-
 ConsoleController::~ConsoleController()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(~ConsoleController() :);
-        #endif // LOGGER
-    }
+    Log::TextInRed(~ConsoleController() :);
 }
-#ifndef ON_LOAD_0
+Data ConsoleController::GetCommand()
+{
+    return view.GetDataFromInput();
+}
+
+#ifndef ON_LOAD
 void ConsoleController::OnLoad()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(ConsoleController::OnLoad()->);
-        __Begin;
-        #endif // LOGGER
-    }
-
+    Log::TextInRed(ConsoleController::OnLoad()->);
+    __Begin;
     for (bool keepGoing = 1; keepGoing; )
-    {     
+    {
         view.Render();
 
         switch (view.stage.value)
@@ -60,124 +83,74 @@ void ConsoleController::OnLoad()
             case Stage::ViewStage::Value::Inception:    Inception();    break; // break->render
             case Stage::ViewStage::Value::HelloNoName:  HelloNoName();  break; // break->render
             case Stage::ViewStage::Value::HelloUser:    HelloUser();    break; // break->render
-            
-            case Stage::ViewStage::Value::MainMenu:     MainMenu();     continue; // norender
+
+            case Stage::ViewStage::Value::MainMenu:     MainMenu();     break; // norender
             case Stage::ViewStage::Value::Exit:         keepGoing = 0;  break; //
         }
     }
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-ConsoleController::OnLoad());
-        #endif // LOGGER
-    }
+    __End;
+    Log::TextInRed(< -ConsoleController::OnLoad());
 }
 void ConsoleController::Exit()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(Exit()->);
-        __Begin;
-        #endif
-    }
+    Log::TextInRed(Exit()->);
+    __Begin;
     {
         model.stupidThreadsDie = true;
         getch();
     }
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-Exit());
-        #endif
-    }
+    __End;
+    Log::TextInRed(<-Exit());
+
 }
 void ConsoleController::Inception()
 {
+    __Begin;
+    Log::TextInRed(Inception()->);
+    String userName;
     {
-        #ifdef LOGGER
-        __Begin;
-        Log::TextInRed(Inception()->);
-        #endif // LOGGER
+        UserData::UserStatus selfStatus("self");
+        UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
+        if (!searchResult.empty())
+            userName = searchResult.at(0).Alias();
     }
+    if (userName.empty())
     {
-        String userName;
-        {
-            {
-                #ifdef LOGGER
-                __Begin;
-                Log::InRed("udf.find(self)");
-                #endif // LOGGER
-            }
-            auto selfStatus = UserData::UserStatus::StatusValue::Self;
-            auto vec = model.udfNavigator.FindUsersInFile(selfStatus);
-            bool nameFound = !vec.empty();
-            if (nameFound)
-                userName = vec.at(0).Alias();
-            {
-                #ifdef LOGGER
-                IF(nameFound)
-                    Log::TextInRed(nameFound + );
-                ELSE
-                    Log::TextInRed(nameFound - );
-                __End;
-                #endif // LOGGER
-            }
-        }
-        if (userName.empty())
-        {
-            view.stage = Stage::HelloNoName;
-        }
-        else
-        {
-            Regex user = std::regex("USER");
-            
-            String format = Stage::HelloUser.format;
-            format = std::regex_replace(format, user, userName);
-            
-            view.stage = Stage::HelloUser;
-            view.stage.format = format;
-        }
+        view.stage = Stage::HelloNoName;
     }
+    else
     {
-        #ifdef LOGGER
-        Log::TextInRed(<-Inception());
-        __End;
-        #endif // LOGGER
+        String format = Stage::HelloUser.format;
+        format = std::regex_replace(format, rxUser, userName);
+
+        view.stage = Stage::HelloUser;
+        view.stage.format = format;
     }
+    Log::TextInRed(<-Inception());
+    __End;
 }
 void ConsoleController::HelloUser()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(HelloUser()->);
-        __Begin;
-        #endif
-    }
+    Log::TextInRed(HelloUser()->);
+    __Begin;
     {
         getch();
         view.stage = Stage::MainMenu;
     }
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-HelloUser());
-        #endif
-    }
+    __End;
+    Log::TextInRed(<-HelloUser());
+
 }
 void ConsoleController::HelloNoName()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(HelloNoName()->);
-        __Begin;
-        #endif
-    }
+    Log::TextInRed(HelloNoName()->);
+    __Begin;
     {
         for (bool keepGoing = true; keepGoing;)
         {
             String command = GetCommand();
 
-            if (std::regex_match(command, Regex(R"((h(!|elp)|[?]))"))) 
+            if (std::regex_match(command, rxHelp))
             {
                 view.stage.provideHelp = true;
                 continue;
@@ -186,15 +159,14 @@ void ConsoleController::HelloNoName()
             Int bad = UserData::IsBadAlias(command);
             if (!bad)
             {
-                auto selfName = command;
-                auto selfAddress = model.presenceAura.GetHostIp();
-                auto selfStatus = UserData::UserStatus::StatusValue::Self;
-               
-                auto self = UserData(selfName, selfAddress, selfStatus);              
-                model.udfNavigator.AppendUser(self);
+                String selfName = command;
+                String selfAddress = model.presenceAura.GetHostIp();
+                UserData::UserStatus selfStatus("self");
+
+                UserData selfData(selfName, selfAddress, selfStatus);
+                model.udfNavigator.AppendUser(selfData);
 
                 view.stage = Stage::Inception;
-                
                 keepGoing = false;
             }
             else
@@ -208,91 +180,82 @@ void ConsoleController::HelloNoName()
             }
         }
     }
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-HelloNoName());
-        #endif
-    }
+    __End;
+    Log::TextInRed(<-HelloNoName());
 }
 void ConsoleController::MainMenu()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(ConsoleController::MainMenu()->);
-        __Begin;
-        #endif // LOGGER
-    }
+    Log::TextInRed(ConsoleController::MainMenu()->);
+    __Begin;
     {
         for (bool keepGoing = 1; keepGoing;)
         {
-            static bool updateMainMenu = true;
+            if (view.stage.value == Stage::ViewStage::Value::MainMenu) 
             {
-                if (updateMainMenu)
+                String format = Stage::MainMenu.format;
                 {
-                    Regex aura("USRS");
-                    Regex urMsg("URMSG");
-                    Regex rMsg("RMSG");
+                    Int auraCount = model.presenceAura.activeLocalBroadcasters.size();
+                    format = std::regex_replace(format, rxUsers, std::to_string(auraCount));
 
-                    String format = Stage::MainMenu.format;
-                    {
-                        Int auraCount = model.presenceAura.activeLocalBroadcasters.size();
-                        format = std::regex_replace(format, aura, std::to_string(auraCount));
+                    Int urMsgCount = model.chatMessenger.MessageUnreadCount();
+                    format = std::regex_replace(format, rxUnread, std::to_string(urMsgCount));
 
-                        Int urMsgCount = model.chatMessenger.MessageUnreadCount();
-                        format = std::regex_replace(format, urMsg, std::to_string(urMsgCount));
-
-                        Int rMsgCount = model.chatMessenger.MessageReadCount();
-                        format = std::regex_replace(format, rMsg, std::to_string(rMsgCount));
-                    }
-
-                    view.stage.format = format;
-                    updateMainMenu = false;
+                    Int rMsgCount = urMsgCount + model.chatMessenger.MessageReadCount();
+                    format = std::regex_replace(format, rxReadMs, std::to_string(rMsgCount));
                 }
+                view.stage.format = format;
             }
-            
+
             view.Render();
 
             switch (view.stage.value)
             {
-                case Stage::ViewStage::Value::MainMenu: break;
-                
                 case Stage::ViewStage::Value::SharedFolder: break; // not ready
-                case Stage::ViewStage::Value::UserData:     break;
+                case Stage::ViewStage::Value::UserData:     UserDataFile(); continue;
                 case Stage::ViewStage::Value::Aura:         break;
-                case Stage::ViewStage::Value::Messenger:    break;
+                case Stage::ViewStage::Value::Messenger:    Messenger();    continue;
 
-                case Stage::ViewStage::Value::Exit: Exit(); keepGoing = false; continue;
+                case Stage::ViewStage::Value::Exit:         Exit(); keepGoing = false; continue;
             }
 
-            const String command = GetCommand();
+            String command = GetCommand();
             {
-                Regex help(R"((h(!|elp)|[?]))");
-                Regex exit(R"(e(!|xit)|q(!|uit))");
-                Regex refr(R"(r(efresh|efr|!))");
-
-                Regex shared(R"(s(hared|f|!))");
-                Regex udf(R"(u(ser[ _]data|df|!))");
-
-                if (std::regex_match(command, help))
+                if (std::regex_match(command, rxHelp))
                 {
                     view.stage.provideHelp = true;
+                    continue;
                 }
-                else if (std::regex_match(command.c_str(), exit))
+
+                if (std::regex_match(command.c_str(), rxExit))
                 {
+                    String format = Stage::Exit.format;
+                    {
+                        String userName;
+                        {
+                            UserData::UserStatus selfStatus("self");
+                            UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
+                            userName = searchResult.at(0).Alias();
+                        }
+                        format = std::regex_replace(format, rxUser, userName);
+
+                    }
                     view.stage = Stage::Exit;
+                    view.stage.format = format;
+                    continue;
                 }
-                else if (std::regex_match(command.c_str(), refr))
+
+                if (std::regex_match(command.c_str(), rxMessenger))
                 {
-                    updateMainMenu = true;
+                    view.stage = Stage::Messenger;
                 }
-                else if (std::regex_match(command.c_str(), shared))
+
+                if (std::regex_match(command.c_str(), rxShared))
                 {
                     //view.stage = Stage::SharedFolder;
                 }
-                else if (std::regex_match(command.c_str(), udf))
+                if (std::regex_match(command.c_str(), rxUdf))
                 {
-                    //view.stage = Stage::UserDataFile;
+                    view.stage = Stage::UserDataFile;
                 }
                 /*
                 .....
@@ -300,214 +263,390 @@ void ConsoleController::MainMenu()
             }
         }
     }
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-ConsoleController::OnLoad());
-        #endif // LOGGER
-    }
+    __End;
+    Log::TextInRed(<-ConsoleController::OnLoad());
 }
-#endif
-
-Data ConsoleController::GetCommand()
+String UlongIpToDotIp(ULONG ul)
 {
-    return view.GetDataFromInput();
+    IN_ADDR adr{};
+    adr.S_un.S_addr = ul;
+    return inet_ntoa(adr);
 }
 
-#ifndef ON_LOAD_1
-void ConsoleController::OnLoad2()
+void ConsoleController::Messenger()
 {
-    {
-        #ifdef LOGGER
-        __Begin;
-        Log::InRed("OnLoad2(){");
-        #endif // LOGGER
-
-    }
-    
-    for (bool keepGoing = true; keepGoing;) {
-        view.Render();
-        switch (view.stage.value) {
-            case Stage::ViewStage::Value::Inception            :   StageInception();               break;
-            case Stage::ViewStage::Value::HelloUser            :   StageHelloUser();               break;
-            case Stage::ViewStage::Value::HelloNoName    :   StageHelloUserNameless();       break;
-            case Stage::ViewStage::Value::MainMenu             :   StageMainMenu();                break;
-            case Stage::ViewStage::Value::Exit                 :   StageExit();keepGoing = false;  break;
-        }
-
-    }
+    Log::TextInRed(Messenger()->);
+    __Begin;
 
     {
-        #ifdef LOGGER
-        Log::InRed("} OnLoad2()");
-        __End;
-        #endif // LOGGER
-
-    } 
-}
-void ConsoleController::StageExit() {
-    model.stupidThreadsDie = true;
-    getch();
-}
-void ConsoleController::StageInception(){
-
-    {
-        #ifdef LOGGER
-        __Begin;
-        Log::TextInRed(StageInception()->);
-        #endif // LOGGER
-
-    }
-    String userName;
-    {
+        for (bool keepGoing = true; keepGoing;)
         {
-            #ifdef LOGGER
-            __Begin;
-            Log::InRed("searching udf for userName");
-            #endif // LOGGER
+            String format = Stage::Messenger.format;
+            {
+                String activeUsersList;
+                {
+                    for (auto aura : model.presenceAura.activeLocalBroadcasters)
+                    {
+                        String ip = UlongIpToDotIp(aura.first);
+                        UserData::UserAddr adr(ip);
+                        UserData ud = model.udfNavigator.FindUsersInFile(adr);
+
+                        if (ud != UserData::BadData)
+                        {
+                            activeUsersList += ud.Alias();
+                        }
+                        else
+                        {
+                            activeUsersList += ip;
+                        }
+
+                        activeUsersList += ";\t";
+                    }
+
+                    if (activeUsersList.empty())
+                        activeUsersList = ">> no auras acound \n";
+                }
+                format = std::regex_replace(format, rxUsers, activeUsersList);
+
+                String messageHistory;
+                {
+                    for (auto msg : model.chatMessenger.Messages())
+                    {
+                        String sMsg;
+                        {
+                            String time;
+                            {
+                                time_t tt = Clock::to_time_t(std::get<0>(msg));
+                                time = String(std::ctime(&tt));
+                                time = time.substr(0, time.length() - 1);
+                            }
+                            String user;
+                            {
+                                String ip = UlongIpToDotIp(std::get<1>(msg));
+                                UserData::UserAddr adr(ip);
+                                auto udata = model.udfNavigator.FindUsersInFile(adr);
+                                if (udata != UserData::BadData)
+                                {
+                                    user += udata.Alias();
+                                }
+                                else
+                                {
+                                    user += ip;
+                                }
+                            }
+                            String txt = std::get<2>(msg);
+
+                            sMsg += time + "[" + user + "]: " + txt + "\n";
+                        }
+                        messageHistory += sMsg;
+                    }
+                }
+                format = std::regex_replace(format, rxMsgs, messageHistory);
+
+                model.chatMessenger.MarkAllAsRead();
+            }
+            view.stage.format = format;
+            view.Render();
+
+            String command = GetCommand();
+            {
+                if (std::regex_match(command, rxBack))
+                {
+                    view.stage = Stage::MainMenu;
+                    keepGoing = false;
+                    continue;
+                }
+
+                if (std::regex_match(command, rxHelp))
+                {
+                    view.stage.provideHelp = true;
+                    continue;
+                }
+
+                StrStream ss(command);
+                String str;
+                {
+                    ss >> str;
+                }
+
+                if (std::regex_match(str, rxSend))
+                {
+                    ss >> str;
+                    ss.ignore();
+                    String msg;
+                    {
+                        std::getline(ss, msg);
+                    }
+
+                    //send all active
+                    if (std::regex_match(str, rxAll))
+                    {
+                        for (auto aura : model.presenceAura.activeLocalBroadcasters)
+                        {
+                            String ip = UlongIpToDotIp(aura.first);
+                            model.chatMessenger.SendMessageTo(msg, ip, messPort);
+                        }
+                    }
+
+                    //send all active with status
+                    if (std::regex_match(str, rxAllStatus))
+                    {
+                        UserData::UserStatus sts;
+                        {
+                            if (std::regex_match(str, rxAllGood))
+                                sts = UserData::UserStatus::StatusValue::Good;
+                            if (std::regex_match(str, rxAllBad))
+                                sts = UserData::UserStatus::StatusValue::Bad;
+                            if (std::regex_match(str, rxAllUgly))
+                                UserData::UserStatus::StatusValue::Ugly;
+                        }
+
+                        MessengerSendToActiveIf(msg, [&](const String ip)->bool
+                        {
+                            UserData::UserAddr adr(ip);
+                            UserData ud = model.udfNavigator.FindUsersInFile(adr);
+                            return (ud != UserData::BadData && ud.Status() == sts);
+                        });
+                    }
+
+                    //send to ip if active
+                    if (std::regex_match(str, rxIp))
+                    {
+                        MessengerSendToActiveIf(msg, [&](const String ip)->bool
+                        {
+                            return str == ip;
+                        });
+                    }
+
+                    //send to userName if in UDF and active
+                    if (!UserData::IsBadAlias(str))
+                    {
+                        UserData ud = model.udfNavigator.FindUsersInFile(str);
+
+                        if (ud != UserData::BadData) {
+                            MessengerSendToActiveIf(msg, [&](const String ip)->bool
+                            {
+                                return (ud.Address() == ip);
+                            });
+                        }
+                    }
+                }
+            }
         }
-        auto selfStatus = UserData::UserStatus::StatusValue::Self;
-        auto vec = model.udfNavigator.FindUsersInFile(selfStatus);
-        if (!vec.empty())
-            userName = vec.at(0).Alias();
-
-        {
-            #ifdef LOGGER
-            Log::InRed("we got a name");
-            __End;
-            #endif // LOGGER
-        }
     }
+    __End;
+    Log::TextInRed(< -Messenger());
 
-    String format;
-
-    if (userName.empty())
-    {
-        view.stage = Stage::HelloNoName;
-        format = view.ProvideStageFormat();
-        
-    }
-    else
-    {
-        view.stage.value = Stage::HelloUser.value;
-        view.stage = Stage::HelloUser;
-        format = view.ProvideStageFormat();
-        
-        std::regex user("USER");
-        format = std::regex_replace(format, user, userName);
-    }
-    
-    view.SetDataToPrint(format);
-
-
-    {
-        #ifdef LOGGER
-        Log::TextInRed(<-StageInception());
-        __End;
-        #endif // LOGGER
-    }
 }
-void ConsoleController::StageHelloUser()
+
+void ConsoleController::MessengerSendToActiveIf(const String& msg, const Condition& cd)
 {
+    for (auto aura : model.presenceAura.activeLocalBroadcasters)
     {
-        #ifdef LOGGER
-        Log::TextInRed(StageHelloUser()->);
-        __Begin;
-        #endif
-    }
-
-    getch();
-
-    view.stage = Stage::MainMenu;
-    String format = view.ProvideStageFormat();
-    view.SetDataToPrint(format);
-
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-StageHelloUser());
-        #endif
-    }
-}
-void ConsoleController::StageHelloUserNameless() 
-{  
-    {
-        #ifdef LOGGER
-        Log::TextInRed(StageHelloUserNameless()->);
-        __Begin;
-        #endif
-    }
-    String format;
-    while (true) 
-    {
-        STR userName = view.GetDataFromInput();
-
-        if (std::regex_match(userName, std::regex("(h(!|elp)|[?])"))) 
-        {
-            format = view.ProvideStageFormat() + view.stage.help;
-            break;
-        }
-
-        INT bad = UserData::IsBadAlias(userName);
-        if (!bad) {
-            auto selfAddress = model.presenceAura.GetHostIp();
-            auto selfStatus = UserData::UserStatus::StatusValue::Self;
-            
-            UserData self(userName, selfAddress, selfStatus);
-
-            model.udfNavigator.AppendUser(self);
-
-            view.stage = Stage::Inception;
-            format = view.ProvideStageFormat();
-
-            break;
-        }         
-        else
-            switch (bad) {
-                case 1: break;// empty
-                case 2: break;// whitespace
-                case 3: break;// bad characters
-                case 4: break;// bad prefix
-            }  
-    }
-    
-    view.SetDataToPrint(format);
-
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-StageHelloUserNameless());
-        #endif
+        String ip = UlongIpToDotIp(aura.first);
+        if (cd(ip))
+            model.chatMessenger.SendMessageTo(msg, ip, messPort);
     }
 }
 
-void ConsoleController::StageMainMenu()
+void ConsoleController::UserDataFile()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(StageMainMenu()->);
-        __Begin;
-        #endif
-    }
 
-    String format;
-    for (bool keepGoing = true; keepGoing;)
-    {
-        String command = view.GetDataFromInput();
+    Log::TextInRed(UserDataFile()->);
+    __Begin;
 
-        if (std::regex_match(command, std::regex("e(xit|!)|q(uit|!)"))) {
-            view.stage = Stage::Exit;
-            keepGoing = false;
+    {
+        for (bool keepGoing = true; keepGoing;)
+        {
+            String format = Stage::UserDataFile.format;
+            {
+                String users;
+                {
+                    for (auto ud : model.udfNavigator.FindUsersInFile())
+                    {
+                        String user;
+                        {
+                            user += ud.Address().to_str() + " ";
+                            user += ud.Alias() + " ";
+                            user += ud.Status().to_str() + "\n";
+                        }
+                        users += user;
+                    }
+                }
+                format = std::regex_replace(format, rxUsers, users);
+            }
+            view.stage.format = format;
+            view.Render();
+
+            String command = GetCommand();
+            {
+                if (std::regex_match(command, rxBack))
+                {
+                    view.stage = Stage::MainMenu;
+                    keepGoing = false;
+                    continue;
+                }
+
+                if (std::regex_match(command, rxHelp))
+                {
+                    view.stage.provideHelp = true;
+                    continue;
+                }
+
+                StrStream ss(command);
+                String str;
+                {
+                    ss >> str;
+                }
+
+                if (std::regex_match(str, rxRemove))
+                {
+                    String userName;
+                    {
+                        ss >> userName;
+                    }
+                    if (UserData::IsBadAlias(userName))
+                    {
+
+                        Log::TextInRed(userName - );
+
+                        continue;
+                    }
+                    UserData ud = model.udfNavigator.FindUsersInFile(userName);
+                    if (ud != UserData::BadData)
+                    {
+                        {
+
+                            Log::TextInRed(FindUsersInFilee + );
+
+                        }
+                        if (model.udfNavigator.RemoveUser(ud))
+                        {
+
+                            Log::TextInRed(RemoveUser + );
+
+                        }
+                        else
+                        {
+
+                            Log::TextInRed(RemoveUser - );
+
+                        }
+                    }
+                    else
+                    {
+
+                        Log::TextInRed(FindUsersInFilee - );
+
+                    }
+                    continue;
+                }
+
+                if (std::regex_match(str, rxAppend))
+                {
+                    String userName;
+                    String ip;
+                    String status;
+                    {
+                        ss >> userName >> ip >> status;
+                    }
+
+                    if (UserData::IsBadAlias(userName))
+                    {
+
+                        Log::TextInRed(userName - );
+
+                        continue;
+                    }
+
+                    if (!std::regex_match(ip, rxIp))
+                    {
+
+                        Log::TextInRed(ip - );
+
+                        continue;
+                    }
+
+                    if (UserData::UserStatus::BadString(status))
+                    {
+
+                        Log::TextInRed(status - );
+
+                        continue;
+                    }
+
+                    UserData ud(userName, UserData::UserAddr(ip), UserData::UserStatus(status));
+
+                    if (model.udfNavigator.AppendUser(ud))
+                    {
+                        Log::TextInRed(AppendUser + );
+                    }
+                    else
+                    {
+                        Log::TextInRed(AppendUser - );
+                    }
+                    continue;
+                }
+                if (std::regex_match(str, rxModify))
+                {
+                    String userName;
+                    String newName;
+                    String ip;
+                    String status;
+                    {
+                        ss >> userName >> newName >> ip >> status;
+                    }
+
+                    if (UserData::IsBadAlias(userName))
+                    {
+                        Log::TextInRed(userName - );
+                        continue;
+                    }
+
+                    if (UserData::IsBadAlias(newName))
+                    {
+                        Log::TextInRed(newName - );
+                        continue;
+                    }
+
+                    if (!std::regex_match(ip, rxIp))
+                    {
+                        Log::TextInRed(ip - );
+                        continue;
+                    }
+
+                    if (UserData::UserStatus::BadString(status))
+                    {
+                        Log::TextInRed(status - );
+                        continue;
+                    }
+
+                    UserData udOld = model.udfNavigator.FindUsersInFile(userName);
+                    if (udOld == UserData::BadData)
+                    {
+                        Log::TextInRed(FindUsersInFile - );
+                        continue;
+                    }
+
+                    if (udOld.Status() == UserData::UserStatus::StatusValue::Self)
+                        status = udOld.Status().to_str();
+
+                    UserData udNew(newName, UserData::UserAddr(ip), UserData::UserStatus(status));
+
+                    if (model.udfNavigator.ModifyUser(udOld, udNew))
+                    {
+                        Log::TextInRed(ModifyUser + );
+                    }
+                    else
+                    {
+                        Log::TextInRed(ModifyUser - );
+                    }
+                    continue;
+                }
+            }
         }
-
     }
-    format = view.ProvideStageFormat();
-    view.SetDataToPrint(format);
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-StageMainMenu());
-        #endif
-    }
+    __End;
+    Log::TextInRed(< -UserDataFile());
 }
 #endif

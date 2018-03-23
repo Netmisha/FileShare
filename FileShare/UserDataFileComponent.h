@@ -69,12 +69,14 @@ namespace FileShare {
             
             UserStatus() = default;
             UserStatus(StatusValue);
+            UserStatus(const String&);
 
             bool operator== (const UserStatus& other) const { return value == other.value; }
             bool operator!= (const UserStatus& other) const { return value != other.value; }
 
             String to_str() const;
 
+            static Bool BadString(const String&);
             static const String statusString[];
 
             StatusValue value;

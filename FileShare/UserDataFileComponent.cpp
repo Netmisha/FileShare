@@ -86,8 +86,23 @@ const String UserData::UserStatus::statusString[] = {
 UserData::UserStatus::UserStatus(StatusValue sts) :
     value(sts)
 {}
+UserData::UserStatus::UserStatus(const String& str):
+    UserStatus()
+{
+    for (int i = 0; i < 4; ++i) 
+        if (statusString[i] == str)
+            value = static_cast<StatusValue>(i);
+}
 String UserData::UserStatus::to_str() const{
     return statusString[static_cast<int>(value)];
+}
+
+Bool UserData::UserStatus::BadString(const String& str)
+{
+    for (const String& s : statusString)
+        if (s == str)
+            return FALSE;
+    return TRUE;
 }
 
 #endif //USER_STATUS_PART_OF
@@ -280,14 +295,16 @@ bool UDFComponent::AppendUser(const UserData& usr){
 }
 bool UDFComponent::RemoveUser(const UserData& usr)
 {
-    auto elem = FindUserInTiXmlDocument(udf, usr);
-    if (!elem)
-        return false;
-
-    udf.RootElement()->RemoveChild(elem);
-    
-    udf.SaveFile();
-    return true;
+    bool result = false;
+    {
+        auto elem = FindUserInTiXmlDocument(udf, usr);
+        if (elem)
+        {
+            result = udf.RootElement()->RemoveChild(elem);
+            udf.SaveFile();
+        }
+    }
+    return result;
 }
 bool UDFComponent::ModifyUser(const UserData & usrOld, const UserData & usrNew)
 {

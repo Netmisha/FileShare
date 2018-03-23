@@ -4,9 +4,11 @@
 #include "Stages.h"
 
 #include <string>
+#include <functional>
 
 namespace FileShare {
     using Data = std::string;
+    using Condition = std::function<bool(const String&)>;
 
     class BasicController{
     public:  
@@ -21,45 +23,36 @@ namespace FileShare {
         public BasicController
     {
     protected:
-        virtual void StageExit()              = 0;
-        virtual void StageInception()         = 0;
-        virtual void StageHelloUser()         = 0;
-        virtual void StageHelloUserNameless() = 0;
-
+        virtual void Exit()         = 0;
+        virtual void Inception()    = 0;
+        virtual void HelloUser()    = 0;
+        virtual void HelloNoName()  = 0;
+        virtual void MainMenu()     = 0;
     };
 
     class ConsoleController:
         public StagedController
     {
     public:
-        class CommandReinterpretation;
-
         ConsoleController(Model&, ConsoleView&);
         ~ConsoleController();
-
-        ConsoleController() = delete;
-        ConsoleController(const ConsoleController&) = delete;
-
         virtual void OnLoad();
-        void OnLoad2();
     protected:
         virtual Data GetCommand();
-    protected:
-        Model& model;
-        ConsoleView& view;
-    protected:
         ///STAGES
-        virtual void StageExit()              ;
-        virtual void StageInception()         ;
-        virtual void StageHelloUser()         ;
-        virtual void StageHelloUserNameless() ;
-        virtual void StageMainMenu()          ;
-
         virtual void Exit();
         virtual void Inception();
         virtual void HelloUser();
         virtual void HelloNoName();
         virtual void MainMenu();
+        virtual void Messenger();
+        virtual void UserDataFile();
+
+
+        virtual void MessengerSendToActiveIf(const String& msg, const Condition& cd);
+    private:
+        Model& model;
+        ConsoleView& view;
     };
 }
 

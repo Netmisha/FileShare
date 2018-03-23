@@ -4,7 +4,6 @@
 #include <chrono>
 
 #include "Logger.h"
-#undef LOGGER
 
 using namespace FileShare;
 using namespace Log;
@@ -126,6 +125,9 @@ Int MessengerComponent::SendMessageTo(const String& msg, const String& adr, USHO
 
 Int MessengerComponent::SendMessageTo(const String& msg, const UserData& usr)
 {
+    if (usr == UserData::BadData)
+        return 0;
+
     String userAddr = usr.Address().to_str();
     USHORT port = usr.Address().port;
 
@@ -187,7 +189,15 @@ Int MessengerComponent::ReceiveMessage()
         result = buff.length();
 
         TimePoint now = Clock::now();
-        ULONG addr = rc.addr.sin_addr.S_un.S_addr;
+        //ULONG addr = rc.addr.sin_addr.S_un.S_addr; 
+        // bad addr
+        // need to use sockname smth
+
+        SOCKADDR_IN sin{};
+        int sinSize = sizeof(sin);
+        getsockname(rc.sc, (SOCKADDR*)&sin, &sinSize);
+        //std::cout << (int)ntohs(sin.sin_port) << " ";
+        ULONG addr = sin.sin_addr.S_un.S_addr;
 
         Message msg = std::make_tuple(now, addr, buff);
 

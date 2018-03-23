@@ -40,6 +40,11 @@ int TEST() {
         ++Log::depth;
         #endif // LOGGER
     }
+
+    /*USHORT msgPort;
+    std::cin >> msgPort;
+
+    Model model(msgPort, requestPort, sharePort, preComPort);*/
     Model model;
     {
         #ifdef LOGGER
@@ -75,7 +80,6 @@ int TEST() {
         Log::TextInRed(:ConsoleController);
         #endif // LOGGER
     }
-
 
     controller.OnLoad();
     return 0;
@@ -124,6 +128,9 @@ int TEST() {
 #if CURRENT_TEST == TEST_MABITCH_MODEL_OUT
 
 #include "Model.h"
+#include <ctime>
+#include <sstream>
+#include <thread>
 using namespace FileShare;
 
 void WsaStartup() {
@@ -132,7 +139,7 @@ void WsaStartup() {
 }
 
 VOID TestUdfComponent(Model&);
-
+VOID TestMessenger(Model&);
 
 using namespace FileShare;
 int TEST() {
@@ -144,11 +151,61 @@ int TEST() {
     }
 
     WsaStartup();
+    USHORT msgPort;
+    std::cin >> msgPort;
+    std::cin.ignore();
 
-    Model mdl;
+    Model mdl(msgPort, requestPort, sharePort, preComPort);
 
-    TestUdfComponent(mdl);
+    //TestUdfComponent(mdl);
+
+    TestMessenger(mdl);
+
+
+
+
     return system("pause");
+}
+
+VOID TestMessenger(Model& mdl)
+{
+    while (true) {
+        String str;
+        std::getline(std::cin, str);
+
+        if(str == "show")
+            for (Message& msg : mdl.chatMessenger.Messages()) {
+
+                time_t tt = Clock::to_time_t(std::get<0>(msg));
+                String time = String(std::ctime(&tt));
+
+                time = time.substr(0, time.length() - 1);
+
+                IN_ADDR addr{};
+                addr.S_un.S_addr = std::get<1>(msg);
+                String ip = inet_ntoa(addr);
+
+                String txt = std::get<2>(msg);
+
+                Log::InWhite(time + "[" + ip + "]: " + txt);
+
+                for (int i = 0; i < 100000; ++i);
+            }
+        else
+        {
+            std::stringstream ss(str);
+
+            USHORT port;
+            ss >> port;
+            ss.ignore();
+            String msg;
+            std::getline(ss, msg);
+
+            mdl.chatMessenger.SendMessageTo(msg, mdl.presenceAura.GetHostIp(), port);
+
+        }
+    }
+
 }
 
 VOID TestUdfComponent(Model& mdl) {

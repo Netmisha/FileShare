@@ -19,6 +19,7 @@ namespace FileShare {
               USHORT presenceComponentBroadcastPort);
         ~Model();
     protected:
+    public:
         MessengerComponent chatMessenger;
         SfnComponent sfNavigator;
         UDFComponent udfNavigator;
@@ -26,6 +27,7 @@ namespace FileShare {
 
         void StartAuraThreadIn();
         void StartAuraThreadOut();
+        void StartMessageReceivingThread();
 
         bool stupidThreadsDie = false;
     };

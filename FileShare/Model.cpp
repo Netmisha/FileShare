@@ -17,75 +17,65 @@ using Request = std::pair<String, String>; // received
 using RequestVector = std::vector<Request>;
 using FileVector = std::vector<String>;
 
-
-
 using namespace FileShare;
-Model::Model():
+Model::Model() :
     chatMessenger(),
     sfNavigator(),
-    udfNavigator(),
     presenceAura()
-
 {
+    Log::TextInRed(Model() :);
+    __Begin;
     {
-        #ifdef LOGGER
-        Log::TextInRed(Model():);
-        #endif // LOGGER
+        StartAuraThreadIn();
+        StartAuraThreadOut();
+        StartMessageReceivingThread();
     }
-    StartAuraThreadIn();
-    StartAuraThreadOut();
+    __End;
 }
 
 Model::Model(USHORT mp, USHORT rp, USHORT fp, USHORT pp) :
     chatMessenger(mp),
     sfNavigator(rp, fp),
     presenceAura(pp)
-{}
+{
+    Log::TextInRed(Model() :);
+    __Begin;
+    {
+        StartAuraThreadIn();
+        StartAuraThreadOut();
+        StartMessageReceivingThread();
+    }
+    __End;
+    Log::TextInRed(< -);
+}
 Model::~Model()
 {
     stupidThreadsDie = true;
-
-    {
-        #ifdef LOGGER
-        Log::TextInRed(~Model());
-        #endif // LOGGER
-    }
-    
+    Log::TextInRed(~Model());
 }
 
 STR msgStandard = "lol-kek-cheburek";
 void Model::StartAuraThreadIn()
 {
+    Log::TextInRed(StartAuraThreadIn()->);
+    __Begin;
+    static Thread auraThreadIn{ [&]() 
     {
-        #ifdef LOGGER
-        Log::TextInRed(StartAuraThreadIn()->);
-        #endif
-    }
+        Log::TextInRed(auraThreadIn->);
 
-    static Thread auraThreadIn
-    { [&]() {
-        {
-            #ifdef LOGGER
-            __Begin;
-            Log::TextInRed(auraThreadIn->);
-            __End;
-            #endif
-        }
         TimePoint lastRefresh = Clock::now();
         Duration refreshRate = Duration(10);
-        while (!stupidThreadsDie) {
-            if (Clock::now() - lastRefresh > refreshRate) {
-                {
-                    #ifdef LOGGER
-                    Log::TextInRed(auraCount refresh);
-                    #endif
-                }
+        while (!stupidThreadsDie) 
+        {
+            if (Clock::now() - lastRefresh > refreshRate) 
+            {
                 presenceAura.activeLocalBroadcasters.clear();
                 lastRefresh = Clock::now();
             }
 
             STR msg = presenceAura.ReceiveBroadcastedMessage();
-            if (msg == msgStandard) {
+            if (msg == msgStandard) 
+            {
                 ULONG ip = presenceAura.inAddrSdr.addr.sin_addr.S_un.S_addr;
                 USHORT port = ntohs(presenceAura.inAddrSdr.addr.sin_port);
                 Aura aura(ip, port);
@@ -93,41 +83,44 @@ void Model::StartAuraThreadIn()
                 presenceAura.activeLocalBroadcasters.insert(aura);
             }
         }
-    }};
+    } };
     auraThreadIn.detach();
-    {
-        #ifdef LOGGER
-        Log::TextInRed(<-StartAuraThreadIn());
-        #endif
-    }
+    __End;
+    Log::TextInRed(< -StartAuraThreadIn());
 }
 void Model::StartAuraThreadOut()
 {
+    Log::TextInRed(StartAuraThreadOut()->);
+    __Begin;
     {
-        #ifdef LOGGER
-        Log::TextInRed(StartAuraThreadOut()->);
-        #endif
+        Thread auraThreadOut
+        { 
+            [&]() {
+                while (!stupidThreadsDie)
+                    presenceAura.SendMessageBroadcast(msgStandard);
+            } 
+        };
+        auraThreadOut.detach();
     }
+    __End;
+    Log::TextInRed(< -StartAuraThreadOut());
+}
 
-    Thread auraThreadOut
-    {[&](){
-        {
-            #ifdef LOGGER
-            __Begin;
-            Log::TextInRed(auraThreadOut->);
-            __End;
-            #endif
-        }
-        while (!stupidThreadsDie)
-        {
-            presenceAura.SendMessageBroadcast(msgStandard);
-            std::this_thread::sleep_for(Duration(2));
-        }
-    }};
-    auraThreadOut.detach();
+void Model::StartMessageReceivingThread()
+{
+    Log::TextInRed(StartMessageReceivingThread()->);
+    __Begin;
     {
-        #ifdef LOGGER
-        Log::TextInRed(<-StartAuraThreadOut());
-        #endif
+        Thread messengerThreadReceive
+        {
+            [&]()
+            {
+                while (!stupidThreadsDie)
+                    chatMessenger.ReceiveMessage();
+            }
+        };
+        messengerThreadReceive.detach();
     }
+    __End;
+    Log::TextInRed(< -StartMessageReceivingThread());
 }

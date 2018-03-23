@@ -23,11 +23,9 @@ namespace Log {
 };
 
 
-#define __Begin {++Log::depth;
+#define __Begin ++Log::depth;
 
-#define __End --Log::depth;}
-
-#define LoggingBlock(SomeCode) ++Log::depth; { SomeCode }--Log::depth;
+#define __End --Log::depth;
 
 #ifdef LOG_BLOCK
 {

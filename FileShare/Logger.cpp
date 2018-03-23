@@ -15,6 +15,7 @@ namespace Log {
 
     void InColor(const std::string& message, int color, bool error=false)
     {
+        #ifdef LOGGER
         while (!consoleFree);
         consoleFree = false;
 
@@ -27,6 +28,7 @@ namespace Log {
         SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
 
         consoleFree = true;
+        #endif // LOGGER
     }
 
     void InRed(const std::string& message)

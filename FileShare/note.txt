@@ -12,3 +12,11 @@ like
 should commence threading experiment
 
 request file
+
+MSG WRONG ADDR
+
+try Stage::ViewStage
+    String (*Format)(Model&);
+
+
+    main menu check cf

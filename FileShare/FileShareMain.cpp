@@ -1,9 +1,9 @@
 #ifndef _DEBUG
-#include <iostream>
-
 #include "Model.h"
 #include "View.h"
 #include "Controller.h"
+
+#include <iostream>
 
 using namespace FileShare;
 
@@ -15,7 +15,6 @@ int main() {
     ConsoleController controller(model, view);
 
     controller.OnLoad();
-
-    return system("pause");
+    return 0;
 }
 #endif
