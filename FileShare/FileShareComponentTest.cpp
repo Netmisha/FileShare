@@ -41,11 +41,12 @@ int TEST() {
         #endif // LOGGER
     }
 
-    /*USHORT msgPort;
+    USHORT msgPort;
     std::cin >> msgPort;
+    std::cin.ignore();
 
-    Model model(msgPort, requestPort, sharePort, preComPort);*/
-    Model model;
+    Model model(msgPort, requestPort, sharePort, preComPort);
+    //Model model;
     {
         #ifdef LOGGER
         --Log::depth;

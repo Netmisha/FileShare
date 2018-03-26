@@ -27,19 +27,20 @@ namespace FileShare
                     SharedFolderSelf,
                     SharedFolderOther    
             };
+
             ViewStage(Value, const String&, const String& = {});
             ViewStage(Value, const String&, const String&, const Function&);
-            ViewStage(const ViewStage&) = default;
-
+            ViewStage(const ViewStage&);
             ViewStage& operator = (const ViewStage&);
 
-            Function UpdateFormat = [](class Model&)->String {};
-            Bool    provideHelp = false;
+            Function UpdateFormat;
 
             Value   value;
             String  format;
             String  help;
-            String  comment;
+
+            Bool    provideHelp = false;
+            String  comment = {};
         };
 
         static const ViewStage Experimental         ;

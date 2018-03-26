@@ -56,7 +56,7 @@ FileShare::ConsoleView::~ConsoleView()
 void ConsoleView::Render(){
     ClearConsole();
 
-    Data toPrint = stage.format;
+    Data toPrint = stage.UpdateFormat(model);
 
     if (!stage.comment.empty())
         toPrint += ">> " + std::move(stage.comment) + "\n";

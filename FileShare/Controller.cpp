@@ -15,23 +15,14 @@ using Regex = std::regex;
 using StrStream = std::stringstream;
 
 #ifndef rxConst
-const Regex rxMessenger(R"(m(!|sg|essenger))");
+const Regex rxExit("e(xit)?|q(uit)?");
+const Regex rxBack("b(ack)?");
+const Regex rxHelp("(h(elp)?|[?])");
 
-const Regex rxHelp(R"((h(!|elp)|[?]))");
-const Regex rxExit(R"(e(!|xit)|q(!|uit))");
-const Regex rxBack("b(!|ack)");
-
-const Regex rxRefr(R"(r(efresh|efr|!))");
-const Regex rxShared(R"(s(hared|f|!))");
-const Regex rxUdf(R"(u(ser[ _]data|df|!))");
-
-const Regex rxUser("USER");
-const Regex rxUsers("USRS");
-const Regex rxUnread("URMSG");
-const Regex rxReadMs("RMSG");
-const Regex rxMsgs("MSGS");
-const Regex rxFiles("FLS");
-const Regex rxPath("PATH");
+const Regex rxMessenger("m(sg|essenger)");
+const Regex rxShared("s(hared|f)");
+const Regex rxUdf("u(ser[ _]data|df)?");
+const Regex rxAura("p(resence)?|aura");
 
 const Regex rxSend("s(end)?");
 const Regex rxAll("a(ll)?");
@@ -39,18 +30,18 @@ const Regex rxAllStatus("a(ll)?-(g(ood)?|b(ad)?|u(gly)?)");
 const Regex rxAllGood("a(ll)?-g(ood)?");
 const Regex rxAllBad("a(ll)?-b(ad)?");
 const Regex rxAllUgly("a(ll)?-u(gly)?");
-const Regex rxSelf("s(!|elf)");
-const Regex rxOther("o(!|ther)");
+const Regex rxSelf("s(elf)?");
+const Regex rxOther("o(ther)?");
 
-const Regex rxAppend("a(!|ppend)");
-const Regex rxModify("m(!|odify)");
-const Regex rxRemove("r(!|emove)");
+const Regex rxAppend("a(ppend)?");
+const Regex rxModify("m(odify)?");
+const Regex rxRemove("r(emove)?");
 
-const Regex rxCreate("c(!|reate)");
-const Regex rxOpen("o(!|pen)");
-const Regex rxRename("r(!|ename)");
-const Regex rxDelete("d(!|elete)");
-const Regex rxUpload("u(!|pload)");
+const Regex rxCreate("c(reate)?");
+const Regex rxOpen  ("o(pen)?");
+const Regex rxRename("r(ename)?");
+const Regex rxDelete("d(elete)?");
+const Regex rxUpload("u(pload)?");
 
 #define _0_255 "(0[0-9]?[0-9]?|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))"
 #define _dot_ "[.]"
@@ -85,8 +76,6 @@ void ConsoleController::OnLoad()
     __Begin;
     for (bool keepGoing = 1; keepGoing; )
     {
-        view.Render();
-
         switch (view.stage.value)
         {
             case Stage::ViewStage::Value::Inception:    Inception();    break; // break->render
@@ -105,6 +94,7 @@ void ConsoleController::Exit()
     Log::TextInRed(Exit()->);
     __Begin;
     {
+        view.Render();
         model.stupidThreadsDie = true;
         getch();
     }
@@ -117,6 +107,8 @@ void ConsoleController::Inception()
     Log::TextInRed(Inception()->);
     __Begin;
     {
+        view.Render();
+
         String userName;
         {
             UserData::UserStatus selfStatus("self");
@@ -130,11 +122,7 @@ void ConsoleController::Inception()
         }
         else
         {
-            String format = Stage::HelloUser.format;
-            format = std::regex_replace(format, rxUser, userName);
-
             view.stage = Stage::HelloUser;
-            view.stage.format = format;
         }
     }
     __End;
@@ -145,6 +133,8 @@ void ConsoleController::HelloUser()
     Log::TextInRed(HelloUser()->);
     __Begin;
     {
+        view.Render();
+
         getch();
         view.stage = Stage::MainMenu;
     }
@@ -158,6 +148,8 @@ void ConsoleController::HelloNoName()
     {
         for (bool keepGoing = true; keepGoing;)
         {
+            view.Render();
+
             String command = GetCommand();
 
             if (std::regex_match(command, rxHelp))
@@ -181,12 +173,12 @@ void ConsoleController::HelloNoName()
             }
             else
             {
-                //switch (bad) {
-                //    case 1: break;// empty
-                //    case 2: break;// whitespace
-                //    case 3: break;// bad characters
-                //    case 4: break;// bad prefix
-                //}
+                switch (bad) {
+                    case 1: view.stage.comment += "error: empty";               break;
+                    case 2: view.stage.comment += "error: contain whitespace";  break;
+                    case 3: view.stage.comment += "error: weird characters";    break;
+                    case 4: view.stage.comment += "non-word prefix";            break;
+                }
             }
         }
     }
@@ -200,34 +192,6 @@ void ConsoleController::MainMenu()
     {
         for (bool keepGoing = 1; keepGoing;)
         {
-            switch (view.stage.value)
-            {
-                case Stage::ViewStage::Value::MainMenu:     break;
-
-                case Stage::ViewStage::Value::SharedFolder: SharedFolder(); continue; // not ready
-                case Stage::ViewStage::Value::UserData:     UserDataFile(); continue;
-                case Stage::ViewStage::Value::Aura:         break;
-                case Stage::ViewStage::Value::Messenger:    Messenger();    continue;
-
-                case Stage::ViewStage::Value::Exit:         Exit(); keepGoing = false; continue;
-            }
-
-            //if (view.stage.value == Stage::ViewStage::Value::MainMenu) 
-            {
-                String format = Stage::MainMenu.format;
-                {
-                    Int auraCount = model.presenceAura.activeLocalBroadcasters.size();
-                    format = std::regex_replace(format, rxUsers, std::to_string(auraCount));
-
-                    Int urMsgCount = model.chatMessenger.MessageUnreadCount();
-                    format = std::regex_replace(format, rxUnread, std::to_string(urMsgCount));
-
-                    Int rMsgCount = urMsgCount + model.chatMessenger.MessageReadCount();
-                    format = std::regex_replace(format, rxReadMs, std::to_string(rMsgCount));
-                }
-                view.stage.format = format;
-            }
-
             view.Render();
 
             String command = GetCommand();
@@ -238,46 +202,46 @@ void ConsoleController::MainMenu()
                     continue;
                 }
 
-                if (std::regex_match(command.c_str(), rxExit))
+                if (std::regex_match(command, rxExit))
                 {
-                    String format = Stage::Exit.format;
-                    {
-                        String userName;
-                        {
-                            UserData::UserStatus selfStatus("self");
-                            UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
-                            userName = searchResult.at(0).Alias();
-                        }
-                        format = std::regex_replace(format, rxUser, userName);
-                    }
                     view.stage = Stage::Exit;
-                    view.stage.format = format;
+                    Exit();
+                    keepGoing = false;
                     continue;
                 }
 
-                if (std::regex_match(command.c_str(), rxMessenger))
+                if (std::regex_match(command, rxMessenger))
                 {
                     view.stage = Stage::Messenger;
+                    Messenger();
+                    continue;
                 }
 
                 if (std::regex_match(command.c_str(), rxShared))
                 {
                     view.stage = Stage::SharedFolder;
+                    SharedFolder();
+                    continue;
                 }
 
                 if (std::regex_match(command.c_str(), rxUdf))
                 {
                     view.stage = Stage::UserDataFile;
+                    UserDataFile();
+                    continue;
                 }
                 /*
                 .....
                 */
+
+                view.stage.comment += "no such command: " + command + ". Try help";
             }
         }
     }
     __End;
     Log::TextInRed(<-ConsoleController::OnLoad());
 }
+
 String UlongIpToDotIp(ULONG ul)
 {
     IN_ADDR adr{};
@@ -293,71 +257,6 @@ void ConsoleController::Messenger()
     {
         for (bool keepGoing = true; keepGoing;)
         {
-            String format = Stage::Messenger.format;
-            {
-                String activeUsersList;
-                {
-                    for (auto aura : model.presenceAura.activeLocalBroadcasters)
-                    {
-                        String ip = UlongIpToDotIp(aura.first);
-                        UserData::UserAddr adr(ip);
-                        UserData ud = model.udfNavigator.FindUsersInFile(adr);
-
-                        if (ud != UserData::BadData)
-                        {
-                            activeUsersList += ud.Alias();
-                        }
-                        else
-                        {
-                            activeUsersList += ip;
-                        }
-
-                        activeUsersList += ";\t";
-                    }
-
-                    if (activeUsersList.empty())
-                        activeUsersList = ">> no auras acound \n";
-                }
-                format = std::regex_replace(format, rxUsers, activeUsersList);
-
-                String messageHistory;
-                {
-                    for (auto msg : model.chatMessenger.Messages())
-                    {
-                        String sMsg;
-                        {
-                            String time;
-                            {
-                                time_t tt = Clock::to_time_t(std::get<0>(msg));
-                                time = String(std::ctime(&tt));
-                                time = time.substr(0, time.length() - 1);
-                            }
-                            String user;
-                            {
-                                String ip = UlongIpToDotIp(std::get<1>(msg));
-                                UserData::UserAddr adr(ip);
-                                auto udata = model.udfNavigator.FindUsersInFile(adr);
-                                if (udata != UserData::BadData)
-                                {
-                                    user += udata.Alias();
-                                }
-                                else
-                                {
-                                    user += ip;
-                                }
-                            }
-                            String txt = std::get<2>(msg);
-
-                            sMsg += time + "[" + user + "]: " + txt + "\n";
-                        }
-                        messageHistory += sMsg;
-                    }
-                }
-                format = std::regex_replace(format, rxMsgs, messageHistory);
-
-                model.chatMessenger.MarkAllAsRead();
-            }
-            view.stage.format = format;
             view.Render();
 
             String command = GetCommand();
@@ -467,24 +366,6 @@ void ConsoleController::UserDataFile()
     {
         for (bool keepGoing = true; keepGoing;)
         {
-            String format = Stage::UserDataFile.format;
-            {
-                String users;
-                {
-                    for (auto ud : model.udfNavigator.FindUsersInFile())
-                    {
-                        String user;
-                        {
-                            user += ud.Address().to_str() + " ";
-                            user += ud.Alias() + " ";
-                            user += ud.Status().to_str() + "\n";
-                        }
-                        users += user;
-                    }
-                }
-                format = std::regex_replace(format, rxUsers, users);
-            }
-            view.stage.format = format;
             view.Render();
 
             String command = GetCommand();
@@ -649,15 +530,6 @@ void ConsoleController::SharedFolder()
     {
         for (bool keepGoing = true; keepGoing;)
         {
-            String format = Stage::SharedFolder.format;
-            {
-                Int fileCount = model.sfNavigator.self.GetFileList().size();
-                format = std::regex_replace(format, rxFiles, std::to_string(fileCount));
-
-                Int userCount = model.presenceAura.activeLocalBroadcasters.size();
-                format = std::regex_replace(format, rxUsers, std::to_string(userCount));
-            }
-            view.stage.format = format;
             view.Render();
 
             String command = GetCommand();
@@ -702,19 +574,6 @@ void ConsoleController::SharedFolderSelf()
     {
         for (bool keepGoing = true; keepGoing;)
         {
-            String format = Stage::SharedFolderSelf.format;
-            {
-                String path = model.sfNavigator.self.SharedFolderPath();
-                format = std::regex_replace(format, rxPath, path);
-
-                String files;
-                {
-                    for (auto& file : model.sfNavigator.self.GetFileList())
-                        files += file + "\n";
-                }
-                format = std::regex_replace(format, rxFiles, files);
-            }
-            view.stage.format = format;
             view.Render();
 
             String command = GetCommand();
@@ -767,7 +626,7 @@ void ConsoleController::SharedFolderSelf()
                     std::getline(ss, fileName);
                     if (!std::regex_match(fileName, rxFileName))
                     {
-                        view.stage.comment += "Bad file name.";
+                        view.stage.comment = "Bad file name.";
                         continue;
                     }
                 }
@@ -788,6 +647,11 @@ void ConsoleController::SharedFolderSelf()
                 {
                     model.sfNavigator.self.FileDelete(fileName);
                     continue;
+                }
+
+                if (std::regex_match(str, rxUpload))
+                {
+                    view.stage.comment = "This finction is to be implemented after throurough Aura testing.";
                 }
             }
         }

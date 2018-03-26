@@ -27,28 +27,4 @@ namespace Log {
 
 #define __End --Log::depth;
 
-#ifdef LOG_BLOCK
-{
-    #ifdef LOGGER
-    Log::TextInRed();
-    __Begin;
-    #endif
-}
-{
-    #ifdef LOGGER
-    __End;
-    Log::TextInRed();
-    #endif
-}
-{
-    #ifdef LOGGER
-    __Begin;
-    Log::TextInRed();
-    __End;
-    #endif
-}
-
-
-#endif
-
 #endif // ! LOGGER
