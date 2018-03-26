@@ -1,9 +1,11 @@
 #pragma once
 #include <string>
+#include <functional>
 namespace FileShare 
 {
     using String = std::string;
     using Bool = int;
+    using Function = std::function < String(class Model&)>;
 
     class Stage{
     public:
@@ -26,14 +28,18 @@ namespace FileShare
                     SharedFolderOther    
             };
             ViewStage(Value, const String&, const String& = {});
+            ViewStage(Value, const String&, const String&, const Function&);
             ViewStage(const ViewStage&) = default;
 
             ViewStage& operator = (const ViewStage&);
 
+            Function UpdateFormat = [](class Model&)->String {};
+            Bool    provideHelp = false;
+
             Value   value;
             String  format;
             String  help;
-            Bool    provideHelp;
+            String  comment;
         };
 
         static const ViewStage Experimental         ;

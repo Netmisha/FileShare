@@ -88,11 +88,15 @@ FileVector SharedFolderNavigatorSelf::FilesInDirectory(const String& dir, const 
         if (fileIter != INVALID_HANDLE_VALUE)
         {
             do {
+                String fileName = String(findData.cFileName);
                 if (findData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
                     continue;
+                else if (fileName == "." || fileName == "..")
+                    continue;
                 else
-                    foundFiles.push_back(String(findData.cFileName));
-            } while (FindNextFile(fileIter, &findData));
+                    foundFiles.push_back(fileName);
+            } 
+            while (FindNextFile(fileIter, &findData));
         }
     }
     return foundFiles;

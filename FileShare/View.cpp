@@ -58,6 +58,9 @@ void ConsoleView::Render(){
 
     Data toPrint = stage.format;
 
+    if (!stage.comment.empty())
+        toPrint += ">> " + std::move(stage.comment) + "\n";
+
     if (stage.provideHelp)
     {
         toPrint += stage.help;

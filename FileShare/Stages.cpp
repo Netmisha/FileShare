@@ -154,8 +154,8 @@ const Stage::ViewStage Stage::SharedFolder
 {
     Stage::ViewStage::Value::SharedFolder,
 {   
-    dOut "Self Shared Folder [FILES]"   LF
-    dOut "Others Shared Folder [OTH]"   LF
+    dOut "Self Shared Folder [FLS]"   LF
+    dOut "Others Shared Folder [USRS]"  LF
 },
 {
     dOut "SF Commands"                  LF
@@ -169,23 +169,23 @@ const Stage::ViewStage Stage::SharedFolderSelf{
 {
     "PATH"  LF
     Line    LF
-    "FILES" LF
+    "FLS" LF
+    Line    LF
 },
 {
     dOut "SF Self Commands"                 LF
-    TB dOut     "screate filename.ext"      LF
+    TB dOut     "create filename.ext"      LF
     TB dOut     "open filename.ext"         LF
-    TB dOut     "rename old.ext new.ext"    LF
+    TB dOut     "rename old.ext NL new.ext" LF
     TB dOut     "delete filename.ext"       LF
     TB dOut     "upload file"               LF
-    TB dOut     "refresh"                   LF
     TB dOut     "back"                      LF
 }
 };
 const Stage::ViewStage Stage::SharedFolderOther{
     Stage::ViewStage::Value::SharedFolderOther,
 {
-        "OTHER"     LF
+        "USRS"     LF
         Line        LF 
 },
 {

@@ -10,7 +10,6 @@ namespace FileShare {
         SharedFolderNavigatorSelf(); // find out if exists, create if doesnt
 
         FileVector GetFileList();
-
         /**
             since function treats provided name as suggestion
             and doesnt guarantee much conformity with it
@@ -30,6 +29,7 @@ namespace FileShare {
         Bool   FileExists(const String& fileName);
         Bool   FileRename(const String& nameOld, const String& nameNew);
 
+        const String& SharedFolderPath();
     protected:
         /**
             to protect ourselves from files with same names replacing others etc
@@ -47,7 +47,6 @@ namespace FileShare {
             also path is converted to dos-path to extinguish whitespaces
         */
         const String& ModuleDirectoryPath();
-        const String& SharedFolderPath();
 
         /**
             should does skip hidden files

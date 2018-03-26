@@ -24,13 +24,14 @@ const Regex rxBack("b(!|ack)");
 const Regex rxRefr(R"(r(efresh|efr|!))");
 const Regex rxShared(R"(s(hared|f|!))");
 const Regex rxUdf(R"(u(ser[ _]data|df|!))");
-const Regex rxUser("USER");
 
+const Regex rxUser("USER");
 const Regex rxUsers("USRS");
 const Regex rxUnread("URMSG");
 const Regex rxReadMs("RMSG");
-
 const Regex rxMsgs("MSGS");
+const Regex rxFiles("FLS");
+const Regex rxPath("PATH");
 
 const Regex rxSend("s(end)?");
 const Regex rxAll("a(ll)?");
@@ -38,17 +39,25 @@ const Regex rxAllStatus("a(ll)?-(g(ood)?|b(ad)?|u(gly)?)");
 const Regex rxAllGood("a(ll)?-g(ood)?");
 const Regex rxAllBad("a(ll)?-b(ad)?");
 const Regex rxAllUgly("a(ll)?-u(gly)?");
+const Regex rxSelf("s(!|elf)");
+const Regex rxOther("o(!|ther)");
 
 const Regex rxAppend("a(!|ppend)");
 const Regex rxModify("m(!|odify)");
 const Regex rxRemove("r(!|emove)");
 
+const Regex rxCreate("c(!|reate)");
+const Regex rxOpen("o(!|pen)");
+const Regex rxRename("r(!|ename)");
+const Regex rxDelete("d(!|elete)");
+const Regex rxUpload("u(!|pload)");
+
 #define _0_255 "(0[0-9]?[0-9]?|1[0-9][0-9]|2([0-4][0-9]|5[0-5]))"
 #define _dot_ "[.]"
 
 const Regex rxIp("(" _0_255 "[.]" "){3}" _0_255);
+const Regex rxFileName(R"(^[^<>:;,?"*|/\\]+[.][A-Za-z0-9]+$)");
 #endif // !rxConst
-
 
 BasicController::~BasicController()
 {
@@ -105,29 +114,31 @@ void ConsoleController::Exit()
 }
 void ConsoleController::Inception()
 {
-    __Begin;
     Log::TextInRed(Inception()->);
-    String userName;
+    __Begin;
     {
-        UserData::UserStatus selfStatus("self");
-        UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
-        if (!searchResult.empty())
-            userName = searchResult.at(0).Alias();
-    }
-    if (userName.empty())
-    {
-        view.stage = Stage::HelloNoName;
-    }
-    else
-    {
-        String format = Stage::HelloUser.format;
-        format = std::regex_replace(format, rxUser, userName);
+        String userName;
+        {
+            UserData::UserStatus selfStatus("self");
+            UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
+            if (!searchResult.empty())
+                userName = searchResult.at(0).Alias();
+        }
+        if (userName.empty())
+        {
+            view.stage = Stage::HelloNoName;
+        }
+        else
+        {
+            String format = Stage::HelloUser.format;
+            format = std::regex_replace(format, rxUser, userName);
 
-        view.stage = Stage::HelloUser;
-        view.stage.format = format;
+            view.stage = Stage::HelloUser;
+            view.stage.format = format;
+        }
     }
-    Log::TextInRed(<-Inception());
     __End;
+    Log::TextInRed(<-Inception());
 }
 void ConsoleController::HelloUser()
 {
@@ -139,7 +150,6 @@ void ConsoleController::HelloUser()
     }
     __End;
     Log::TextInRed(<-HelloUser());
-
 }
 void ConsoleController::HelloNoName()
 {
@@ -190,7 +200,19 @@ void ConsoleController::MainMenu()
     {
         for (bool keepGoing = 1; keepGoing;)
         {
-            if (view.stage.value == Stage::ViewStage::Value::MainMenu) 
+            switch (view.stage.value)
+            {
+                case Stage::ViewStage::Value::MainMenu:     break;
+
+                case Stage::ViewStage::Value::SharedFolder: SharedFolder(); continue; // not ready
+                case Stage::ViewStage::Value::UserData:     UserDataFile(); continue;
+                case Stage::ViewStage::Value::Aura:         break;
+                case Stage::ViewStage::Value::Messenger:    Messenger();    continue;
+
+                case Stage::ViewStage::Value::Exit:         Exit(); keepGoing = false; continue;
+            }
+
+            //if (view.stage.value == Stage::ViewStage::Value::MainMenu) 
             {
                 String format = Stage::MainMenu.format;
                 {
@@ -207,16 +229,6 @@ void ConsoleController::MainMenu()
             }
 
             view.Render();
-
-            switch (view.stage.value)
-            {
-                case Stage::ViewStage::Value::SharedFolder: break; // not ready
-                case Stage::ViewStage::Value::UserData:     UserDataFile(); continue;
-                case Stage::ViewStage::Value::Aura:         break;
-                case Stage::ViewStage::Value::Messenger:    Messenger();    continue;
-
-                case Stage::ViewStage::Value::Exit:         Exit(); keepGoing = false; continue;
-            }
 
             String command = GetCommand();
             {
@@ -237,7 +249,6 @@ void ConsoleController::MainMenu()
                             userName = searchResult.at(0).Alias();
                         }
                         format = std::regex_replace(format, rxUser, userName);
-
                     }
                     view.stage = Stage::Exit;
                     view.stage.format = format;
@@ -251,8 +262,9 @@ void ConsoleController::MainMenu()
 
                 if (std::regex_match(command.c_str(), rxShared))
                 {
-                    //view.stage = Stage::SharedFolder;
+                    view.stage = Stage::SharedFolder;
                 }
+
                 if (std::regex_match(command.c_str(), rxUdf))
                 {
                     view.stage = Stage::UserDataFile;
@@ -438,7 +450,6 @@ void ConsoleController::Messenger()
     Log::TextInRed(< -Messenger());
 
 }
-
 void ConsoleController::MessengerSendToActiveIf(const String& msg, const Condition& cd)
 {
     for (auto aura : model.presenceAura.activeLocalBroadcasters)
@@ -451,10 +462,8 @@ void ConsoleController::MessengerSendToActiveIf(const String& msg, const Conditi
 
 void ConsoleController::UserDataFile()
 {
-
     Log::TextInRed(UserDataFile()->);
     __Begin;
-
     {
         for (bool keepGoing = true; keepGoing;)
         {
@@ -507,37 +516,26 @@ void ConsoleController::UserDataFile()
                     }
                     if (UserData::IsBadAlias(userName))
                     {
-
                         Log::TextInRed(userName - );
-
                         continue;
                     }
                     UserData ud = model.udfNavigator.FindUsersInFile(userName);
                     if (ud != UserData::BadData)
                     {
                         {
-
                             Log::TextInRed(FindUsersInFilee + );
-
                         }
-                        if (model.udfNavigator.RemoveUser(ud))
+                        Bool removeUserResult = model.udfNavigator.RemoveUser(ud);
                         {
-
-                            Log::TextInRed(RemoveUser + );
-
-                        }
-                        else
-                        {
-
-                            Log::TextInRed(RemoveUser - );
-
+                            if (removeUserResult)                            
+                                Log::TextInRed(RemoveUser + );
+                            else
+                                Log::TextInRed(RemoveUser - );
                         }
                     }
                     else
                     {
-
                         Log::TextInRed(FindUsersInFilee - );
-
                     }
                     continue;
                 }
@@ -553,38 +551,32 @@ void ConsoleController::UserDataFile()
 
                     if (UserData::IsBadAlias(userName))
                     {
-
                         Log::TextInRed(userName - );
-
                         continue;
                     }
 
                     if (!std::regex_match(ip, rxIp))
                     {
-
                         Log::TextInRed(ip - );
-
                         continue;
                     }
 
                     if (UserData::UserStatus::BadString(status))
                     {
-
                         Log::TextInRed(status - );
-
                         continue;
                     }
 
                     UserData ud(userName, UserData::UserAddr(ip), UserData::UserStatus(status));
 
-                    if (model.udfNavigator.AppendUser(ud))
+                    Bool appendUserResult = model.udfNavigator.AppendUser(ud);
                     {
-                        Log::TextInRed(AppendUser + );
+                        if (appendUserResult)
+                            Log::TextInRed(AppendUser + );
+                        else
+                            Log::TextInRed(AppendUser - );
                     }
-                    else
-                    {
-                        Log::TextInRed(AppendUser - );
-                    }
+                    
                     continue;
                 }
                 if (std::regex_match(str, rxModify))
@@ -633,20 +625,174 @@ void ConsoleController::UserDataFile()
 
                     UserData udNew(newName, UserData::UserAddr(ip), UserData::UserStatus(status));
 
-                    if (model.udfNavigator.ModifyUser(udOld, udNew))
+                    Bool modifyUserResult = model.udfNavigator.ModifyUser(udOld, udNew);
                     {
-                        Log::TextInRed(ModifyUser + );
+                        if (modifyUserResult)
+                            Log::TextInRed(ModifyUser + );
+                        else
+                            Log::TextInRed(ModifyUser - );
                     }
-                    else
-                    {
-                        Log::TextInRed(ModifyUser - );
-                    }
+                    
                     continue;
                 }
             }
         }
     }
     __End;
-    Log::TextInRed(< -UserDataFile());
+    Log::TextInRed(<-UserDataFile());
+}
+
+void ConsoleController::SharedFolder() 
+{
+    Log::TextInRed(SharedFolder()->);
+    __Begin;
+    {
+        for (bool keepGoing = true; keepGoing;)
+        {
+            String format = Stage::SharedFolder.format;
+            {
+                Int fileCount = model.sfNavigator.self.GetFileList().size();
+                format = std::regex_replace(format, rxFiles, std::to_string(fileCount));
+
+                Int userCount = model.presenceAura.activeLocalBroadcasters.size();
+                format = std::regex_replace(format, rxUsers, std::to_string(userCount));
+            }
+            view.stage.format = format;
+            view.Render();
+
+            String command = GetCommand();
+            {
+                if (std::regex_match(command, rxBack))
+                {
+                    view.stage = Stage::MainMenu;
+                    keepGoing = false;
+                    continue;
+                }
+
+                if (std::regex_match(command, rxHelp))
+                {
+                    view.stage.provideHelp = true;
+                    continue;
+                }
+
+                if (std::regex_match(command, rxSelf))
+                {
+                    view.stage = Stage::SharedFolderSelf;
+                    SharedFolderSelf();
+                    continue;
+                }
+
+                if (std::regex_match(command, rxOther))
+                {
+                    //view.stage = Stage::SharedFolderOther;
+                    //SharedFolderOther();
+                    continue;
+                }
+            }
+        }
+    }
+    __End;
+    Log::TextInRed(<-SharedFolder());
+}
+
+void ConsoleController::SharedFolderSelf()
+{
+    Log::TextInRed(SharedFolderSelf()->);
+    __Begin;
+    {
+        for (bool keepGoing = true; keepGoing;)
+        {
+            String format = Stage::SharedFolderSelf.format;
+            {
+                String path = model.sfNavigator.self.SharedFolderPath();
+                format = std::regex_replace(format, rxPath, path);
+
+                String files;
+                {
+                    for (auto& file : model.sfNavigator.self.GetFileList())
+                        files += file + "\n";
+                }
+                format = std::regex_replace(format, rxFiles, files);
+            }
+            view.stage.format = format;
+            view.Render();
+
+            String command = GetCommand();
+            {
+                if (std::regex_match(command, rxBack))
+                {
+                    view.stage = Stage::MainMenu;
+                    keepGoing = false;
+                    continue;
+                }
+
+                if (std::regex_match(command, rxHelp))
+                {
+                    view.stage.provideHelp = true;
+                    continue;
+                }
+
+                StrStream ss(command);
+
+                String str;
+                {
+                    ss >> str;
+                    ss.ignore();
+                }
+
+                if (std::regex_match(str, rxRename))
+                {
+                    String fileName = GetCommand();
+                    {
+                        if (!std::regex_match(fileName, rxFileName))
+                        {
+                            view.stage.comment += "Bad file name.";
+                            continue;
+                        }
+                    }
+                    String newfName = GetCommand();
+                    {
+                        if (!std::regex_match(newfName, rxFileName))
+                        {
+                            view.stage.comment += "Bad file name.";
+                            continue;
+                        }
+                    }
+                    model.sfNavigator.self.FileRename(fileName, newfName);
+                    continue;
+                }
+
+                String fileName;
+                {
+                    std::getline(ss, fileName);
+                    if (!std::regex_match(fileName, rxFileName))
+                    {
+                        view.stage.comment += "Bad file name.";
+                        continue;
+                    }
+                }
+
+                if (std::regex_match(str, rxCreate))
+                {
+                    model.sfNavigator.self.FileCreate(fileName);
+                    continue;
+                }
+
+                if (std::regex_match(str, rxOpen))
+                {
+                    model.sfNavigator.self.FileOpen(fileName);
+                    continue;
+                }
+
+                if (std::regex_match(str, rxDelete))
+                {
+                    model.sfNavigator.self.FileDelete(fileName);
+                    continue;
+                }
+            }
+        }
+    }
+    __End;
+    Log::TextInRed(<-SharedFolderSelf());
 }
 #endif

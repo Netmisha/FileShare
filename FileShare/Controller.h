@@ -47,6 +47,9 @@ namespace FileShare {
         virtual void MainMenu();
         virtual void Messenger();
         virtual void UserDataFile();
+        virtual void SharedFolder();
+        virtual void SharedFolderSelf();
+        //virtual void SharedFolderOther();
 
 
         virtual void MessengerSendToActiveIf(const String& msg, const Condition& cd);
