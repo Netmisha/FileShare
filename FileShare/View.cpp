@@ -1,9 +1,9 @@
-#include "Logger.h"
 #include "View.h"
 #include "Stages.h"
 
 using namespace FileShare;
-
+#define DontLog
+#include "Logger.h"
 using std::endl;
 
 BasicView::BasicView(Model& mdl) :

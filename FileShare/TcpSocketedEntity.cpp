@@ -203,9 +203,7 @@ String Receiver::ReceiveMessage()
 Sender::Sender(SOCKET sc, ULONG addr, USHORT port) :
     TCPSocketedEntity(sc, addr, port)
 {
-    __Begin;
     Log::InRed("Created sender");
-    __End;
 }
 Sender::Sender(Int scType, Int ptc, ULONG addr, USHORT port) :
     Sender(socket(AF_INET, scType, ptc), addr, port)
@@ -244,6 +242,7 @@ Int Sender::SendMessageToUser(const String & buff)
     Log::InRed("SendMessageToUser()->");
     __Begin;
     {
+        Log::InRed(buff);
         result = send(sc, buff.c_str(), buff.length(), NULL);
 
         if (result < 0)

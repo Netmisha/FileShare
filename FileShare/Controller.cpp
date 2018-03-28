@@ -760,7 +760,7 @@ void ConsoleController::SharedFolderOther()
                         }
                     }
 
-                    Sender requestSender(target, requestPort);
+                    Sender requestSender(target, requestPort20);
                     requestSender.ConnectToUser();
 
                     String specificRequest;

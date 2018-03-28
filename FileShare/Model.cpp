@@ -38,7 +38,7 @@ Model::Model() :
     csfn(),
     cpca()
 {
-    Log::TextInRed(Model() :);
+    Log::InRed("Model() :");
     __Begin;
     {
         StartAuraThreadIn();
@@ -74,6 +74,7 @@ void Model::WsaStartup()
     static WSADATA wsaData;
     int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
 }
+#define InRed DoNothing
 void Model::StartAuraThreadIn()
 {
     Log::InRed("StartAuraThreadIn()->");
@@ -144,7 +145,7 @@ void Model::StartAuraThreadOut()
 }
 void Model::StartMessageReceivingThread()
 {
-    Log::TextInRed(StartMessageReceivingThread()->);
+    Log::InRed("StartMessageReceivingThread()->");
     __Begin;
     {
         Thread messengerThreadReceive
@@ -158,8 +159,9 @@ void Model::StartMessageReceivingThread()
         messengerThreadReceive.detach();
     }
     __End;
-    Log::TextInRed(< -StartMessageReceivingThread());
+    Log::InRed("< -StartMessageReceivingThread()");
 }
+#undef InRed
 void ProceedWithRequestReceiver(Model& mdl, RequestReceiver& rr)
 {
     String request;
@@ -248,10 +250,13 @@ void Model::StartRequestReceivingThread20()
             __Begin;
             while (!stupidThreadsDie) 
             {
-                Receiver requestReceiver = csfn.other20.requestListener.Accept();
+                Receiver requestReceiver(csfn.other20.requestListener.Accept());
+
+                //Log::InRed(requestReceiver.ReceiveMessage());
 
                 auto recvRequestAndDoSmthAboutIt = [&]()
                 {
+                    Log::InRed("acceptingRequestFunction()->");
                     Receiver rc = std::move(requestReceiver);
 
                     Log::InRed("recvingRequestAndDoingSmth");
@@ -266,7 +271,8 @@ void Model::StartRequestReceivingThread20()
                     Sender responder(std::move(se));
 
                     if (request == Commands::fileListPls)
-                        responder.SendMessageToUser("hereugobitch");
+                        while (
+                            responder.SendMessageToUser("hereugobitch") == SOCKET_ERROR);
 
                 };
 

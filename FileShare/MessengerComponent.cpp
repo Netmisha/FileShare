@@ -175,18 +175,7 @@ Int MessengerComponent::ReceiveMessage()
             result = buff.length();
 
             TimePoint now = Clock::now();
-            //ULONG addr = rc.addr.sin_addr.S_un.S_addr; 
-            // bad addr
-            // need to use sockname smth
-
-            //SOCKADDR_IN sin{};
-            //int sinSize = sizeof(sin);
-            //getsockname(rc.sc, (SOCKADDR*)&sin, &sinSize);
-            ////std::cout << (int)ntohs(sin.sin_port) << " ";
-            //ULONG addr = sin.sin_addr.S_un.S_addr;
-
             ULONG addr = rc.addr.sin_addr.S_un.S_addr;
-
             Message msg = std::make_tuple(now, addr, buff);
 
             msgs.push_back(msg);

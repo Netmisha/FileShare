@@ -1,6 +1,8 @@
-#include "Logger.h"
 #include "Stages.h"
 #include "Model.h"
+
+#define DontLog
+#include "Logger.h"
 
 using namespace FileShare;
 
