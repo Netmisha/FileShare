@@ -41,12 +41,12 @@ int TEST() {
         #endif // LOGGER
     }
 
-    USHORT msgPort;
+   /* USHORT msgPort;
     std::cin >> msgPort;
     std::cin.ignore();
 
-    Model model(msgPort, requestPort, sharePort, preComPort);
-    //Model model;
+    Model model(msgPort, requestPort, sharePort, preComPort);*/
+    Model model;
     {
         #ifdef LOGGER
         --Log::depth;
@@ -85,7 +85,6 @@ int TEST() {
     controller.OnLoad();
     return 0;
 }
-
 
 #endif // CURRENT_TEST==TEST_TRYING_TO_CONTROL
 #endif // CURRENT_TEST
@@ -141,32 +140,39 @@ void WsaStartup() {
 
 VOID TestUdfComponent(Model&);
 VOID TestMessenger(Model&);
+VOID TestPresenceComponentAbit(Model&);
 
 using namespace FileShare;
 int TEST() {
     Log::InRed(TO_STR(TEST_MABITCH_MODEL_OUT));
-    {
-        #ifdef LOGGER
-        Log::InRed("creating Model");
-        #endif // LOGGER
-    }
+    Log::InRed("creating Model");
 
     WsaStartup();
-    USHORT msgPort;
-    std::cin >> msgPort;
-    std::cin.ignore();
 
-    Model mdl(msgPort, requestPort, sharePort, preComPort);
+    //USHORT msgPort;
+    //std::cin >> msgPort;
+    //std::cin.ignore();
+
+    //Model mdl(msgPort, requestPort, sharePort, preComPort);
+    Model mdl;
 
     //TestUdfComponent(mdl);
 
-    TestMessenger(mdl);
+    //TestMessenger(mdl);
 
-
-
+    TestPresenceComponentAbit(mdl);
 
     return system("pause");
 }
+VOID TestPresenceComponentAbit(Model&mdl)
+{
+    while (true) 
+    {
+        for(auto& bc: mdl.cpca.activeLocalBroadcasters)
+            Log::InRed(std::to_string(bc.first));
+    }
+}
+
 
 VOID TestMessenger(Model& mdl)
 {
@@ -175,7 +181,7 @@ VOID TestMessenger(Model& mdl)
         std::getline(std::cin, str);
 
         if(str == "show")
-            for (Message& msg : mdl.chatMessenger.Messages()) {
+            for (Message& msg : mdl.cmsg.Messages()) {
 
                 time_t tt = Clock::to_time_t(std::get<0>(msg));
                 String time = String(std::ctime(&tt));
@@ -202,7 +208,7 @@ VOID TestMessenger(Model& mdl)
             String msg;
             std::getline(ss, msg);
 
-            mdl.chatMessenger.SendMessageTo(msg, mdl.presenceAura.GetHostIp(), port);
+            mdl.cmsg.SendMessageTo(msg, mdl.cpca.GetHostIp(), port);
 
         }
     }
@@ -243,7 +249,7 @@ VOID TestUdfComponent(Model& mdl) {
         BOOL userExists;
         {
             __Begin;
-            UserData userFound = mdl.udfNavigator.FindUsersInFile(userName);
+            UserData userFound = mdl.cudf.FindUsersInFile(userName);
             userExists = (userFound != UserData::BadData);
             __End;
         }
@@ -255,11 +261,11 @@ VOID TestUdfComponent(Model& mdl) {
         {
             Log::InRed("userName doesnt exist. adding");
             __Begin;
-            String ip = mdl.presenceAura.GetHostIp();
+            String ip = mdl.cpca.GetHostIp();
             UserData::UserStatus sts = UserData::UserStatus::StatusValue::Good;
             UserData newUser(userName, ip, sts);
 
-            mdl.udfNavigator.AppendUser(newUser);
+            mdl.cudf.AppendUser(newUser);
             __End;
         }
     }
@@ -282,7 +288,7 @@ VOID TestUdfComponent(Model& mdl) {
 
 using namespace FileShare;
 using Clock = std::chrono::system_clock;
-using Duration = std::chrono::duration<INT>;
+using Seconds = std::chrono::duration<INT>;
 using TimePoint = std::chrono::system_clock::time_point;
 using Seconds = std::chrono::seconds;
 
@@ -323,11 +329,11 @@ String GetHostIp()
     WSADATA wsaData;
     int error = WSAStartup(MAKEWORD(2, 2), &wsaData);
     char hostName[1024]{};
-    IF (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
+    if (gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
         return{};
     return inet_ntoa(*((IN_ADDR**)(gethostbyname(hostName))->h_addr_list)[0]);
 }
-void Wait(const Duration dur) {
+void Wait(const Seconds dur) {
     std::this_thread::sleep_for(dur);
 }
 void TrySendingFile(){
@@ -341,7 +347,7 @@ void TrySendingFile(){
 
         FileSender fs(hostIp, filePort);
 
-        IF (fs.InvalidSocket()) {
+        if (fs.InvalidSocket()) {
             Log::InRedWithError("FS invalid");
             continue;
         }
@@ -351,23 +357,23 @@ void TrySendingFile(){
         for (auto then = Clock::now(); Clock::now() - then < Seconds(4); Wait(Seconds(1))) 
         {
             someResult = fs.ConnectToUser();
-            IF (someResult != SOCKET_ERROR)
+            if (someResult != SOCKET_ERROR)
                 break;
         }
 
-        IF (someResult == SOCKET_ERROR) {
+        if (someResult == SOCKET_ERROR) {
             Log::InRed("failed to connect");
         }
-        ELSE {
+        else {
             for (auto then = Clock::now(); Clock::now() - then < Seconds(4); Wait(Seconds(1))) 
             {
                 someResult = fs.SendFile(folderPath + folderFrom + fileName, 1024);
-                IF (someResult != SOCKET_ERROR) {
+                if (someResult != SOCKET_ERROR) {
                     keepAtIt = false;
                     break;
                 }
             }
-            IF (someResult == SOCKET_ERROR) {
+            if (someResult == SOCKET_ERROR) {
                 Log::InRed("failed to send");
             }
         }
@@ -387,7 +393,7 @@ void TryReceivingFile() {
     while (true) {
         ++Log::depth;
         FileReceiver fr = fl.Accept();
-        IF(fr.ReceiveFile(folderPath + folderTo + fileName) != SOCKET_ERROR)
+        if(fr.ReceiveFile(folderPath + folderTo + fileName) != SOCKET_ERROR)
             break;
         --Log::depth;
     }
@@ -404,46 +410,48 @@ void TestFileListenerSenderReceiver()
     }
 }
 
-bool TimeOut(const TimePoint& then, const Duration& timeOut = Seconds(5)) {
+bool TimeOut(const TimePoint& then, const Seconds& timeOut = Seconds(5)) {
     auto now = Clock::now();
-    IF (now - then < timeOut)
+    if (now - then < timeOut)
         return false;
-    ELSE
+    else
         return true;
 }
 
 INT RequestSenderTryConnect(RequestSender& rs) {
     INT result = SOCKET_ERROR;
-    for (TimePoint now = Clock::now();;)
-    __Begin
-        result = rs.ConnectToUser();
-        IF(result != SOCKET_ERROR) {
+    for (TimePoint now = Clock::now();;) {
+        __Begin
+            result = rs.ConnectToUser();
+        if(result != SOCKET_ERROR) {
             Log::InRed("Connected alright");
             break;
         }
-        ELIF(TimeOut(now)) {
+        else if(TimeOut(now)) {
             Log::InRed("Connect timeout");
             break;
         }
         Wait(std::chrono::seconds(1));
-    __End
+        __End
+    }
     return result;
 }
 INT RequestSenderTrySend(RequestSender& rs, const String& request) {
     INT result = SOCKET_ERROR;
-    for (TimePoint now = Clock::now();;)
-    __Begin
-        result = rs.SendRequest(request);
-        IF(result != SOCKET_ERROR) {
+    for (TimePoint now = Clock::now();;) {
+        __Begin
+            result = rs.SendRequest(request);
+        if(result != SOCKET_ERROR) {
             Log::InRed("Request sent");
             break;
         }
-        ELIF(TimeOut(now)) {
+        else if(TimeOut(now)) {
             Log::InRed("Send timeout");
             break;
         }
         Wait(std::chrono::seconds(1));
-    __End
+        __End
+    }
     return result;
 }
 INT RequestReceiverTryReceive(RequestReceiver& rr) {
@@ -467,21 +475,21 @@ void TrySendingRequest() {
         Log::InRed("Creqte request sender");
         RequestSender rs(hostIp, requPort);
         {
-            IF (rs.InvalidSocket()) 
+            if (rs.InvalidSocket()) 
             {
                 Log::InRed("rs socket fail, try again");
                 continue;
             }
-            ELSE{
+            else{
                 INT result = RequestSenderTryConnect(rs);
 
-                IF (result != SOCKET_ERROR) 
+                if (result != SOCKET_ERROR) 
                 {
                     String request = "This Is My Request";
 
                     result = RequestSenderTrySend(rs, request);
 
-                    IF(result != SOCKET_ERROR) 
+                    if(result != SOCKET_ERROR) 
                     {
                         Log::InRed("Trying RS->RR");
                         RequestReceiver rr = std::move(dynamic_cast<TCPSocketedEntity&>(rs));
@@ -584,25 +592,25 @@ void WsaStartup() {
 
     #ifdef LOGGER
     {
-        IF(error)
-            InRedWithError("wsastartup failed with error: ");
-        ELSE
-            InRed("wsastartup");
+        if(error)
+            Log::InRedWithError("wsastartup failed with error: ");
+        else
+            Log::InRed("wsastartup");
     }
     #endif
 }
 
 String GetHostIp() {
     char hostName[1024]{};
-    IF(gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
-        InRedWithError("Your host is nameless somehow");
-    //ELSE
-    //    InRed("Host name: " + String(hostName));
+    if(gethostname(hostName, sizeof(hostName)) == SOCKET_ERROR)
+        Log::InRedWithError("Your host is nameless somehow");
+    //else
+    //    Log::InRed("Host name: " + String(hostName));
 
     HOSTENT* hostEnt = gethostbyname(hostName);
     IN_ADDR** addrList = (IN_ADDR**)hostEnt->h_addr_list;
     char* hostAddr = inet_ntoa(*addrList[0]);
-    //InRed("Host addr: " + String(hostAddr));
+    //Log::InRed("Host addr: " + String(hostAddr));
     
     return hostAddr;
 }
@@ -632,14 +640,14 @@ void TestListenerAndReceiver() {
     listener.Listen();
 
     while (true) {
-        InRed("About to enter accepting loop");
+        Log::InRed("About to enter accepting loop");
         Receiver se = listener.Accept();
 
         String buff = se.ReceiveMessage();
 
-        IF (buff.empty())
+        if (buff.empty())
             continue;
-        ELSE
+        else
             InWhite(buff.c_str());
         for (int i = 0; i < 100000; ++i);
     }
@@ -671,9 +679,9 @@ void TestListenerSenderAndReceiver() {
         while (true) {
             Receiver receiver = listener.Accept();
             String message = receiver.ReceiveMessage();
-            IF (message.empty())
+            if (message.empty())
                 continue;
-            ELSE
+            else
                 InWhite(message.c_str());
             for (int i = 0; i < 100000; ++i);
         }
@@ -687,13 +695,13 @@ volatile bool showMessages = false;
 
 void TestMessengerSomehow() {
     USHORT listenerPort;
-    InRed("Test: chose your port - ");
+    Log::InRed("Test: chose your port - ");
     std::cin >> listenerPort;
 
     MessengerComponent mc(listenerPort);
 
     std::thread th_receive([&]() {
-        InRed("recv_thread started");
+        Log::InRed("recv_thread started");
 
         while (true) {
             mc.ReceiveMessage();
@@ -701,34 +709,34 @@ void TestMessengerSomehow() {
     });
 
     std::thread th_send([&]() {
-        InRed("send_thread started");
-        InRed("");
+        Log::InRed("send_thread started");
+        Log::InRed("");
 
         while (true) {
-            IF (showMessages)
+            if (showMessages)
                 std::this_thread::yield();
 
             String command;
             std::cin >> command;
 
-            IF (command == "send") {
+            if (command == "send") {
                 USHORT port;
                 std::cin >> port;
 
                 String msg;
                 std::getline(std::cin, msg);
 
-                InRed("Test: sending...");
-                IF(mc.SendMessageTo(msg, GetHostIp(), port) > 0)
-                    InRed("Test: ...msg sent");
-                ELSE
-                    InRed("Test: ...msg not sent");
+                Log::InRed("Test: sending...");
+                if(mc.SendMessageTo(msg, GetHostIp(), port) > 0)
+                    Log::InRed("Test: ...msg sent");
+                else
+                    Log::InRed("Test: ...msg not sent");
 
             }
-            ELSE 
-                IF (command == "show") {
-                    IF (!mc.Messages().empty()) {
-                        InRed("Test: some msg in");
+            else 
+                if (command == "show") {
+                    if (!mc.Messages().empty()) {
+                        Log::InRed("Test: some msg in");
                         for (Message& msg : mc.Messages()) {
 
                             time_t tt = Clock::to_time_t(std::get<0>(msg));
@@ -747,8 +755,8 @@ void TestMessengerSomehow() {
                             for (int i = 0; i < 100000; ++i);
                         }
                     }
-                    ELSE
-                        InRed("Test: msg none");
+                    else
+                        Log::InRed("Test: msg none");
                     showMessages = false;
                 }
         }
@@ -788,7 +796,7 @@ using Thread = std::thread;
 volatile bool mutex = false;
 
 int TEST() {
-    InRed(TO_STR(TEST_PRESENCE_COMPONENT));
+    Log::InRed(TO_STR(TEST_PRESENCE_COMPONENT));
 
     PresenceComponent preCom;
 
@@ -830,7 +838,7 @@ int TEST() {
 using namespace FileShare; 
 using namespace Log;
 int TEST() {
-    InRed(TO_STR(TEST_USER_DATA_FILE_COMPONENT));
+    Log::InRed(TO_STR(TEST_USER_DATA_FILE_COMPONENT));
 
     UDFComponent udf;
 
@@ -842,18 +850,18 @@ int TEST() {
     })
         udf.AppendUser(ud);
 
-    InRed("UDF with some users: ");
+    Log::InRed("UDF with some users: ");
     for (auto& ud : udf.FindUsersInFile())
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
-    InRed("try to fing good users");
+    Log::InRed("try to fing good users");
     for (auto& ud : udf.FindUsersInFile(UserData::UserStatus::StatusValue::Good))
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
     UserData ud = udf.FindUsersInFile("Boi");
     udf.ModifyUser(ud, { "ULIKE", UserData::UserAddr("THE POWAH, HUH"), UserData::UserStatus::StatusValue::Ugly});
 
-    InRed("Tried modIFying user");
+    Log::InRed("Tried modIFying user");
     for (auto& ud : udf.FindUsersInFile())
         std::cout << ud.Alias() << " " << ud.Address().to_str() << " " << ud.Status().to_str() << std::endl;
 
@@ -886,24 +894,24 @@ int TEST() {
 
 
     std::cout << "hello, ";
-    InRed("world\n");
+    Log::InRed("world\n");
     
     SharedFolderNavigatorSelf self;
-    InRed("instance created");
+    Log::InRed("instance created");
 
     String paintmeName = self.FileCreate("paintme.bmp");
-    IF (paintmeName != "paintme.bmp") {
-        InRed("paintme.bmp already existed.");
-        InRed("new paintme is created as " + paintmeName);
-        InRed("gonna rename " + paintmeName + " somehow");
+    if (paintmeName != "paintme.bmp") {
+        Log::InRed("paintme.bmp already existed.");
+        Log::InRed("new paintme is created as " + paintmeName);
+        Log::InRed("gonna rename " + paintmeName + " somehow");
         self.FileRename(paintmeName, "new_paintme_name_with_blackjack_and_hookers.bmp");
     }
-    ELSE
-        InRed("paintme.bmp created");
+    else
+        Log::InRed("paintme.bmp created");
     {
         FileVector fv = self.GetFileList();
-        IF (fv.empty())
-            InRed("vector empty, smth wrong");
+        if (fv.empty())
+            Log::InRed("vector empty, smth wrong");
 
         for (const String& fileName : fv)
             std::cout << fileName << std::endl;
@@ -913,10 +921,10 @@ int TEST() {
     std::cout << "file name pls" << std::endl;
     std::cin >> fileName;
 
-    InRed("opening " + fileName);
+    Log::InRed("opening " + fileName);
     self.FileOpen(fileName);
 
-    InRed("opened file s gonna be deleted afterwards");
+    Log::InRed("opened file s gonna be deleted afterwards");
     system("pause");
 
     self.FileDelete(fileName);

@@ -7,6 +7,8 @@
 
 #include "UserDataFileComponent.h"
 #include "tinyxml.h"
+
+#define DontLog
 #include "Logger.h"
 
 using namespace FileShare;
@@ -57,9 +59,14 @@ Bool UserData::IsBadAlias(const String &als){
         return soBad;
 
     return FALSE;
-}  
+}
+Bool UserData::IsBadData()
+{
+    return *this == BadData;
+}
 bool UserData::operator==(const UserData & other) const{
-    return{
+    return
+    {
         alias == other.alias &&
         address == other.address &&
         status == other.status
@@ -123,49 +130,35 @@ namespace Udfn {
 String UdfPath();
 
 static TiXmlDocument udf;
-UDFComponent::UDFComponent(){
+UDFComponent::UDFComponent() {
+    Log::InRed("UDF()->");
+    __Begin;
     {
-        #ifdef LOGGER
-        Log::TextInRed(UDF()->);
-        __Begin;
-        #endif // LOGGERsd
-    }
-
-    bool loadResult = udf.LoadFile(UdfPath().c_str(), TIXML_ENCODING_LEGACY);
-    {
-        #ifdef LOGGER
-        IF(loadResult)
-            Log::TextInRed(udf.LoadFile()+);
-        ELSE
-            Log::TextInRed(udf.LoadFile()-);
-        #endif // LOGGER
-    }
-   
-    if (udf.NoChildren()) {
+        bool loadResult = udf.LoadFile(UdfPath().c_str(), TIXML_ENCODING_LEGACY);
         {
-            #ifdef LOGGER
-            Log::TextInRed(udf no root creating one);
-            #endif
+            if (loadResult)
+                Log::InRed("udf.LoadFile() + ");
+            else
+                Log::InRed("udf.LoadFile() - ");
         }
-        udf.LinkEndChild(new TiXmlElement(Udfn::root));
-    }
 
-    bool saveResult = udf.SaveFile();
-    {
-        #ifdef LOGGER
-        IF(saveResult)
-            Log::TextInRed(udf.SaveFile()+);
-        ELSE
-            Log::TextInRed(udf.SaveFile()-);
-        #endif // LOGGER
-    }
+        if (udf.NoChildren())
+        {
+            Log::InRed("udf no root creating one");
 
-    {
-        #ifdef LOGGER
-        __End;
-        Log::TextInRed(<-UDF());
-        #endif // LOGER
+            udf.LinkEndChild(new TiXmlElement(Udfn::root));
+        }
+
+        bool saveResult = udf.SaveFile();
+        {
+            if (saveResult)
+                Log::InRed("udf.SaveFile() + ");
+            else
+                Log::InRed("udf.SaveFile() - ");
+        }
     }
+    __End;
+    Log::InRed("< -UDF()");
 }
 UDFComponent::~UDFComponent() 
 {
@@ -173,14 +166,10 @@ UDFComponent::~UDFComponent()
 }
 
 String UdfPath() {
+    Log::InRed("UdfPath()->");
+    __Begin;
     static String directoryPathShort;
     {
-        {
-            #ifdef LOGGER
-            Log::TextInRed(UdfPath()->);
-            __Begin;
-            #endif // LOGGER
-        }
         if (directoryPathShort.empty())
         {
             TCHAR tmodulePath[MAX_PATH]{};
@@ -190,20 +179,10 @@ String UdfPath() {
             GetShortPathName(directoryPath.c_str(), tdirectPathShort, MAX_PATH);
             directoryPathShort = String(tdirectPathShort);
         }
-
-        {
-            #ifdef LOGGER
-            Log::InRed("UdfPath: " + directoryPathShort);
-            #endif
-        }
-
-        {
-            #ifdef LOGGER
-            __End;
-            Log::TextInRed(<-UdfPath());
-            #endif // LOGGER
-        }
+        Log::InRed("UdfPath: " + directoryPathShort);
     }
+    __End;
+    Log::InRed("<-UdfPath()");
     return directoryPathShort + udfXml;
 }
 

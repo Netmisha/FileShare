@@ -9,20 +9,12 @@ using std::endl;
 BasicView::BasicView(Model& mdl) :
     model(mdl)
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(BasicView() :);
-        #endif // LOGGER
-    }
+    Log::InRed("BasicView() :");
 }
 
 BasicView::~BasicView()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(~BasicView());
-        #endif // LOGGER
-    }
+    Log::InRed("~BasicView()");
 }
 
 ConsoleView::ConsoleView(Model& mdl, InStream& in, OtStream& out) :
@@ -32,25 +24,15 @@ ConsoleView::ConsoleView(Model& mdl, InStream& in, OtStream& out) :
     stage(Stage::Inception),
     dataToPrint(ProvideStageFormat())
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(ConsoleView() :);
-        #endif // LOGGER
-    }
+        Log::InRed("ConsoleView() :");
 }
 
 FileShare::ConsoleView::~ConsoleView()
 {
-    {
-        #ifdef LOGGER
-        Log::TextInRed(~ConsoleView() :);
-        #endif // LOGGER
-    }
-    {
-        #ifdef NDEBUG
+    Log::InRed("~ConsoleView() :");
+    #ifdef NDEBUG
         ClearConsole();
-        #endif // _RELEASE
-    }
+    #endif // _RELEASE
 }
 
 void ConsoleView::Render(){
@@ -73,22 +55,14 @@ void ConsoleView::Render(){
 
 Data ConsoleView::GetDataFromInput() {
     Data str;
+    Log::InRed("GetDataFromInput()->");
+    __Begin;
     {
-        {
-            #ifdef LOGGER
-            Log::TextInRed(GetDataFromInput()->);
-            __Begin;
-            #endif
-        }
         ostrm << "<< ";
         std::getline(istrm, str);
-        {
-            #ifdef LOGGER
-            __End;
-            Log::TextInRed(< -GetDataFromInput());
-            #endif
-        }
     }
+    __End;
+    Log::InRed("< -GetDataFromInput()");
     return str;
 }
 

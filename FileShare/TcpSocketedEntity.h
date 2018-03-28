@@ -60,6 +60,7 @@ namespace FileShare {
         Sender(Int scType, Int protocol, ULONG addr, USHORT port);
         Sender(ULONG addr, USHORT port);
         Sender(String addr, USHORT port);
+        Sender(TCPSocketedEntity&&);
 
         Int ConnectToUser();
         Int SendMessageToUser(String const& msg);

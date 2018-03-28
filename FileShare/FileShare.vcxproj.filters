@@ -90,6 +90,9 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files\MVC</Filter>
     </ClCompile>
+    <ClCompile Include="SharedFolderNavigatorOther20.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Stages.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="Controller.h">
       <Filter>Header Files\MVC</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedFolderNavigatorOther20.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

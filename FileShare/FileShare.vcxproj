@@ -99,7 +99,7 @@
       </MidlCommandFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(SolutionDir)$(Configuration) - Copy\" /Y/I/E</Command>
+      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(Downloads)$(Configuration)\" /Y/I/E</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -117,7 +117,7 @@
       </MidlCommandFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(SolutionDir)$(Configuration) - Copy\" /Y/I/E</Command>
+      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(Downloads)$(Configuration)\" /Y/I/E</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,7 +139,7 @@
       </MidlCommandFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(SolutionDir)$(Configuration) - Copy\" /Y/I/E</Command>
+      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(Downloads)$(Configuration)\" /Y/I/E</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -161,7 +161,7 @@
       </MidlCommandFile>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(SolutionDir)$(Configuration) - Copy\" /Y/I/E</Command>
+      <Command>xcopy "$(SolutionDir)$(Configuration)\*.*" "$(Downloads)$(Configuration)\" /Y/I/E</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -178,6 +178,7 @@
     <ClCompile Include="SharedFolderNavigatorComponent.cpp" />
     <ClCompile Include="FileShareComponentTest.cpp" />
     <ClCompile Include="SharedFolderNavigatorOther.cpp" />
+    <ClCompile Include="SharedFolderNavigatorOther20.cpp" />
     <ClCompile Include="SharedFolderNavigatorSelf.cpp" />
     <ClCompile Include="Stages.cpp" />
     <ClCompile Include="TcpSocketedEntity.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="PresenceComponent.h" />
     <ClInclude Include="SharedFolderNavigatorComponent.h" />
     <ClInclude Include="SharedFolderNavigatorOther.h" />
+    <ClInclude Include="SharedFolderNavigatorOther20.h" />
     <ClInclude Include="SharedFolderNavigatorSelf.h" />
     <ClInclude Include="Stages.h" />
     <ClInclude Include="TcpSocketedEntity.h" />

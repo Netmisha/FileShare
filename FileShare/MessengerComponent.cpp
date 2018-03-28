@@ -1,12 +1,12 @@
 #include "MessengerComponent.h"
-#include "Logger.h"
+
 #include <ctime>
 #include <chrono>
 
+#define DontLog
 #include "Logger.h"
 
 using namespace FileShare;
-using namespace Log;
 
 #ifndef MESSENGER_COMPONENT
 
@@ -16,7 +16,7 @@ MessengerComponent::MessengerComponent(USHORT port):
 {
     #ifdef LOGGER
     {
-        InRed("MSG component constructing");
+        Log::InRed("MSG component constructing");
     }
     #endif
     listener.Bind();
@@ -26,7 +26,6 @@ MessengerComponent::MessengerComponent() :
     MessengerComponent(messPort)
 {}
 #endif MESSENGER_COMPONENT_CONSTRUCTORS
-
 Int SendMessageViaSender(const String msg, Sender&& sender) {
 
     Int result = SOCKET_ERROR;
@@ -36,7 +35,7 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
     {
         #ifdef LOGGER
         {
-            InRed("gonna try to connect for 5s");
+            Log::InRed("gonna try to connect for 5s");
         }
         #endif LOGGER
     }
@@ -50,7 +49,7 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
     if (result == SOCKET_ERROR) {
         #ifdef LOGGER
         {
-            InRedWithError("MSG component Send failed, connect timeout, error: ");
+            Log::InRedWithError("MSG component Send failed, connect timeout, error: ");
         }
         #endif LOGGER
 
@@ -60,7 +59,7 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
 
         #ifdef LOGGER
         {
-            InRed("gonna try to send for 5s");
+            Log::InRed("gonna try to send for 5s");
         }
         #endif LOGGER
 
@@ -72,10 +71,10 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
 
         #ifdef LOGGER
         {
-            IF(result <= NULL)
-                InRedWithError("MSG component Send failed to send, error: ");
-            ELSE
-                InRed("MSG component Send succeeded in sending");
+            if(result <= NULL)
+                Log::InRedWithError("MSG component Send failed to send, error: ");
+            else
+                Log::InRed("MSG component Send succeeded in sending");
         }
         #endif LOGGER
     }
@@ -85,37 +84,30 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
 Int MessengerComponent::SendMessageTo(const String& msg, ULONG adr, USHORT port)
 {
     Int result = SOCKET_ERROR;
-
-    #ifdef LOGGER
+    Log::InRed("SendMessageTo()->");
+    __Begin;
     {
-        InRed("entering SendMessage, creating sender");
-    }
-    #endif LOGGER
+        Sender sender(adr, port);
 
-    Sender sender(adr, port);
-
-    if (sender.InvalidSocket()) 
-    {
-        #ifdef LOGGER
+        if (sender.InvalidSocket())
         {
-            InRed("sender wasnt created properly");
+            Log::InRed("sender wasnt created properly");
+            result = sender.sc;
         }
-        #endif LOGGER
-
-        result = sender.sc;
-
-    }
-    else 
-    {
-        #ifdef LOGGER
+        else
         {
-            InRed("sender created? trying to send");
-        }
-        #endif LOGGER
+            Log::InRed("sender created? trying to send");
+            result = SendMessageViaSender(msg, std::move(sender));
 
-        result = SendMessageViaSender(msg, std::move(sender));
+            if (result != SOCKET_ERROR)
+            {
+                msgs.emplace_back(Clock::now(), adr^(~0), msg);
+            }
+
+        }
     }
-    
+    __End;
+    Log::InRed("SendMessageTo();");
     return result;
 }
 Int MessengerComponent::SendMessageTo(const String& msg, const String& adr, USHORT port)
@@ -146,65 +138,63 @@ Int MessengerComponent::SendMessageTo(const String& msg, const UserVector& users
     // 0 is total fail
 }
 Int MessengerComponent::ReceiveMessage()
-{
-    #ifdef LOGGER
-    {
-        InRed("entering MSG_C RecMes");
-    }
-    #endif
-
+{    
     Int result = 0;
-
-    Receiver rc = listener.Accept();
-
-    #ifdef LOGGER
+    Log::InRed("ReceiveMessage()->");
+    __Begin;
     {
-        InRed("listener accepter receiver");
-    }
-    #endif
+        Receiver rc = listener.Accept();
 
-    String buff = rc.ReceiveMessage();
 
-    #ifdef LOGGER
-    {
-        InRed("Receiver tried hard");
-    }
-    #endif
+        Log::InRed("Listener.accept() +");
 
-    if (buff.empty()) {
+
+        String buff = rc.ReceiveMessage();
+
         #ifdef LOGGER
         {
-            InRed("but we got nothing");
-        }
-        #endif
-    }
-    else
-    {
-        #ifdef LOGGER
-        {
-            InRed("and we got smth");
+            Log::InRed("Receiver tried hard");
         }
         #endif
 
-        result = buff.length();
+        if (buff.empty()) {
+            #ifdef LOGGER
+            {
+                Log::InRed("but we got nothing");
+            }
+            #endif
+        }
+        else
+        {
+            #ifdef LOGGER
+            {
+                Log::InRed("and we got smth");
+            }
+            #endif
 
-        TimePoint now = Clock::now();
-        //ULONG addr = rc.addr.sin_addr.S_un.S_addr; 
-        // bad addr
-        // need to use sockname smth
+            result = buff.length();
 
-        SOCKADDR_IN sin{};
-        int sinSize = sizeof(sin);
-        getsockname(rc.sc, (SOCKADDR*)&sin, &sinSize);
-        //std::cout << (int)ntohs(sin.sin_port) << " ";
-        ULONG addr = sin.sin_addr.S_un.S_addr;
+            TimePoint now = Clock::now();
+            //ULONG addr = rc.addr.sin_addr.S_un.S_addr; 
+            // bad addr
+            // need to use sockname smth
 
-        Message msg = std::make_tuple(now, addr, buff);
+            //SOCKADDR_IN sin{};
+            //int sinSize = sizeof(sin);
+            //getsockname(rc.sc, (SOCKADDR*)&sin, &sinSize);
+            ////std::cout << (int)ntohs(sin.sin_port) << " ";
+            //ULONG addr = sin.sin_addr.S_un.S_addr;
 
-        msgs.push_back(msg);
-        ++unreadCount;
+            ULONG addr = rc.addr.sin_addr.S_un.S_addr;
+
+            Message msg = std::make_tuple(now, addr, buff);
+
+            msgs.push_back(msg);
+            ++unreadCount;
+        }
     }
-    
+    __End;
+    Log::InRed("ReceiveMessage();");
     return result;
 }
 

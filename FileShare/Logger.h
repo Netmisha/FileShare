@@ -1,30 +1,22 @@
 #pragma once
 #include <string>
-
-#ifdef _DEBUG
 #define LOGGER
-
-#define IF   if
-#define ELSE else
-#define ELIF ELSE IF
-
 #define TO_STR(s) (#s)
 
-namespace Log {
-    extern int depth;
-    void InRed(const std::string& message);
-    void InRedWithError(const std::string& message);
-    void InWhite(const std::string& message);
-
-    void InFile(const std::string& message);
-    void InFileWithError(const std::string& message);
-
-    #define TextInRed(s) InRed(#s)
+class Log {
+public:
+    static int depth;
+    static void Log::InRed(const std::string& message);
+    static void Log::InRedWithError(const std::string& message);
+    static void InWhite(const std::string& message);
+    static void InFile(const std::string& message);
+    static void InFileWithError(const std::string& message);
+    static void DoNothing(const std::string&) {};
 };
-
-
+#define TextInRed(s) Log::InRed(#s)
 #define __Begin ++Log::depth;
-
 #define __End --Log::depth;
 
-#endif // ! LOGGER
+#ifdef DontLog
+#define InRed(x) DoNothing(x)
+#endif

@@ -3,69 +3,76 @@
 #include <fstream>
 #include "Logger.h"
 
-namespace Log {
-    int depth = 0;
 
-    bool consoleFree = true;
+int Log::depth = 0;
 
-    void Indent(int dpt)
+bool outputFree = true;
+
+void Indent(int dpt, std::ostream& os = std::cerr)
     {
-        while (dpt--) std::cerr << "  ";
+        while (dpt--) os << "  ";
     }
-
+#ifdef _DEBUG
     void InColor(const std::string& message, int color, bool error=false)
-    {
-        #ifdef LOGGER
-        while (!consoleFree);
-        consoleFree = false;
+        {
+            #ifdef LOGGER
+            while (!outputFree);
+            outputFree = false;
+    
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+            Indent(Log::depth);
+            std::cerr << message;
+            if (error)
+                std::cerr << GetLastError();
+            std::cerr << std::endl;
+            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+    
+            outputFree = true;
+            #endif // LOGGER
+        }
+#else
+void LogToFile(const std::string&, bool);
+void InColor(const std::string& message, int color, bool error = false)
+{
+    LogToFile(message, error);
+}
+#endif // DEBUG
 
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
-        Indent(depth);
-        std::cerr << message;
-        if (error)
-            std::cerr << GetLastError();
-        std::cerr << std::endl;
-        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 15);
+void Log::InRed(const std::string& message)
+{
+    InColor(message, 12);
+}
 
-        consoleFree = true;
-        #endif // LOGGER
-    }
+void Log::InRedWithError(const std::string& message)
+{
+    InColor(message, 12, true);
+}
 
-    void InRed(const std::string& message)
-    {
-        InColor(message, 12);
-    }
+void Log::InWhite(const std::string& message)
+{
+    InColor(message, 15);
+}
 
-    void InRedWithError(const std::string& message)
-    {
-        InColor(message, 12, true);
-    }
+void LogToFile(const std::string& message, bool error = false) 
+{
+    std::fstream fs;
+    fs.open("log.txt", std::ios::out | std::ios::app);
+    Indent(Log::depth, fs);
+    fs << message;
+    if (error)
+        fs << GetLastError();
+    fs << std::endl;
+    fs.close();
+}
 
-    void InWhite(const std::string& message)
-    {
-        InColor(message, 15);
-    }
-
-    void LogToFile(const std::string& message, bool error = false) 
-    {
-        std::fstream fs;
-        fs.open("log.txt", std::ios::out | std::ios::app);
-        fs << message;
-        if (error)
-            fs << GetLastError();
-        fs << std::endl;
-        fs.close();
-    }
-
-    void InFileWithError(const std::string& message)
+void Log::InFileWithError(const std::string& message)
     {
         LogToFile(message, true);      
     }
 
-    void InFile(const std::string& message)
-    {
-        LogToFile(message);
-    }
-
-    
+void Log::InFile(const std::string& message)
+{
+    LogToFile(message);
 }
+    
+    

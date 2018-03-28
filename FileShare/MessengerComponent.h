@@ -6,12 +6,16 @@
 #include <tuple>
 #include <vector>
 
-namespace FileShare {
-
+namespace FileShare 
+{
+    //#ifndef USING_LOTTA_STUFF
+   // #define USING_LOTTA_STUFF
     using Clock = std::chrono::system_clock;
     using TimePoint = Clock::time_point;
     using Message = std::tuple<TimePoint, ULONG, String>;
     using MessageVector = std::vector<Message>;
+    //#endif // !USING_LOTTA_STUFF
+
 
 #ifndef MESSENGER_COMPONENT
     
@@ -42,7 +46,7 @@ namespace FileShare {
     class MessengerComponent:
         public SenderInterface,
         public ReceiverInterface,
-        protected ReceiverData
+        public ReceiverData
     {
     public:
         MessengerComponent();

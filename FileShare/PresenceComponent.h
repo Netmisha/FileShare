@@ -1,7 +1,7 @@
 #pragma once
 #include <winsock2.h>
 #include <string>
-#include <set>
+#include <vector>
 #include <utility>
 
 /*
@@ -15,7 +15,7 @@
 namespace FileShare {
     using STR = std::string;
     using Aura = std::pair<ULONG, USHORT>;
-    using AuraSet = std::set<Aura>;
+    using AuraSet = std::vector<Aura>;
     using Int = int;
 
     #define preComPort (USHORT)14088

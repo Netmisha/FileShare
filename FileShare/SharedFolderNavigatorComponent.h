@@ -1,6 +1,7 @@
 #pragma once
 #include"SharedFolderNavigatorSelf.h"
 #include "SharedFolderNavigatorOther.h"
+#include "SharedFolderNavigatorOther20.h"
 
 namespace FileShare {
     using SfnSelf = SharedFolderNavigatorSelf;
@@ -13,6 +14,7 @@ namespace FileShare {
 
         SharedFolderNavigatorSelf self;
         SharedFolderNavigatorOther other;
+        SharedFolderNavigatorOther20 other20;
     };
 
     using SfnComponent = SharedFolderNavigatorComponent;

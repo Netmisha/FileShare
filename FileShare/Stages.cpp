@@ -15,8 +15,9 @@ const Regex rxReadMs("RMSG");
 const Regex rxMsgs("MSGS");
 const Regex rxPath("PATH");
 const Regex rxFiles("FLS");
+const Regex rxAuras("AURAS");
 #endif
-
+constexpr ULONG basicLocalIp = 3221225472; // >= 192.0.0.0
 extern FileShare::String UlongIpToDotIp(ULONG ul);
 
 Stage::ViewStage::ViewStage(ViewStage::Value val, const String& frm, const String& hlp) :
@@ -25,14 +26,12 @@ Stage::ViewStage::ViewStage(ViewStage::Value val, const String& frm, const Strin
     help(hlp),
     UpdateFormat([&](class Model&)->String { return this->format;})
 {}
-
 Stage::ViewStage::ViewStage(Value val, const String& frm, const String& hlp, const Function& fun):
     value(val),
     format(frm),
     help(hlp),
     UpdateFormat(fun)
 {}
-
 Stage::ViewStage::ViewStage(const ViewStage& sample):
     value(sample.value),
     format(sample.format),
@@ -40,9 +39,7 @@ Stage::ViewStage::ViewStage(const ViewStage& sample):
     provideHelp(sample.provideHelp),
     comment(sample.comment),
     UpdateFormat(sample.UpdateFormat)
-{
-}
-
+{}
 Stage::ViewStage& Stage::ViewStage::operator=(const ViewStage& other)
 {
     value = other.value;
@@ -102,7 +99,7 @@ const Stage::ViewStage Stage::HelloUser{
     {
         dOut    "Hello, USER!"         LF
         dOut    "How is it goin?"      LF
-        dOut    "Press any key..."  LF
+        dOut    "Press any key..."     LF
     },
     String{},
     [&](Model& model)->String
@@ -116,7 +113,7 @@ const Stage::ViewStage Stage::HelloUser{
                 String userName;
                 {
                     UserData::UserStatus selfStatus("self");
-                    UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
+                    UserVector searchResult = model.cudf.FindUsersInFile(selfStatus);
                     if (!searchResult.empty())
                         userName = searchResult.at(0).Alias();
                 }
@@ -161,7 +158,7 @@ const Stage::ViewStage Stage::Exit{
                 String userName;
                 {
                     UserData::UserStatus selfStatus("self");
-                    UserVector searchResult = model.udfNavigator.FindUsersInFile(selfStatus);
+                    UserVector searchResult = model.cudf.FindUsersInFile(selfStatus);
                     if (!searchResult.empty())
                         userName = searchResult.at(0).Alias();
                 }
@@ -198,13 +195,13 @@ const Stage::ViewStage Stage::MainMenu{
         {
             format = Stage::MainMenu.format;
             {
-                Int auraCount = model.presenceAura.activeLocalBroadcasters.size();
+                Int auraCount = model.cpca.activeLocalBroadcasters.size();
                 format = std::regex_replace(format, rxUsers, std::to_string(auraCount));
 
-                Int urMsgCount = model.chatMessenger.MessageUnreadCount();
+                Int urMsgCount = model.cmsg.MessageUnreadCount();
                 format = std::regex_replace(format, rxUnread, std::to_string(urMsgCount));
 
-                Int rMsgCount = urMsgCount + model.chatMessenger.MessageReadCount();
+                Int rMsgCount = urMsgCount + model.cmsg.MessageReadCount();
                 format = std::regex_replace(format, rxReadMs, std::to_string(rMsgCount));
             }    
         }
@@ -213,7 +210,6 @@ const Stage::ViewStage Stage::MainMenu{
         return format;
     }
 };
-
 const Stage::ViewStage Stage::UserDataFile{
     Stage::ViewStage::Value::UserData,
     {
@@ -252,7 +248,7 @@ const Stage::ViewStage Stage::UserDataFile{
             {
                 String users;
                 {
-                    for (auto ud : model.udfNavigator.FindUsersInFile())
+                    for (auto ud : model.cudf.FindUsersInFile())
                     {
                         String user;
                         {
@@ -271,21 +267,54 @@ const Stage::ViewStage Stage::UserDataFile{
         return format;
     }
 };
-
 const Stage::ViewStage Stage::CheckPresence{
     Stage::ViewStage::Value::Aura,
-{
-    dOut "Active Auras [LCH]"       LF
-    "AURAS"                         LF
-},
-{
-    dOut "Aura Component Commands"   LF
-    TB  dOut    "add ip name status" LF
-    TB  dOut    "refresh"            LF
-    TB  dOut    "back"               LF
-}
-};
 
+    {
+        dOut "Active Auras [USRS]"  LF
+        Line                        LF
+        "AURAS"                     LF
+        Line                        LF
+    },
+
+    {
+        dOut "Aura Component Commands"      LF
+        TB  dOut    "append ip name status" LF
+        TB  dOut    "back"                  LF
+    },
+
+    [&](Model& model)->String
+    {
+        String format;
+        Log::InRed("UpdateFormat()->");
+        __Begin;
+        {
+            format = Stage::CheckPresence.format;
+            {
+                Int auraCount = model.cpca.activeLocalBroadcasters.size();
+                format = std::regex_replace(format, rxUsers, std::to_string(auraCount));
+                String auras;
+                {
+                    for (auto& aura : model.cpca.activeLocalBroadcasters)
+                    {
+                        String ip = UlongIpToDotIp(aura.first);
+                        UserData::UserAddr addr(ip);
+
+                        UserData ud = model.cudf.FindUsersInFile(addr);
+                        if (ud != UserData::BadData)
+                            auras += ud.Alias() + "\t" + ud.Status().to_str() + "\n";
+                        else
+                            auras += ip + "\t" + "unknown" + "\n";
+                    }
+                }
+                format = std::regex_replace(format, rxAuras, auras);
+            }
+        }
+        __End;
+        Log::InRed("UpdateFormat();");
+        return format;
+    }
+};
 const Stage::ViewStage Stage::Messenger{
     Stage::ViewStage::Value::Messenger,
     {
@@ -297,8 +326,7 @@ const Stage::ViewStage Stage::Messenger{
         dOut "Messenger Commands"              LF
         TB  dOut    "send all msg"             LF
         TB  dOut    "send all-status msg"      LF
-        TB  dOut    "send name msg"            LF
-        TB  dOut    "send [name1;name2;] msg"  LF
+        TB  dOut    "send aura msg"            LF
         TB  dOut    "back"                     LF
     },
     [&](Model& model)->String {
@@ -310,15 +338,16 @@ const Stage::ViewStage Stage::Messenger{
             {
                 String activeUsersList;
                 {
-                    for (auto aura : model.presenceAura.activeLocalBroadcasters)
+                    for (auto aura : model.cpca.activeLocalBroadcasters)
                     {
                         String ip = UlongIpToDotIp(aura.first);
                         UserData::UserAddr adr(ip);
-                        UserData ud = model.udfNavigator.FindUsersInFile(adr);
+                        UserData ud = model.cudf.FindUsersInFile(adr);
     
                         if (ud != UserData::BadData)
                         {
-                            activeUsersList += ud.Alias();
+                            activeUsersList += ud.Alias() + "(";
+                            activeUsersList += ud.Status().to_str() + ")";
                         }
                         else
                         {
@@ -335,7 +364,7 @@ const Stage::ViewStage Stage::Messenger{
     
                 String messageHistory;
                 {
-                    for (auto msg : model.chatMessenger.Messages())
+                    for (auto msg : model.cmsg.Messages())
                     {
                         String sMsg;
                         {
@@ -347,16 +376,30 @@ const Stage::ViewStage Stage::Messenger{
                             }
                             String user;
                             {
-                                String ip = UlongIpToDotIp(std::get<1>(msg));
-                                UserData::UserAddr adr(ip);
-                                auto udata = model.udfNavigator.FindUsersInFile(adr);
-                                if (udata != UserData::BadData)
+                                ULONG addr = std::get<1>(msg);
+                                if ((addr ^ (~0)) < basicLocalIp)
                                 {
-                                    user += udata.Alias();
+                                    String ipTo = UlongIpToDotIp(addr ^ (~0));
+                                    UserData::UserAddr adrTo(ipTo);
+                                    UserData udTo = model.cudf.FindUsersInFile(adrTo);
+                                    if (udTo != UserData::BadData)
+                                        user += "to " + udTo.Alias();
+                                    else
+                                        user += ipTo;
                                 }
                                 else
                                 {
-                                    user += ip;
+                                    String ip = UlongIpToDotIp(addr);
+                                    UserData::UserAddr adr(ip);
+                                    auto udata = model.cudf.FindUsersInFile(adr);
+                                    if (udata != UserData::BadData)
+                                    {
+                                        user += udata.Alias();
+                                    }
+                                    else
+                                    {
+                                        user += ip;
+                                    }
                                 }
                             }
                             String txt = std::get<2>(msg);
@@ -368,7 +411,7 @@ const Stage::ViewStage Stage::Messenger{
                 }
                 format = std::regex_replace(format, rxMsgs, messageHistory);
     
-                model.chatMessenger.MarkAllAsRead();
+                model.cmsg.MarkAllAsRead();
             }
         }
         __End;
@@ -376,8 +419,7 @@ const Stage::ViewStage Stage::Messenger{
         return format;
     }
 };
-const Stage::ViewStage Stage::SharedFolder
-{
+const Stage::ViewStage Stage::SharedFolder{
     Stage::ViewStage::Value::SharedFolder,
 {   
     dOut "Self Shared Folder [FLS]"   LF
@@ -397,10 +439,10 @@ const Stage::ViewStage Stage::SharedFolder
     {
         format = Stage::SharedFolder.format;
         {
-            Int fileCount = model.sfNavigator.self.GetFileList().size();
+            Int fileCount = model.csfn.self.GetFileList().size();
             format = std::regex_replace(format, rxFiles, std::to_string(fileCount));
 
-            Int userCount = model.presenceAura.activeLocalBroadcasters.size();
+            Int userCount = model.cpca.activeLocalBroadcasters.size();
             format = std::regex_replace(format, rxUsers, std::to_string(userCount));
         }
     }
@@ -434,12 +476,12 @@ const Stage::ViewStage Stage::SharedFolderSelf{
         {
             format = Stage::SharedFolderSelf.format;
             {
-                String path = model.sfNavigator.self.SharedFolderPath();
+                String path = model.csfn.self.SharedFolderPath();
                 format = std::regex_replace(format, rxPath, path);
     
                 String files;
                 {
-                    for (auto& file : model.sfNavigator.self.GetFileList())
+                    for (auto& file : model.csfn.self.GetFileList())
                         files += file + "\n";
                 }
                 format = std::regex_replace(format, rxFiles, files);
@@ -452,14 +494,48 @@ const Stage::ViewStage Stage::SharedFolderSelf{
 };
 const Stage::ViewStage Stage::SharedFolderOther{
     Stage::ViewStage::Value::SharedFolderOther,
-{
-        "USRS"  LF
-        Line    LF 
-},
-{
-    dOut "SF Other Commands"                 LF
-    TB dOut     "request user filename.ext"  LF
-    TB dOut     "refresh"                    LF
-    TB dOut     "back"                       LF
-}
+    {
+        "Active users: USRS"    LF
+        Line                    LF 
+        "AURAS"                 LF
+        Line                    LF
+    },
+    {
+        dOut "SFOther Commands"                 LF
+        TB dOut     "request usr file_list"     LF
+        TB dOut     "request usr send file"     LF
+        TB dOut     "request usr recv"          LF
+        TB dOut     "back"                      LF
+    },
+    [&](Model& model)->String
+    {
+        String format;
+        Log::InRed("UpdateFormat()->");
+        __Begin;
+        {
+            format = Stage::SharedFolderOther.format;
+            {
+                Int auraCount = model.cpca.activeLocalBroadcasters.size();
+                format = std::regex_replace(format, rxUsers, std::to_string(auraCount));
+                String auras;
+                {
+                    for (auto& aura : model.cpca.activeLocalBroadcasters)
+                    {
+                        String ip = UlongIpToDotIp(aura.first);
+                        UserData::UserAddr addr(ip);
+
+                        UserData ud = model.cudf.FindUsersInFile(addr);
+                        if (ud != UserData::BadData)
+                            auras += ud.Alias() + "\t" + ud.Status().to_str() + "\n";
+                        else
+                            auras += ip + "\t" + "unknown" + "\n";
+                    }
+                }
+                format = std::regex_replace(format, rxAuras, auras);
+            }
+        }
+        __End;
+        Log::InRed("UpdateFormat();");
+        return format;  
+    }
 };

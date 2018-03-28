@@ -38,6 +38,8 @@ namespace FileShare {
         */
         static Bool IsBadAlias(const String& alias);
 
+        Bool IsBadData();
+
         bool operator==(const UserData& other) const;
         bool operator!=(const UserData& other) const;
 

@@ -20,14 +20,22 @@ namespace FileShare {
         ~Model();
     protected:
     public:
-        MessengerComponent chatMessenger;
-        SfnComponent sfNavigator;
-        UDFComponent udfNavigator;
-        PresenceComponent presenceAura;
+        //component: Messenger
+        MessengerComponent cmsg;
+        // component: Shared Folder Navigator
+        SfnComponent csfn;
+        // component: User Data File
+        UDFComponent cudf;
+        // component: Presence Aura
+        PresenceComponent cpca;
+
+        static void WsaStartup();
 
         void StartAuraThreadIn();
         void StartAuraThreadOut();
         void StartMessageReceivingThread();
+        void StartRequestReceivingThread();
+        void StartRequestReceivingThread20();
 
         bool stupidThreadsDie = false;
     };

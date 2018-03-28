@@ -84,10 +84,10 @@ namespace FileShare {
 
         Int SendFileToUser(const String& filePath, UINT chunkSize, const String& addr, USHORT port = sharePort);
 
-    protected:
         RequestListener requestListener;
         FileListener fileListener;
 
         friend class SharedFolderNavigatorComponent;
+        friend class Model;
     };
 }
