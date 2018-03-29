@@ -24,11 +24,12 @@ namespace FileShare
         //Int RequestFileList(Sender& target);
         //Int RequestFile(Sender& target);
 
-        String RequestAndReceiveFileList(Sender&);
-        Int RequestAndReceiveFile(Sender&, const String& fileName);
-        Int RequestReceivingAndSendFile(Sender&, const String fileName);
+        String RequestAndReceiveFileList(Sender& requestTarget);
 
-        Int SendFile(Sender&, const String& fileName, Int chunkSize);
-        Int RecvFile(Receiver&, const String& fileName, Int chunkSize);
+        Int RequestSendingAndReceiveFile(Sender& target, const String& fileName, const String& recvPath);
+        Int RequestReceivingAndSendFile(Sender& target, const String& fileName, const String& filePath);
+
+        Int SendFile(Sender& target, const String& filePath);
+        Int RecvFile(Receiver& target, const String& filePath);
     };
 };

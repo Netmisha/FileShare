@@ -20,3 +20,5 @@ try Stage::ViewStage
 
 
     main menu check cf
+
+ask v bt nw

@@ -29,12 +29,12 @@ namespace FileShare {
         // component: Presence Aura
         PresenceComponent cpca;
 
-        static void WsaStartup();
+        static int WsaStartup();
 
         void StartAuraThreadIn();
         void StartAuraThreadOut();
         void StartMessageReceivingThread();
-        void StartRequestReceivingThread();
+        //void StartRequestReceivingThread();
         void StartRequestReceivingThread20();
 
         bool stupidThreadsDie = false;

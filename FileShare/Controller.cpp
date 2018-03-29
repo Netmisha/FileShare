@@ -57,13 +57,13 @@ const Regex rxIp("(" _0_255 "[.]" "){3}" _0_255);
 const Regex rxFileName(R"(^[^<>:;,?"*|/\\]+[.][A-Za-z0-9]+$)");
 const Regex rxStatus("g(ood)?|b(ad)?|u(gly)?");
 
-namespace Commands
+namespace Request
 {
-    const String msgStandard = "LOLKEK";
-    const String recRecvMyFile = "RECVMYFILE";
-    const String fileListPls = "FILELISTPLS";
-    const String recSendMeFile = "SENDMEFILE";
-    const String recNoSuchFile = "NOSUCHFILE";
+    const String bcStandard = "LOLKEK";
+    const String recvMyFile = "RECVMYFILE";
+    const String fileLstPls = "FILELISTPLS";
+    const String sendMeFile = "SENDMEFILE";
+    const String noSuchFile = "NOSUCHFILE";
 };
 #endif // !rxConst
 
@@ -622,7 +622,7 @@ void ConsoleController::SharedFolderSelf()
 
                 if (std::regex_match(command, rxBack))
                 {
-                    view.stage = Stage::MainMenu;
+                    view.stage = Stage::SharedFolder;
                     keepGoing = false;
                     continue;
                 }
@@ -718,7 +718,7 @@ void ConsoleController::SharedFolderOther()
 
                 if (std::regex_match(command, rxBack))
                 {
-                    view.stage = Stage::MainMenu;
+                    view.stage = Stage::SharedFolder;
                     keepGoing = false;
                     continue;
                 }
@@ -766,82 +766,91 @@ void ConsoleController::SharedFolderOther()
                     String specificRequest;
                     {
                         ss >> specificRequest;
-                    }
 
-                    if (std::regex_match(specificRequest, rxRecList)) 
-                    {
-                        String fileList = model.csfn.other20.RequestAndReceiveFileList(requestSender);
-
-                        if (fileList.empty())
+                        if (std::regex_match(specificRequest, rxRecList))
                         {
-                            view.stage.comment = "failed to recv fileList";
-                        }
-                        else
-                        {
-                            view.stage.comment = fileList;
-                        }
-                    }
+                            String fileList = model.csfn.other20.RequestAndReceiveFileList(requestSender);
 
-                    if (std::regex_match(specificRequest, rxRecSend))
-                    {
-                        String fileName;
-                        {
-                            ss.ignore();
-                            std::getline(ss, fileName);
-
-                            if (!std::regex_match(fileName, rxFileName)) 
+                            if (fileList.empty())
                             {
-                                view.stage.comment = "bad fileName";
-                                continue;
-                            }
-                        }
-
-                        Int requestResult = model.csfn.other20.RequestAndReceiveFile(requestSender, fileName);
-
-                        if (requestResult)
-                        {
-                            view.stage.comment = "request was sent";
-                        }
-                        else
-                        {
-                            view.stage.comment = "request probably failed";
-                        }
-                    }
-
-                    if (std::regex_match(specificRequest, rxRecRecv))
-                    {
-                        String fileName;
-                        {
-                            ss.ignore();
-                            std::getline(ss, fileName);
-
-                            if (!std::regex_match(fileName, rxFileName))
-                            {
-                                view.stage.comment = "bad fileName";
-                                continue;
-                            }
-
-                            Bool fileExists = model.csfn.self.FileExists(fileName);
-                            if (fileExists)
-                            {
-                                String folderPath = model.csfn.self.SharedFolderPath();
-                                fileName = folderPath + fileName;
+                                view.stage.comment = "failed to recv";
                             }
                             else
                             {
-                                view.stage.comment = "no such file in SharedFolder";
+                                view.stage.comment = rawTarget + "/" + fileList;
                             }
+
+                            continue;
                         }
 
-                        Int requestResult = model.csfn.other20.RequestReceivingAndSendFile(requestSender, fileName);
+                        if (std::regex_match(specificRequest, rxRecSend))
+                        {
+                            String fileName;
+                            {
+                                ss.ignore();
+                                std::getline(ss, fileName);
 
-                        if (requestResult)
-                        {
-                            view.stage.comment = "request was sent";
+                                if (!std::regex_match(fileName, rxFileName))
+                                {
+                                    view.stage.comment = "bad fileName";
+                                    continue;
+                                }
+                            }
+                            String targetPath = model.csfn.self.SharedFolderPath();
+                            String targetName = model.csfn.self.FileCreate(fileName);
+
+                            Int requestResult = model.csfn.other20.RequestSendingAndReceiveFile(requestSender, fileName, targetPath+targetName);
+
+                            if (requestResult != -1)
+                            {
+                                view.stage.comment += "request was sent\n>> ";
+                                view.stage.comment += "w8 for beep signal\n>> ";
+                                view.stage.comment += "file is saved as " + targetName;
+                            }
+                            else
+                            {
+                                view.stage.comment += "request probably failed\n>>";
+                                view.stage.comment += targetName + " probably corrupted";
+                            }
+                            continue;
                         }
-                        else
+
+                        if (std::regex_match(specificRequest, rxRecRecv))
                         {
-                            view.stage.comment = "request probably failed";
+                            String fileName;
+                            {
+                                ss.ignore();
+                                std::getline(ss, fileName);
+
+                                if (!std::regex_match(fileName, rxFileName))
+                                {
+                                    view.stage.comment = "bad fileName";
+                                    continue;
+                                }
+
+                                Bool fileExists = model.csfn.self.FileExists(fileName);
+                                if (fileExists)
+                                {
+                                    String folderPath = model.csfn.self.SharedFolderPath();
+                                    fileName = folderPath + fileName;
+                                }
+                                else
+                                {
+                                    view.stage.comment = "no such file in SharedFolder";
+                                }
+                            }
+                            String filePath = model.csfn.self.SharedFolderPath();
+
+                            Int requestResult = model.csfn.other20.RequestReceivingAndSendFile(requestSender, fileName, filePath + fileName);
+
+                            if (requestResult)
+                            {
+                                view.stage.comment = "request was sent";
+                            }
+                            else
+                            {
+                                view.stage.comment = "request probably failed";
+                            }
                         }
                     }
                 }
@@ -916,7 +925,7 @@ void ConsoleController::SharedFolderOther()
 //
 //                    if (std::regex_match(request, rxRecList))
 //                    {
-//                        rs.SendRequest(Commands::fileListPls);
+//                        rs.SendRequest(Request::fileLstPls);
 //                        RequestReceiver rr(std::move(rs));
 //
 //                        String fileList = rr.ReceiveRequest();
@@ -933,7 +942,7 @@ void ConsoleController::SharedFolderOther()
 //                            getline(ss, fileName);
 //                        }
 //
-//                        rs.SendRequest(Commands::recSendMeFile + fileName);
+//                        rs.SendRequest(Request::sendMeFile + fileName);
 //
 //                        view.stage.comment = "request sent";
 //                        continue;
@@ -956,7 +965,7 @@ void ConsoleController::SharedFolderOther()
 //                        }
 //                        else
 //                        {
-//                            rs.SendRequest(Commands::recRecvMyFile + fileName);
+//                            rs.SendRequest(Request::recvMyFile + fileName);
 //                            FileSender fs(userAddr);
 //                            String path = model.sfNavigator.self.SharedFolderPath();
 //                            Thread th{ [&]() {

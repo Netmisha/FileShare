@@ -13,7 +13,7 @@ namespace FileShare {
         SharedFolderNavigatorComponent(USHORT, USHORT);
 
         SharedFolderNavigatorSelf self;
-        SharedFolderNavigatorOther other;
+        //SharedFolderNavigatorOther other;
         SharedFolderNavigatorOther20 other20;
     };
 

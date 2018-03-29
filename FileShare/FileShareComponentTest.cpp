@@ -13,10 +13,60 @@
 #define TEST_MABITCH_MODEL_OUT              6
 #define TEST_TRYING_TO_VIEW                 7
 #define TEST_TRYING_TO_CONTROL              8
+#define TEST_SF_NAVIGATOR_OTHER20           9
 
 #if !defined(CURRENT_TEST)
 #define CURRENT_TEST 8
 #endif // !CURRENT_TEST
+
+#ifdef TEST_SF_NAVIGATOR_OTHER20
+#ifdef CURRENT_TEST
+#if CURRENT_TEST == TEST_SF_NAVIGATOR_OTHER20
+
+
+#include "Model.h"
+using namespace FileShare;
+
+int error = Model::WsaStartup();
+
+String request = "SENDMEFILE";
+String fileName = "note.txt";
+
+void TestFileSender(Model&);
+//void TestFileReceiver();
+int TEST()
+{
+    Model mdl;
+    int choice;
+    {
+        std::cin >> choice;
+    }
+    switch (choice)
+    {
+        case 1: TestFileSender(mdl); break;
+            //case 2: TestFileReceiver(); break;
+    }
+    return system("pause");
+}
+
+void TestFileSender(Model& mdl)
+{
+    Sender rs(mdl.cpca.GetHostIp(), requestPort20);
+    rs.ConnectToUser();
+    String folderPath = mdl.csfn.self.SharedFolderPath();
+    String targetPath = folderPath + mdl.csfn.self.FileCreate(fileName);
+
+    int result = mdl.csfn.other20.RequestSendingAndReceiveFile(rs, fileName, targetPath);
+
+    if (result != SOCKET_ERROR)
+        std::cout << "ok";
+}
+//void TestFileReceiver();
+
+#endif // CURRENT_TEST == TEST_SF_NAVIGATOR_OTHER20
+#endif // CURRENT_TEST
+#endif // TEST_SF_NAVIGATOR_OTHER20
+
 
 #ifdef TEST_TRYING_TO_CONTROL
 #ifdef CURRENT_TEST

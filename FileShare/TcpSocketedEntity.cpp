@@ -170,10 +170,13 @@ TCPSocketedEntity Listener::Accept()
 #ifndef TCP_RECEIVER
 
 Receiver::Receiver(TCPSocketedEntity&& target) :
-    TCPSocketedEntity(std::move(target))
+    TCPSocketedEntity(target.sc, target.addr.sin_addr.S_un.S_addr, ntohs(addr.sin_port))
 {
     __Begin;
-    Log::InRed("receiver created");
+    {
+        target.sc = INVALID_SOCKET;
+        Log::InRed("receiver created");
+    }
     __End;
 }
 String Receiver::ReceiveMessage()
@@ -215,9 +218,11 @@ Sender::Sender(String addr, USHORT port) :
     Sender(inet_addr(addr.c_str()), port)
 {}
 
-Sender::Sender(TCPSocketedEntity&& other):
-    TCPSocketedEntity(std::move(other))
-{}
+Sender::Sender(TCPSocketedEntity&& target):
+    TCPSocketedEntity(target.sc, target.addr.sin_addr.S_un.S_addr, ntohs(addr.sin_port))
+{
+    target.sc = SOCKET_ERROR;
+}
 
 Int Sender::ConnectToUser()
 {
