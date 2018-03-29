@@ -91,7 +91,7 @@
       <Filter>Source Files\MVC</Filter>
     </ClCompile>
     <ClCompile Include="SharedFolderNavigatorOther20.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

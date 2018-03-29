@@ -506,7 +506,7 @@ const Stage::ViewStage Stage::SharedFolderOther{
         dOut "SFOther Commands"                 LF
         TB dOut     "request usr file_list"     LF
         TB dOut     "request usr send file"     LF
-        TB dOut     "request usr recv"          LF
+        TB dOut     "request usr recv file"     LF
         TB dOut     "back"                      LF
     },
     [&](Model& model)->String

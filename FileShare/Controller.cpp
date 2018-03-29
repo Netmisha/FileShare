@@ -829,14 +829,10 @@ void ConsoleController::SharedFolderOther()
                                 }
 
                                 Bool fileExists = model.csfn.self.FileExists(fileName);
-                                if (fileExists)
-                                {
-                                    String folderPath = model.csfn.self.SharedFolderPath();
-                                    fileName = folderPath + fileName;
-                                }
-                                else
+                                if (!fileExists)
                                 {
                                     view.stage.comment = "no such file in SharedFolder";
+                                    continue;
                                 }
                             }
                             String filePath = model.csfn.self.SharedFolderPath();

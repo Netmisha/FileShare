@@ -111,13 +111,43 @@ Int SharedFolderNavigatorOther20::RequestSendingAndReceiveFile(Sender& rs, const
     return recvFileResult;
 }
 
-Int SharedFolderNavigatorOther20::RequestReceivingAndSendFile(Sender& se, const String& fileName, const String& filePath)
+Int SharedFolderNavigatorOther20::RequestReceivingAndSendFile(Sender& fs, const String& fileName, const String& filePath)
 {
     Int resultOfSendFile = SOCKET_ERROR;
     Log::InRed("RequestReceivingAndSendFile()->");
     __Begin;
     {
+        Int sendRequestResult = SOCKET_ERROR;
+        {
+            for (TimePoint start = Clock::now(); Clock::now() - start < Seconds(3);)
+            {
+                sendRequestResult = fs.SendMessageToUser(Request::recvMyFile + fileName);
+                if (sendRequestResult != SOCKET_ERROR)
+                    break;
+            }
+        }
 
+        Receiver rc = std::move(fs);
+        String msg;
+        while (msg.empty())
+            msg=rc.ReceiveMessage();
+
+        if (sendRequestResult != SOCKET_ERROR)
+        {
+            auto thFileSendFun = [this, &rc, filePath]()
+            {
+                Sender se = std::move(rc);
+                if (SendFile(se, filePath) != -1)
+                {
+                    Log::InRed("send()+ " + filePath);
+                    Beep(523, 500);
+                }
+            };
+            Thread sendThread{ thFileSendFun };
+            sendThread.detach();
+            std::this_thread::sleep_for(Seconds(1));
+            resultOfSendFile = TRUE;
+        }
     }
     __End;
     Log::InRed("RequestReceivingAndSendFile();");

@@ -162,83 +162,6 @@ void Model::StartMessageReceivingThread()
 }
 ///#undef InRed
 
-//void ProceedWithRequestReceiver(Model& mdl, RequestReceiver& rr)
-//{
-//    String request;
-//    
-//    while(request.empty())
-//        request = rr.ReceiveRequest();
-//
-//    RequestSender rs(std::move(rr));
-//    
-//    if (std::regex_match(request, rxFileListPls))
-//    {
-//        String fileList;
-//        {
-//            for (auto& f : mdl.csfn.self.GetFileList())
-//            {
-//                fileList += f + "\n";
-//            }
-//        }
-//        RequestSender rs(std::move(rr));
-//        rs.SendRequest(fileList);
-//    }
-//
-//    if (std::regex_search(request, rxRecMyFile))
-//    {
-//        String fileName = std::regex_replace(request, rxRecMyFile, {});
-//        mdl.csfn.self.FileCreate(fileName);
-//
-//        FileReceiver fr = mdl.csfn.other.fileListener.Accept();
-//        fr.ReceiveFile(mdl.csfn.self.SharedFolderPath() + fileName);
-//    }
-//
-//    if (std::regex_search(request, rxSendMeFile))
-//    {
-//        String fileName = std::regex_replace(request, rxSendMeFile, {});
-//        
-//        if (mdl.csfn.self.FileExists(fileName))
-//        {
-//            rs.SendRequest(Request::recvMyFile + fileName);
-//
-//            String sfPath = mdl.csfn.self.SharedFolderPath();
-//            FileSender fs(rs.addr.sin_addr.S_un.S_addr);
-//            fs.SendFile(sfPath + request);
-//        }
-//        //else
-//        //{
-//        //    rs.SendRequest(Request::noSuchFile + fileName);
-//        //}
-//    }
-//
-//}
-//void Model::StartRequestReceivingThread()
-//{
-//    Log::InRed("StartRequestReceivingThread()->");
-//    __Begin;
-//    {
-//        auto requestThreadFunclion = [&]()
-//        {
-//            while (!stupidThreadsDie)
-//            {
-//                RequestReceiver rr = csfn.other.requestListener.Accept();
-//
-//                auto thFun = [&]()
-//                {
-//                    ProceedWithRequestReceiver(*this, rr);
-//                };
-//
-//                Thread th{ thFun };
-//                th.detach();
-//            }
-//        };
-//        Thread sfoThreadReceiveRequests{ requestThreadFunclion };
-//        sfoThreadReceiveRequests.detach();
-//    }
-//    __End;
-//    Log::InRed("StartRequestReceivingThread();");
-//}
-
 void Model::StartRequestReceivingThread20()
 {
     Log::InRed("StartRequestReceivingThread20()->");
@@ -262,9 +185,7 @@ void Model::StartRequestReceivingThread20()
                     {
                         while (request.empty())
                             request = rc.ReceiveMessage();
-                    }
-
-                    Sender responder(std::move(rc));
+                    }                    
 
                     if (request == Request::fileLstPls)
                     {
@@ -276,6 +197,8 @@ void Model::StartRequestReceivingThread20()
                             }
                         }
 
+                        Sender responder(std::move(rc));
+
                         Int sendResult = SOCKET_ERROR;
                         while(sendResult == SOCKET_ERROR)
                             sendResult = responder.SendMessageToUser(fileList);
@@ -286,15 +209,26 @@ void Model::StartRequestReceivingThread20()
                         String fileName = std::regex_replace(request, rxSendMeFile, "");
                         String filePath = csfn.self.SharedFolderPath();
 
-                        Int sendResult = SOCKET_ERROR;
-                        //while (sendResult == SOCKET_ERROR)
-                            sendResult = csfn.other20.SendFile(responder, filePath + fileName);
+                        Sender responder(std::move(rc));
+                        csfn.other20.SendFile(responder, filePath + fileName);
+                    }
+
+                    if (std::regex_search(request, rxRecMyFile))
+                    {
+                        String fileName = std::regex_replace(request, rxRecMyFile, "");
+                        fileName = csfn.self.FileCreate(fileName);
+
+                        String filePath = csfn.self.SharedFolderPath();
+
+                        Sender imOk = std::move(rc);
+                        imOk.SendMessageToUser("IMOK");
+                        Receiver responder = std::move(imOk);
+                        csfn.other20.RecvFile(responder, filePath + fileName);
                     }
                 };
 
                 Thread recvRequest(recvRequestAndDoSmthAboutIt);
                 recvRequest.detach();
-                //while (!requestReceiver.InvalidSocket());
                 std::this_thread::sleep_for(Seconds(2));
             }
             __End;
