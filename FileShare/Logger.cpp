@@ -3,15 +3,13 @@
 #include <fstream>
 #include "Logger.h"
 
-
 int Log::depth = 0;
-
 bool outputFree = true;
 
 void Indent(int dpt, std::ostream& os = std::cerr)
-    {
-        while (dpt--) os << "  ";
-    }
+{
+    while (dpt--) os << "  ";
+}
 #ifdef _DEBUG
     void InColor(const std::string& message, int color, bool error=false)
         {
@@ -66,9 +64,9 @@ void LogToFile(const std::string& message, bool error = false)
 }
 
 void Log::InFileWithError(const std::string& message)
-    {
-        LogToFile(message, true);      
-    }
+{
+    LogToFile(message, true);
+}
 
 void Log::InFile(const std::string& message)
 {

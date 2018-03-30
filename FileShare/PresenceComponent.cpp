@@ -55,7 +55,6 @@ PresenceComponent::~PresenceComponent()
 
 STR PresenceComponent::ReceiveBroadcastedMessage()
 {   
-    //STR buff(100, 0);
     CHAR buff[100]{};
     recvfrom(sc, buff,sizeof(buff), NULL, inAddrSdr.addrPtr, &inAddrSdr.addrSize);
 
@@ -90,7 +89,6 @@ Int PresenceComponent::WSAstartup()
     __Begin;
     {
         wsaStartupResult = WSAStartup(MAKEWORD(2, 2), &wsa);
-
     }
     __End;
     Log::InRed("<-WSAstartup();");

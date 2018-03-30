@@ -24,7 +24,7 @@ ConsoleView::ConsoleView(Model& mdl, InStream& in, OtStream& out) :
     stage(Stage::Inception),
     dataToPrint(ProvideStageFormat())
 {
-        Log::InRed("ConsoleView() :");
+    Log::InRed("ConsoleView() :");
 }
 
 FileShare::ConsoleView::~ConsoleView()

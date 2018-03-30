@@ -1,13 +1,12 @@
 #pragma once
-#define _WINSOCK_DEPRECATED_NO_WARNINGS 
-
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
 #include <string>
 
-namespace FileShare {
-
+namespace FileShare 
+{
     using String = std::string;
     using Int = int;
     using Bool = int;

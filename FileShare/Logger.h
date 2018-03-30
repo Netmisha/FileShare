@@ -3,7 +3,8 @@
 #define LOGGER
 #define TO_STR(s) (#s)
 
-class Log {
+class Log 
+{
 public:
     static int depth;
     static void Log::InRed(const std::string& message);

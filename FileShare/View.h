@@ -4,16 +4,17 @@
 #include "Model.h"
 #include "Stages.h"
 
-namespace FileShare {
+namespace FileShare 
+{
     using Data = std::string;
     using InStream = std::istream;
     using OtStream = std::ostream;
 
-    class BasicView {
+    class BasicView 
+    {
     protected:      
         BasicView(Model&);
-        ~BasicView();
-
+       ~BasicView();
         virtual void Render() = 0;
         Model& model;
     };
@@ -25,17 +26,15 @@ namespace FileShare {
         friend int main();
     public:
         ConsoleView(Model&, InStream&, OtStream&);
-        ~ConsoleView();
+       ~ConsoleView();
     protected:
         virtual void Render()    override;
-        
-        virtual Data GetDataFromInput();
-        virtual Data ProvideStageFormat();
-
         virtual void ClearConsole();
         virtual void SetDataToPrint(const Data&);
         virtual void PrintData();
         virtual void PrintData(const Data&);
+        virtual Data GetDataFromInput();
+        virtual Data ProvideStageFormat();
         
         InStream& istrm;
         OtStream& ostrm;

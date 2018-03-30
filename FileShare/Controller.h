@@ -6,15 +6,17 @@
 #include <string>
 #include <functional>
 
-namespace FileShare {
+namespace FileShare 
+{
     using Data = std::string;
     using Condition = std::function<bool(const String&)>;
 
-    class BasicController{
+    class BasicController
+    {
     public:  
         virtual void OnLoad() = 0;
     protected:    
-        ~BasicController();
+       ~BasicController();
         BasicController() = default;   
         BasicController(const BasicController&) = delete;
     };
@@ -35,7 +37,7 @@ namespace FileShare {
     {
     public:
         ConsoleController(Model&, ConsoleView&);
-        ~ConsoleController();
+       ~ConsoleController();
         virtual void OnLoad();
     protected:
         virtual Data GetCommand();

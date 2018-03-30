@@ -9,7 +9,7 @@
 #define TEST_USER_DATA_FILE_COMPONENT       2
 #define TEST_PRESENCE_COMPONENT             3
 #define TEST_MESSENGER                      4
-#define TEST_SHARED_FOLDER_NAVIGATOR_OTHER  5
+#define TEST_SHARED_FOLDER_NAVIGATOR_OTHER  5 // superfluous. sfno was replaced by sfno20
 #define TEST_MABITCH_MODEL_OUT              6
 #define TEST_TRYING_TO_VIEW                 7
 #define TEST_TRYING_TO_CONTROL              8

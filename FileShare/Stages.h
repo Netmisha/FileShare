@@ -7,9 +7,11 @@ namespace FileShare
     using Bool = int;
     using Function = std::function < String(class Model&)>;
 
-    class Stage{
+    class Stage
+    {
     public:
-        class ViewStage {
+        class ViewStage 
+        {
         public:
             enum class Value
             {
@@ -24,8 +26,8 @@ namespace FileShare
                     Messenger,
                     UserData,
                     SharedFolder,
-                    SharedFolderSelf,
-                    SharedFolderOther    
+                        SharedFolderSelf,
+                        SharedFolderOther    
             };
 
             ViewStage(Value, const String&, const String& = {});

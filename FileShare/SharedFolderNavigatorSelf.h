@@ -7,15 +7,17 @@ namespace FileShare {
         protected BasicSharedFolderNavigator
     {
     public:
-        SharedFolderNavigatorSelf(); // find out if exists, create if doesnt
-
+        // find out if exists, create if doesnt
+        SharedFolderNavigatorSelf(); 
+        // visible files, name.ext only
         FileVector GetFileList();
         /**
             since function treats provided name as suggestion
-            and doesnt guarantee much conformity with it
+            and doesnt guarantee much conformity with it,
             newly created file name is returned
         */
         String FileCreate(const String& fileName);
+        // dont know if deleting files in use may couse problems
         Bool   FileDelete(const String& fileName);
         /*
             User can open some files from shared folder
@@ -25,14 +27,15 @@ namespace FileShare {
             pictures - mspaint
             music/video - wmplayer
         */
-        Bool   FileOpen  (const String& fileName); // text - notepad, picture - paint, music/video - wmplayer
+        Bool   FileOpen  (const String& fileName);
         Bool   FileExists(const String& fileName);
         Bool   FileRename(const String& nameOld, const String& nameNew);
-
+        // short path
         const String& SharedFolderPath();
     protected:
         /**
-            to protect ourselves from files with same names replacing others etc
+            to protect ourselves from files 
+            with same names replacing others etc
             we create new names for files with names already existing
         */
         String FileCreateUniqueName(const String&);
@@ -49,7 +52,7 @@ namespace FileShare {
         const String& ModuleDirectoryPath();
 
         /**
-            should does skip hidden files
+            should skip hidden files
         */
         FileVector FilesInDirectory(const String& directoryPath, const String& key = "*.*");
 

@@ -1,9 +1,7 @@
 #include "TcpSocketedEntity.h"
-
 #include "Logger.h"
 
 using namespace FileShare;
-
 
 #ifndef TCP_SOCKETED_ENTITY
 TCPSocketedEntity::TCPSocketedEntity(SOCKET s, ULONG inetAddr, USHORT port) :
@@ -261,7 +259,6 @@ Int Sender::SendMessageToUser(const String & buff)
     Log::InRed("SendMessageToUser();");
     return result;
 }
-
 #endif TCP_SENDER
 
 #endif !TCP_SOCKETED_ENTITY

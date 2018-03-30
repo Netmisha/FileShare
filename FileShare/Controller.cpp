@@ -295,6 +295,7 @@ void ConsoleController::Messenger()
                 {
                     continue;
                 }
+                
                 if (std::regex_match(command, rxBack))
                 {
                     view.stage = Stage::MainMenu;
@@ -340,10 +341,16 @@ void ConsoleController::Messenger()
                         {
                             if (std::regex_match(str, rxAllGood))
                                 sts = UserData::UserStatus::StatusValue::Good;
-                            if (std::regex_match(str, rxAllBad))
+                            else if (std::regex_match(str, rxAllBad))
                                 sts = UserData::UserStatus::StatusValue::Bad;
-                            if (std::regex_match(str, rxAllUgly))
+                            else if (std::regex_match(str, rxAllUgly))
                                 UserData::UserStatus::StatusValue::Ugly;
+                            else
+                            {
+                                view.stage.comment += "bad status " + str + ". Try help";
+                                continue;
+                            }
+
                         }
 
                         MessengerSendToActiveIf(msg, [&](const String ip)->bool
@@ -376,6 +383,11 @@ void ConsoleController::Messenger()
                         }
                     }
                 }
+                else
+                {
+                    view.stage.comment += "no such command: " + str + ". Try help";
+                    continue;
+                }
             }
         }
     }
@@ -404,6 +416,11 @@ void ConsoleController::UserDataFile()
 
             String command = GetCommand();
             {
+                if (command.empty())
+                {
+                    continue;
+                }
+
                 if (std::regex_match(command, rxBack))
                 {
                     view.stage = Stage::MainMenu;
@@ -494,6 +511,7 @@ void ConsoleController::UserDataFile()
                     
                     continue;
                 }
+                
                 if (std::regex_match(str, rxModify))
                 {
                     String userName;
@@ -550,6 +568,9 @@ void ConsoleController::UserDataFile()
                     
                     continue;
                 }
+
+                view.stage.comment += "no such command: " + str + ". Try help";
+                continue;
             }
         }
     }
@@ -598,6 +619,9 @@ void ConsoleController::SharedFolder()
                     SharedFolderOther();
                     continue;
                 }
+
+                view.stage.comment += "no such command: " + command + ". Try help";
+                continue;
             }
         }
     }
@@ -678,22 +702,22 @@ void ConsoleController::SharedFolderSelf()
                     model.csfn.self.FileCreate(fileName);
                     continue;
                 }
-
+                else
                 if (std::regex_match(str, rxOpen))
                 {
                     model.csfn.self.FileOpen(fileName);
                     continue;
                 }
-
+                else
                 if (std::regex_match(str, rxDelete))
                 {
                     model.csfn.self.FileDelete(fileName);
                     continue;
                 }
-
-                if (std::regex_match(str, rxUpload))
+                else
                 {
-                    view.stage.comment = "This function is to be implemented after throurough Aura testing.";
+                    view.stage.comment += "no such command: " + str + ". Try help";
+                    continue;
                 }
             }
         }
@@ -847,11 +871,16 @@ void ConsoleController::SharedFolderOther()
                             {
                                 view.stage.comment = "request probably failed";
                             }
+                            continue;
                         }
+
+                        view.stage.comment += "no such command: " + specificRequest + ". Try help";
+                        continue;
                     }
                 }
                 else
                 {
+                    view.stage.comment += "no such command: " + request + ". Try help";
                     continue;
                 }
             }
@@ -860,126 +889,6 @@ void ConsoleController::SharedFolderOther()
     __End;
     Log::InRed("SharedFolderOther();");
 }
-//{
-//    Log::InRed("SharedFolderOther()->");
-//    __Begin;
-//    {
-//        for (bool keepGoing = true; keepGoing;)
-//        {
-//            view.Render();
-
-//            String command = GetCommand(); 
-//            {
-//                if (std::regex_match(command, rxBack))
-//                {
-//                    view.stage = Stage::MainMenu;
-//                    keepGoing = false;
-//                    continue;
-//                }
-
-//                if (std::regex_match(command, rxHelp))
-//                {
-//                    view.stage.provideHelp = true;
-//                    continue;
-//                }
-
-//                StrStream ss(command);
-//                String str;
-//                {
-//                    ss >> str;
-//                }
-
-//                if (std::regex_match(str, rxRequest))
-//                {
-//                    String userSmth; {
-//                        ss >> userSmth;
-//                    }
-//                    String userAddr;
-//                    //usrSmth is ip
-//                    if (std::regex_match(userSmth, rxIp))
-//                    {
-//                        userAddr = userSmth;
-//                    }
-//                    //usrSmth is name
-//                    else
-//                    {
-//                        UserData ud = model.cudf.FindUsersInFile(userSmth);
-//                        if (ud.IsBadData())
-//                        {
-//                            view.stage.comment = "error: bad user data";
-//                            continue;
-//                        }
-//                        userAddr = ud.Address().to_str();
-//                    }
-
-//                    RequestSender rs(std::move(Sender(userAddr, requestPort)));
-//
-//                    String request;
-//                    {
-//                        ss >> request;
-//                    }
-//
-//                    if (std::regex_match(request, rxRecList))
-//                    {
-//                        rs.SendRequest(Request::fileLstPls);
-//                        RequestReceiver rr(std::move(rs));
-//
-//                        String fileList = rr.ReceiveRequest();
-//
-//                        view.stage.comment = fileList;
-//                        continue;
-//                    }
-
-//                    if (std::regex_match(request, rxRecSend))
-//                    {
-//                        String fileName;
-//                        {
-//                            ss.ignore();
-//                            getline(ss, fileName);
-//                        }
-//
-//                        rs.SendRequest(Request::sendMeFile + fileName);
-//
-//                        view.stage.comment = "request sent";
-//                        continue;
-//                    }
-
-//                    if (std::regex_match(request, rxRecRecv))
-//                    {
-//                        view.stage = Stage::SharedFolderSelf;
-//                        view.Render();
-//
-//                        String fileName = GetCommand();
-//                        String stageComment;
-//                        if (!std::regex_match(fileName, rxFileName))
-//                        {
-//                            stageComment = "error: bad file name";
-//                        }
-//                        else if (!model.sfNavigator.self.FileExists(fileName))
-//                        {
-//                            stageComment = "error: file not found";
-//                        }
-//                        else
-//                        {
-//                            rs.SendRequest(Request::recvMyFile + fileName);
-//                            FileSender fs(userAddr);
-//                            String path = model.sfNavigator.self.SharedFolderPath();
-//                            Thread th{ [&]() {
-//                                fs.SendFile(path + fileName);
-//                                }
-//                            };
-//                            th.detach();
-//                            view.stage = Stage::SharedFolderOther;
-//                            continue;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    __End;
-//    Log::InRed("SharedFolderOther();");
-//}
 void ConsoleController::CheckPresence()
 {
     Log::InRed("CheckPresence()->");
@@ -991,6 +900,11 @@ void ConsoleController::CheckPresence()
 
             String command = GetCommand();
             {
+                if (command.empty())
+                {
+                    continue;
+                }
+
                 if (std::regex_match(command, rxBack))
                 {
                     view.stage = Stage::MainMenu;
@@ -1065,7 +979,11 @@ void ConsoleController::CheckPresence()
                         continue;
                     }              
                 }
-
+                else
+                {
+                    view.stage.comment += "no such command: " + str + ". Try help";
+                    continue;
+                }
             }
         }
     }

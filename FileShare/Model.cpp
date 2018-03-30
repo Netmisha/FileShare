@@ -39,24 +39,24 @@ Model::Model() :
     Log::InRed("Model() :");
     __Begin;
     {
-        StartAuraThreadIn();
-        StartAuraThreadOut();
+        StartAuraBroadcastingThread();
+        StartAuraBroadcastReceivingThread();
         StartMessageReceivingThread();
         StartRequestReceivingThread20();
     }
     __End;
 }
 
-Model::Model(USHORT mp, USHORT rp, USHORT fp, USHORT pp) :
+Model::Model(USHORT mp, USHORT rp, USHORT pp) :
     cmsg(mp),
-    csfn(rp, fp),
+    csfn(rp),
     cpca(pp)
 {
     Log::InRed("Model():");
     __Begin;
     {
-        StartAuraThreadIn();
-        StartAuraThreadOut();
+        StartAuraBroadcastingThread();
+        StartAuraBroadcastReceivingThread();
         StartMessageReceivingThread();
     }
     __End;
@@ -73,13 +73,13 @@ int Model::WsaStartup()
     return WSAStartup(MAKEWORD(2, 2), &wsaData);
 }
 #define InRed DoNothing
-void Model::StartAuraThreadIn()
+void Model::StartAuraBroadcastingThread()
 {
-    Log::InRed("StartAuraThreadIn()->");
+    Log::InRed("StartAuraBroadcastingThread()->");
     __Begin;
-    static Thread auraThreadIn{ [&]() 
+    static Thread auraBroadcastingThread{ [&]() 
     {
-        Log::InRed("auraThreadIn->");
+        Log::InRed("auraBroadcastingThread->");
 
         TimePoint lastRefresh = Clock::now();
         Duration refreshRate = Seconds(10);
@@ -117,29 +117,29 @@ void Model::StartAuraThreadIn()
             }
         }
     } };
-    auraThreadIn.detach();
+    auraBroadcastingThread.detach();
     __End;
-    Log::InRed("<-StartAuraThreadIn()");
+    Log::InRed("<-StartAuraBroadcastingThread()");
 }
-void Model::StartAuraThreadOut()
+void Model::StartAuraBroadcastReceivingThread()
 {
-    Log::InRed("StartAuraThreadOut()->");
+    Log::InRed("StartAuraBroadcastReceivingThread()->");
     __Begin;
     {
-        auto auraThreadOutFunction = [&]() 
+        auto auraBroadcastReceivingThreadFunction = [&]() 
         {
-            Log::InRed("auraThreadOut->");
+            Log::InRed("auraBroadcastReceivingThread->");
             while (!stupidThreadsDie)
             {
                 cpca.SendMessageBroadcast(Request::bcStandard);
                 std::this_thread::sleep_for(MSeconds(300));
             }
         };
-        Thread auraThreadOut{ auraThreadOutFunction };
-        auraThreadOut.detach();
+        Thread auraBroadcastReceivingThread{ auraBroadcastReceivingThreadFunction };
+        auraBroadcastReceivingThread.detach();
     }
     __End;
-    Log::InRed("StartAuraThreadOut();");
+    Log::InRed("StartAuraBroadcastReceivingThread();");
 }
 #undef InRed
 void Model::StartMessageReceivingThread()
@@ -215,8 +215,9 @@ void Model::StartRequestReceivingThread20()
 
                     if (std::regex_search(request, rxRecMyFile))
                     {
-                        String fileName = std::regex_replace(request, rxRecMyFile, "");
-                        fileName = csfn.self.FileCreate(fileName);
+                        String rawFileName = std::regex_replace(request, rxRecMyFile, "");
+                        String fileName = csfn.self.FileCreate(rawFileName); 
+                            // creates new fN if exists
 
                         String filePath = csfn.self.SharedFolderPath();
 

@@ -78,9 +78,6 @@
     <ClCompile Include="Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SharedFolderNavigatorOther.cpp">
-      <Filter>Source Files\ModelComponents\SharedFolderNavigator</Filter>
-    </ClCompile>
     <ClCompile Include="View.cpp">
       <Filter>Source Files\MVC</Filter>
     </ClCompile>
@@ -120,9 +117,6 @@
       <Filter>Header Files\ModelComponents</Filter>
     </ClInclude>
     <ClInclude Include="SharedFolderNavigatorComponent.h">
-      <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedFolderNavigatorOther.h">
       <Filter>Header Files\ModelComponents\SharedFolderNavigator</Filter>
     </ClInclude>
     <ClInclude Include="BasicSharedFolderNavigator.h">

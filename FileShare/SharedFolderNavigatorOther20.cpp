@@ -16,6 +16,7 @@ using Seconds = std::chrono::seconds;
 using Thread = std::thread;
 
 using namespace FileShare;
+
 SharedFolderNavigatorOther20::SharedFolderNavigatorOther20():
     SharedFolderNavigatorOther20(requestPort20)
 {}
@@ -38,7 +39,6 @@ namespace Request
     const String recvMyFile = "RECVMYFILE";
     const String fileLstPls = "FILELISTPLS";
     const String sendMeFile = "SENDMEFILE";
-    const String noSuchFile = "NOSUCHFILE";
 };
 
 
@@ -88,7 +88,6 @@ Int SharedFolderNavigatorOther20::RequestSendingAndReceiveFile(Sender& rs, const
         }
         if (sendRequestResult != SOCKET_ERROR)
         {
-            //TCPSocketedEntity& se = static_cast<TCPSocketedEntity&>(rs);
             auto thFileRecvFun = [this, &rs, recvPath]()
             {
                 Receiver rc(std::move(rs));
@@ -255,7 +254,6 @@ Int SharedFolderNavigatorOther20::SendFile(Sender&fs, String const& filePath)
             else
             {
                 Log::InRed("buff = new() -");
-                //sendResult *= 3;
             }
             Log::InRed("file.close()");
             file.close();
@@ -263,7 +261,6 @@ Int SharedFolderNavigatorOther20::SendFile(Sender&fs, String const& filePath)
         else
         {
             Log::InRed("ifstream() -");
-            //sendResult *= 2;
         }
     }
     __End;

@@ -173,7 +173,6 @@
     <ClCompile Include="PresenceComponent.cpp" />
     <ClCompile Include="SharedFolderNavigatorComponent.cpp" />
     <ClCompile Include="FileShareComponentTest.cpp" />
-    <ClCompile Include="SharedFolderNavigatorOther.cpp" />
     <ClCompile Include="SharedFolderNavigatorOther20.cpp" />
     <ClCompile Include="SharedFolderNavigatorSelf.cpp" />
     <ClCompile Include="Stages.cpp" />
@@ -191,16 +190,12 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="PresenceComponent.h" />
     <ClInclude Include="SharedFolderNavigatorComponent.h" />
-    <ClInclude Include="SharedFolderNavigatorOther.h" />
     <ClInclude Include="SharedFolderNavigatorOther20.h" />
     <ClInclude Include="SharedFolderNavigatorSelf.h" />
     <ClInclude Include="Stages.h" />
     <ClInclude Include="TcpSocketedEntity.h" />
     <ClInclude Include="UserDataFileComponent.h" />
     <ClInclude Include="View.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="note.txt" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\Debug\UDF.xml">

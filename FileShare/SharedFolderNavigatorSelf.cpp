@@ -51,8 +51,8 @@ Bool SharedFolderNavigatorSelf::FileDelete(const String& fileName)
         String filePath = SharedFolderPath() + fileName;
         return DeleteFile(filePath.c_str());
     }
-
-    return FALSE;
+    else
+        return FALSE;
 }
 Bool SharedFolderNavigatorSelf::FileOpen(const String& fileName)
 {

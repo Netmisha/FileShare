@@ -218,7 +218,8 @@ UserVector UDFComponent::FindUsersInFile(const UserData::UserStatus& sts)
     UserVector uv;
 
     auto root = udf.RootElement();
-    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) {
+    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) 
+    {
         auto ud = ConvertTiXmlElementToUserData(iter);
         if (ud.Status() == sts)
             uv.push_back(ud);
@@ -228,16 +229,19 @@ UserVector UDFComponent::FindUsersInFile(const UserData::UserStatus& sts)
 }
 UserData UDFComponent::FindUsersInFile(const String& als){
     auto root = udf.RootElement();
-    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) {
+    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) 
+    {
         auto ud = ConvertTiXmlElementToUserData(iter);
         if (ud.Alias() == als)
             return ud;
     }
     return UserData::BadData;
 }
-UserData FileShare::UDFComponent::FindUsersInFile(const UserData::UserAddr& addr){
+UserData FileShare::UDFComponent::FindUsersInFile(const UserData::UserAddr& addr)
+{
     auto root = udf.RootElement();
-    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) {
+    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) 
+    {
         auto ud = ConvertTiXmlElementToUserData(iter);
         if (ud.Address() == addr)
             return ud;
@@ -247,7 +251,8 @@ UserData FileShare::UDFComponent::FindUsersInFile(const UserData::UserAddr& addr
 UserData UDFInterface::FindUsersInFile(const UserData::UserAddr& adr)
 {
     auto root = udf.RootElement();
-    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) {
+    for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user)) 
+    {
         auto ud = ConvertTiXmlElementToUserData(iter);
         if (ud.Address() == adr)
             return ud;
@@ -255,16 +260,18 @@ UserData UDFInterface::FindUsersInFile(const UserData::UserAddr& adr)
     return UserData::BadData;
 }
 
-
-bool UDFComponent::AppendUser(const UserData& usr){
+bool UDFComponent::AppendUser(const UserData& usr)
+{
     //try to find if usr already exists in udf
     if (FindUserInTiXmlDocument(udf, usr))
         return false; // if exists AppendUser fail
-    else {
+    else 
+    {
         auto elem = ConvertUserDataToTiXmlElement(usr); // create new
         if (!elem)
             return false;
-        else {
+        else 
+        {
             auto root = udf.RootElement();
             root->LinkEndChild(elem);
             udf.SaveFile();
@@ -302,20 +309,23 @@ bool UDFComponent::ModifyUser(const UserData & usrOld, const UserData & usrNew)
     udf.SaveFile();
     return true;
 }
-bool UDFComponent::UserAlreadyExists(const UserData& usr){
+bool UDFComponent::UserAlreadyExists(const UserData& usr)
+{
     auto elem = FindUserInTiXmlDocument(udf, usr);  
     return elem != nullptr;
 }
 
 #ifndef UDF_XML_HELPER_FUNCTIONS
-UserData ConvertTiXmlElementToUserData(const TiXmlElement* element) {
+UserData ConvertTiXmlElementToUserData(const TiXmlElement* element) 
+{
     auto alias = String(element->Attribute(Udfn::alias));
     auto address = UserData::UserAddr(element->Attribute(Udfn::address));  
     auto status = static_cast<UserData::UserStatus::StatusValue>(std::stoi(element->Attribute(Udfn::status)));
 
     return UserData(alias, address, status);
 }
-TiXmlElement* ConvertUserDataToTiXmlElement(const UserData& usr) {
+TiXmlElement* ConvertUserDataToTiXmlElement(const UserData& usr) 
+{
     auto alias   = usr.Alias();
     auto address = usr.Address().to_str();
     auto status  = static_cast<int>(usr.Status().value);
@@ -328,7 +338,8 @@ TiXmlElement* ConvertUserDataToTiXmlElement(const UserData& usr) {
 
     return element;
 }
-TiXmlElement* FindUserInTiXmlDocument(const TiXmlDocument& udf, const UserData& usr) {
+TiXmlElement* FindUserInTiXmlDocument(const TiXmlDocument& udf, const UserData& usr) 
+{
     auto root = udf.RootElement();
     for (auto iter = root->FirstChildElement(Udfn::user); iter; iter = iter->NextSiblingElement(Udfn::user))
         if (ConvertTiXmlElementToUserData(iter).Alias() == usr.Alias())

@@ -5,20 +5,20 @@
 #include "UserDataFileComponent.h"
 #include "PresenceComponent.h"
 
-namespace FileShare {
+namespace FileShare 
+{
     class Model
     {
         friend class StagedController;
         friend class ConsoleController;
-        friend int main();
+        friend int main(); 
     public:
         Model();
+       ~Model();
+    protected:        
         Model(USHORT messengerPort, 
               USHORT sharedFolderRequestPort, 
-              USHORT sharedFolderFileExchangePort, 
               USHORT presenceComponentBroadcastPort);
-        ~Model();
-    protected:
     public:
         //component: Messenger
         MessengerComponent cmsg;
@@ -31,12 +31,12 @@ namespace FileShare {
 
         static int WsaStartup();
 
-        void StartAuraThreadIn();
-        void StartAuraThreadOut();
+        void StartAuraBroadcastingThread();
+        void StartAuraBroadcastReceivingThread();
         void StartMessageReceivingThread();
-        //void StartRequestReceivingThread();
         void StartRequestReceivingThread20();
 
+        // this variable telss thread loops to stop
         bool stupidThreadsDie = false;
     };
 }

@@ -60,14 +60,10 @@ namespace FileShare {
             USHORT port;
         };
 
-        class UserStatus{
+        class UserStatus
+        {
         public:
-            enum class StatusValue: int{
-                Ugly, 
-                Bad,
-                Good,
-                Self
-            };
+            enum class StatusValue : int { Ugly, Bad, Good, Self };
             
             UserStatus() = default;
             UserStatus(StatusValue);
@@ -93,15 +89,16 @@ namespace FileShare {
         friend class UDFComponent;
     };
     
-    class UDFInterface {
+    class UDFInterface 
+    {
     public:
-        virtual UserVector  FindUsersInFile()                               = 0; // find all (self excluded)        
+        virtual UserVector  FindUsersInFile()                               = 0; // find all but self        
         virtual UserVector  FindUsersInFile(const UserData::UserStatus&)    = 0;        
         virtual UserData    FindUsersInFile(const String&)                  = 0; 
         virtual UserData    FindUsersInFile(const UserData::UserAddr&)      = 0;
 
         virtual bool AppendUser(const UserData&) = 0;  // first user to append is gonna be SELF
-        virtual bool RemoveUser(const UserData&) = 0;  // remove(findinfile(name))
+        virtual bool RemoveUser(const UserData&) = 0; 
         virtual bool ModifyUser(const UserData&, const UserData&) = 0; 
     protected:
         virtual bool UserAlreadyExists(const UserData&) = 0;
@@ -118,7 +115,7 @@ namespace FileShare {
         virtual UserVector  FindUsersInFile(const UserData::UserStatus& sts)  override;
         virtual UserData    FindUsersInFile(const String& alias)              override;
         virtual UserData    FindUsersInFile(const UserData::UserAddr& addr)   override;
-        //
+
         virtual bool AppendUser(const UserData&)    override;
         virtual bool RemoveUser(const UserData&)    override;  
         virtual bool ModifyUser(const UserData& oldUD, const UserData& newUD) override;

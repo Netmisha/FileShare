@@ -8,14 +8,10 @@
 
 namespace FileShare 
 {
-    //#ifndef USING_LOTTA_STUFF
-   // #define USING_LOTTA_STUFF
     using Clock = std::chrono::system_clock;
     using TimePoint = Clock::time_point;
     using Message = std::tuple<TimePoint, ULONG, String>;
     using MessageVector = std::vector<Message>;
-    //#endif // !USING_LOTTA_STUFF
-
 
 #ifndef MESSENGER_COMPONENT
     
@@ -28,17 +24,18 @@ namespace FileShare
         virtual Int SendMessageTo(const String&, const UserData&)   = 0;
         virtual Int SendMessageTo(const String&, const UserVector&) = 0;
     };
-    class ReceiverInterface {
+    class ReceiverInterface 
+    {
     public:
-        virtual Int ReceiveMessage() = 0;
-
         virtual MessageVector& Messages()   = 0;
+        virtual Int ReceiveMessage()        = 0;
         virtual Int MessageReadCount()      = 0;
         virtual Int MessageUnreadCount()    = 0;
         virtual Int MarkAllAsRead()         = 0;
     };
 
-    struct ReceiverData {
+    struct ReceiverData 
+    {
         int unreadCount = 0;
         MessageVector msgs;
     };
@@ -52,20 +49,15 @@ namespace FileShare
         MessengerComponent();
         MessengerComponent(USHORT port);
 
-        virtual Int SendMessageTo(const String&, const String&, USHORT) override;
-        virtual Int SendMessageTo(const String&, ULONG, USHORT) override;
-
-        virtual Int SendMessageTo(const String&, const UserData&)   override;
-        virtual Int SendMessageTo(const String&, const UserVector&) override;
-
-        virtual Int ReceiveMessage() override;
-
         virtual MessageVector& Messages() override;
-
+        virtual Int SendMessageTo(const String&, const String&, USHORT) override;
+        virtual Int SendMessageTo(const String&, ULONG, USHORT)         override;
+        virtual Int SendMessageTo(const String&, const UserData&)       override;
+        virtual Int SendMessageTo(const String&, const UserVector&)     override;
+        virtual Int ReceiveMessage()        override;
         virtual Int MessageReadCount()      override;
         virtual Int MessageUnreadCount()    override;
-
-        virtual Int MarkAllAsRead()    override;
+        virtual Int MarkAllAsRead()         override;
 
         Listener listener;
     };

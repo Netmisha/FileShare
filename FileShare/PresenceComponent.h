@@ -4,15 +4,8 @@
 #include <vector>
 #include <utility>
 
-/*
-    Presence component is gonna spam local area with <notice-me> msgs
-    <notice-me> msg contains
-        usr name
-        messenger sockaddr
-        file-share-request sockaddr
-*/
-
-namespace FileShare {
+namespace FileShare 
+{
     using STR = std::string;
     using Aura = std::pair<ULONG, USHORT>;
     using AuraSet = std::vector<Aura>;
@@ -20,7 +13,8 @@ namespace FileShare {
 
     #define preComPort (USHORT)14088
 
-    struct SockAddrIn {
+    struct SockAddrIn 
+    {
         SockAddrIn();
         SockAddrIn(USHORT port);
 
@@ -29,7 +23,8 @@ namespace FileShare {
         Int addrSize;
     };
 
-    class BasicPresenceComponentInterface {
+    class BasicPresenceComponentInterface 
+    {
     protected:
         virtual Int WSAstartup()            = 0;
         virtual Int InitializeSockaddr()    = 0;

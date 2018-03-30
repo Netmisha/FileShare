@@ -11,14 +11,11 @@ using namespace FileShare;
 #ifndef MESSENGER_COMPONENT
 
 #ifndef MESSENGER_COMPONENT_CONSTRUCTORS
-MessengerComponent::MessengerComponent(USHORT port):
+MessengerComponent::MessengerComponent(USHORT port) :
     listener(port)
 {
-    #ifdef LOGGER
-    {
-        Log::InRed("MSG component constructing");
-    }
-    #endif
+    Log::InRed("MSG component constructing");
+
     listener.Bind();
     listener.Listen();
 }
@@ -26,42 +23,27 @@ MessengerComponent::MessengerComponent() :
     MessengerComponent(messPort)
 {}
 #endif MESSENGER_COMPONENT_CONSTRUCTORS
-Int SendMessageViaSender(const String msg, Sender&& sender) {
-
+Int SendMessageViaSender(const String msg, Sender&& sender) 
+{
     Int result = SOCKET_ERROR;
-
     std::chrono::duration<LONG> timeOut = std::chrono::seconds(5);
+    Log::InRed("gonna try to connect for 5s");
 
+    for (TimePoint then = Clock::now(); Clock::now() - then < timeOut;) 
     {
-        #ifdef LOGGER
-        {
-            Log::InRed("gonna try to connect for 5s");
-        }
-        #endif LOGGER
-    }
-
-    for (TimePoint then = Clock::now(); Clock::now() - then < timeOut;) {
         result = sender.ConnectToUser();
         if (result != SOCKET_ERROR)
             break;
     }
 
-    if (result == SOCKET_ERROR) {
-        #ifdef LOGGER
-        {
-            Log::InRedWithError("MSG component Send failed, connect timeout, error: ");
-        }
-        #endif LOGGER
-
+    if (result == SOCKET_ERROR) 
+    {
+        Log::InRedWithError("MSG component Send failed, connect timeout, error: ");
         return result;
     }
-    else{
-
-        #ifdef LOGGER
-        {
-            Log::InRed("gonna try to send for 5s");
-        }
-        #endif LOGGER
+    else
+    {
+        Log::InRed("gonna try to send for 5s");
 
         for (TimePoint then = Clock::now(); Clock::now() - then < timeOut;) {
             result = sender.SendMessageToUser(msg);
@@ -69,14 +51,10 @@ Int SendMessageViaSender(const String msg, Sender&& sender) {
                 break;
         }
 
-        #ifdef LOGGER
-        {
-            if(result <= NULL)
-                Log::InRedWithError("MSG component Send failed to send, error: ");
-            else
-                Log::InRed("MSG component Send succeeded in sending");
-        }
-        #endif LOGGER
+        if (result <= NULL)
+            Log::InRedWithError("MSG component Send failed to send, error: ");
+        else
+            Log::InRed("MSG component Send succeeded in sending");
     }
     return result;
 }
@@ -138,40 +116,24 @@ Int MessengerComponent::SendMessageTo(const String& msg, const UserVector& users
     // 0 is total fail
 }
 Int MessengerComponent::ReceiveMessage()
-{    
+{
     Int result = 0;
     Log::InRed("ReceiveMessage()->");
     __Begin;
     {
         Receiver rc = listener.Accept();
-
-
         Log::InRed("Listener.accept() +");
 
-
         String buff = rc.ReceiveMessage();
+        Log::InRed("Receiver tried hard");
 
-        #ifdef LOGGER
+        if (buff.empty())
         {
-            Log::InRed("Receiver tried hard");
-        }
-        #endif
-
-        if (buff.empty()) {
-            #ifdef LOGGER
-            {
-                Log::InRed("but we got nothing");
-            }
-            #endif
+            Log::InRed("but we got nothing");
         }
         else
         {
-            #ifdef LOGGER
-            {
-                Log::InRed("and we got smth");
-            }
-            #endif
-
+            Log::InRed("and we got smth");
             result = buff.length();
 
             TimePoint now = Clock::now();
